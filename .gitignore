@@ -38,5 +38,6 @@ htmlcov/
 .pytest_cache/
 
 # Otros
+*.md
 *.swp
 *.swo
