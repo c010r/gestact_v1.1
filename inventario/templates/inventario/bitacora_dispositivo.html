@@ -1,0 +1,327 @@
+{% extends 'inventario/base.html' %}
+{% load static %}
+
+{% block title %}Bitácora - {{ dispositivo_nombre }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #dee2e6;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 30px;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        left: -22px;
+        top: 8px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 3px solid #fff;
+        box-shadow: 0 0 0 2px #dee2e6;
+    }
+    
+    .timeline-marker.registro { background-color: #28a745; }
+    .timeline-marker.servicio_garantia { background-color: #ffc107; }
+    .timeline-marker.mantenimiento { background-color: #17a2b8; }
+    .timeline-marker.reparacion { background-color: #fd7e14; }
+    .timeline-marker.cambio_estado { background-color: #6f42c1; }
+    .timeline-marker.cambio_ubicacion { background-color: #20c997; }
+    .timeline-marker.asignacion_personal { background-color: #e83e8c; }
+    .timeline-marker.baja { background-color: #dc3545; }
+    .timeline-marker.actualizacion { background-color: #6c757d; }
+    .timeline-marker.otro { background-color: #343a40; }
+    
+    .timeline-content {
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .timeline-content:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+    }
+    
+    .device-info {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stats-card {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+        border: 1px solid #dee2e6;
+    }
+    
+    .badge-computadora { background-color: #007bff; }
+    .badge-impresora { background-color: #28a745; }
+    .badge-monitor { background-color: #ffc107; color: #212529; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Información del dispositivo -->
+            <div class="device-info">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge badge-{{ tipo_dispositivo }} me-3 fs-6">
+                                {{ tipo_dispositivo|title }}
+                            </span>
+                            <h3 class="mb-0">{{ dispositivo_nombre }}</h3>
+                        </div>
+                        {% if dispositivo %}
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <small class="d-block opacity-75">
+                                        <i class="fas fa-barcode"></i> 
+                                        <strong>Serie:</strong> {{ dispositivo.numero_serie|default:"N/A" }}
+                                    </small>
+                                    {% if dispositivo.marca %}
+                                        <small class="d-block opacity-75">
+                                            <i class="fas fa-tag"></i> 
+                                            <strong>Marca:</strong> {{ dispositivo.marca }}
+                                        </small>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    {% if dispositivo.lugar %}
+                                        <small class="d-block opacity-75">
+                                            <i class="fas fa-map-marker-alt"></i> 
+                                            <strong>Ubicación:</strong> {{ dispositivo.lugar }}
+                                        </small>
+                                    {% endif %}
+                                    {% if dispositivo.estado %}
+                                        <small class="d-block opacity-75">
+                                            <i class="fas fa-info-circle"></i> 
+                                            <strong>Estado:</strong> {{ dispositivo.get_estado_display }}
+                                        </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="stats-card bg-white bg-opacity-25">
+                            <h4 class="mb-1">{{ bitacoras|length }}</h4>
+                            <small>Eventos Registrados</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-history"></i> Historial de Eventos
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#registrarEventoModal">
+                                <i class="fas fa-plus"></i> Registrar Evento
+                            </button>
+                            <a href="{% if bitacora_tipo == 'informatica' %}{% url 'inventario:bitacora_list_informatica' %}{% elif bitacora_tipo == 'medica' %}{% url 'inventario:bitacora_list_medica' %}{% else %}{% url 'inventario:bitacora_list' %}{% endif %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Volver a Bitácora
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Timeline de eventos -->
+            <div class="card">
+                <div class="card-body">
+                    {% if bitacoras %}
+                        <div class="timeline">
+                            {% for bitacora in bitacoras %}
+                                <div class="timeline-item">
+                                    <div class="timeline-marker {{ bitacora.tipo_evento }}"></div>
+                                    <div class="timeline-content">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="text-primary mb-0">
+                                                {{ bitacora.get_tipo_evento_display }}
+                                            </h6>
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock"></i> 
+                                                {{ bitacora.fecha_evento|date:"d/m/Y H:i" }}
+                                            </small>
+                                        </div>
+                                        
+                                        <p class="mb-2">{{ bitacora.descripcion }}</p>
+                                        
+                                        {% if bitacora.valor_anterior or bitacora.valor_nuevo %}
+                                            <div class="row mb-2">
+                                                {% if bitacora.valor_anterior %}
+                                                    <div class="col-md-6">
+                                                        <small class="text-muted">
+                                                            <strong>Valor Anterior:</strong><br>
+                                                            <span class="text-danger">{{ bitacora.valor_anterior }}</span>
+                                                        </small>
+                                                    </div>
+                                                {% endif %}
+                                                {% if bitacora.valor_nuevo %}
+                                                    <div class="col-md-6">
+                                                        <small class="text-muted">
+                                                            <strong>Valor Nuevo:</strong><br>
+                                                            <span class="text-success">{{ bitacora.valor_nuevo }}</span>
+                                                        </small>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if bitacora.observaciones %}
+                                            <div class="alert alert-light mb-2">
+                                                <small>
+                                                    <i class="fas fa-comment"></i> 
+                                                    <strong>Observaciones:</strong> {{ bitacora.observaciones }}
+                                                </small>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if bitacora.usuario_responsable %}
+                                            <small class="text-muted">
+                                                <i class="fas fa-user"></i> 
+                                                <strong>Responsable:</strong> {{ bitacora.usuario_responsable }}
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No hay eventos registrados</h5>
+                            <p class="text-muted">Este dispositivo aún no tiene eventos en su historial.</p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registrarEventoModal">
+                                <i class="fas fa-plus"></i> Registrar Primer Evento
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para registrar evento -->
+<div class="modal fade" id="registrarEventoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus"></i> Registrar Nuevo Evento
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'inventario:registrar_evento_manual' %}">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" name="tipo_dispositivo" value="{{ tipo_dispositivo }}">
+                    <input type="hidden" name="dispositivo_id" value="{{ dispositivo_id }}">
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="tipo_evento" class="form-label">Tipo de Evento *</label>
+                            <select class="form-select" id="tipo_evento" name="tipo_evento" required>
+                                <option value="">Seleccionar tipo...</option>
+                                <option value="servicio_garantia">Servicio por Garantía</option>
+                                <option value="mantenimiento">Mantenimiento</option>
+                                <option value="reparacion">Reparación</option>
+                                <option value="cambio_estado">Cambio de Estado</option>
+                                <option value="cambio_ubicacion">Cambio de Ubicación</option>
+                                <option value="asignacion_personal">Asignación de Personal</option>
+                                <option value="baja">Baja del Equipo</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="fecha_evento" class="form-label">Fecha del Evento</label>
+                            <input type="datetime-local" class="form-control" id="fecha_evento" name="fecha_evento">
+                            <small class="form-text text-muted">Si no se especifica, se usará la fecha actual</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción *</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3" 
+                                  placeholder="Describe el evento que se está registrando..." required></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="valor_anterior" class="form-label">Valor Anterior</label>
+                            <input type="text" class="form-control" id="valor_anterior" name="valor_anterior" 
+                                   placeholder="Ej: Estado anterior, ubicación anterior...">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="valor_nuevo" class="form-label">Valor Nuevo</label>
+                            <input type="text" class="form-control" id="valor_nuevo" name="valor_nuevo" 
+                                   placeholder="Ej: Nuevo estado, nueva ubicación...">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="observaciones" class="form-label">Observaciones</label>
+                        <textarea class="form-control" id="observaciones" name="observaciones" rows="2" 
+                                  placeholder="Observaciones adicionales (opcional)..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Registrar Evento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Establecer fecha actual por defecto
+document.addEventListener('DOMContentLoaded', function() {
+    const fechaInput = document.getElementById('fecha_evento');
+    if (fechaInput && !fechaInput.value) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        fechaInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+});
+</script>
+{% endblock %}

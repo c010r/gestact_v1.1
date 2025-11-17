@@ -1,0 +1,233 @@
+{% extends 'inventario/base_device_form.html' %}
+
+{% block form_sections %}
+<div class="card">
+	<div class="card-body">
+		{% if form.non_field_errors %}
+		<div class="alert alert-danger mb-3">
+			<ul class="mb-0">
+				{% for error in form.non_field_errors %}
+				<li>{{ error }}</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+
+		<ul class="nav nav-tabs" id="networkingTabs" role="tablist">
+			<li class="nav-item" role="presentation">
+				<button class="nav-link active" id="networking-tab-basicos" data-bs-toggle="tab"
+						data-bs-target="#networking-pane-basicos" type="button" role="tab"
+						aria-controls="networking-pane-basicos" aria-selected="true">
+					Datos básicos
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="networking-tab-hardware" data-bs-toggle="tab"
+						data-bs-target="#networking-pane-hardware" type="button" role="tab"
+						aria-controls="networking-pane-hardware" aria-selected="false">
+					Hardware
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="networking-tab-red" data-bs-toggle="tab"
+						data-bs-target="#networking-pane-red" type="button" role="tab"
+						aria-controls="networking-pane-red" aria-selected="false">
+					Conectividad
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="networking-tab-compra" data-bs-toggle="tab"
+						data-bs-target="#networking-pane-compra" type="button" role="tab"
+						aria-controls="networking-pane-compra" aria-selected="false">
+					Compra y garantía
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="networking-tab-notas" data-bs-toggle="tab"
+						data-bs-target="#networking-pane-notas" type="button" role="tab"
+						aria-controls="networking-pane-notas" aria-selected="false">
+					Notas
+				</button>
+			</li>
+		</ul>
+
+		<div class="tab-content pt-3" id="networkingTabsContent">
+			<div class="tab-pane fade show active" id="networking-pane-basicos" role="tabpanel"
+				 aria-labelledby="networking-tab-basicos">
+				<div class="row g-3">
+					<div class="col-md-6">
+						{{ form.nombre.label_tag }}
+						{{ form.nombre }}
+						<small class="text-muted">Ej: Switch Core Planta Baja</small>
+						{% for error in form.nombre.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.numero_inventario.label_tag }}
+						{{ form.numero_inventario }}
+						{% for error in form.numero_inventario.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.numero_serie.label_tag }}
+						{{ form.numero_serie }}
+						{% for error in form.numero_serie.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.tipo_networking.label_tag }}
+						{{ form.tipo_networking }}
+						{% for error in form.tipo_networking.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.estado.label_tag }}
+						{{ form.estado }}
+						{% for error in form.estado.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.lugar.label_tag }}
+						{{ form.lugar }}
+						{% for error in form.lugar.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="networking-pane-hardware" role="tabpanel"
+				 aria-labelledby="networking-tab-hardware">
+				<div class="row g-3">
+					<div class="col-md-4">
+						{{ form.fabricante.label_tag }}
+						{{ form.fabricante }}
+						{% for error in form.fabricante.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.modelo.label_tag }}
+						{{ form.modelo }}
+						{% for error in form.modelo.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.firmware_version.label_tag }}
+						{{ form.firmware_version }}
+						{% for error in form.firmware_version.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.cantidad_puertos.label_tag }}
+						{{ form.cantidad_puertos }}
+						{% for error in form.cantidad_puertos.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="networking-pane-red" role="tabpanel"
+				 aria-labelledby="networking-tab-red">
+				<div class="row g-3">
+					<div class="col-md-6">
+						{{ form.direccion_ip.label_tag }}
+						{{ form.direccion_ip }}
+						{% for error in form.direccion_ip.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.direccion_mac.label_tag }}
+						{{ form.direccion_mac }}
+						<small class="text-muted">Formato: AA:BB:CC:DD:EE:FF</small>
+						{% for error in form.direccion_mac.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						<div class="form-check mt-4">
+							{{ form.soporte_poe }}
+							<label class="form-check-label" for="{{ form.soporte_poe.id_for_label }}">
+								{{ form.soporte_poe.label }}
+							</label>
+						</div>
+						{% for error in form.soporte_poe.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="networking-pane-compra" role="tabpanel"
+				 aria-labelledby="networking-tab-compra">
+				<div class="row g-3">
+					<div class="col-md-6">
+						{{ form.proveedor.label_tag }}
+						{{ form.proveedor }}
+						{% for error in form.proveedor.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.fecha_adquisicion.label_tag }}
+						{{ form.fecha_adquisicion }}
+						{% for error in form.fecha_adquisicion.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-2">
+						{{ form.moneda.label_tag }}
+						{{ form.moneda }}
+						{% for error in form.moneda.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.valor_adquisicion.label_tag }}
+						{{ form.valor_adquisicion }}
+						{% for error in form.valor_adquisicion.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.tipo_garantia.label_tag }}
+						{{ form.tipo_garantia }}
+						{% for error in form.tipo_garantia.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.anos_garantia.label_tag }}
+						{{ form.anos_garantia }}
+						{% for error in form.anos_garantia.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="networking-pane-notas" role="tabpanel"
+				 aria-labelledby="networking-tab-notas">
+				<div class="row g-3">
+					<div class="col-12">
+						{{ form.comentarios.label_tag }}
+						{{ form.comentarios }}
+						{% for error in form.comentarios.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

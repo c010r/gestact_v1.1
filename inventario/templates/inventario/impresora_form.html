@@ -1,0 +1,218 @@
+{% extends 'inventario/base_device_form.html' %}
+
+{% block form_sections %}
+<div class="card">
+    <div class="card-body">
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger mb-3">
+            <ul class="mb-0">
+                {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <ul class="nav nav-tabs" id="impresoraTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="impresora-tab-basicos" data-bs-toggle="tab"
+                        data-bs-target="#impresora-pane-basicos" type="button" role="tab"
+                        aria-controls="impresora-pane-basicos" aria-selected="true">
+                    Datos básicos
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="impresora-tab-especificaciones" data-bs-toggle="tab"
+                        data-bs-target="#impresora-pane-especificaciones" type="button" role="tab"
+                        aria-controls="impresora-pane-especificaciones" aria-selected="false">
+                    Especificaciones
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="impresora-tab-compra" data-bs-toggle="tab"
+                        data-bs-target="#impresora-pane-compra" type="button" role="tab"
+                        aria-controls="impresora-pane-compra" aria-selected="false">
+                    Compra y garantía
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="impresora-tab-notas" data-bs-toggle="tab"
+                        data-bs-target="#impresora-pane-notas" type="button" role="tab"
+                        aria-controls="impresora-pane-notas" aria-selected="false">
+                    Notas
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content pt-3" id="impresoraTabsContent">
+            <div class="tab-pane fade show active" id="impresora-pane-basicos" role="tabpanel"
+                 aria-labelledby="impresora-tab-basicos">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        {{ form.nombre.label_tag }}
+                        {{ form.nombre }}
+                        <small class="text-muted">Identifica la impresora en reportes y listados.</small>
+                        {% for error in form.nombre.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.numero_inventario.label_tag }}
+                        {{ form.numero_inventario }}
+                        {% for error in form.numero_inventario.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.numero_serie.label_tag }}
+                        {{ form.numero_serie }}
+                        {% for error in form.numero_serie.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.tipo_impresora.label_tag }}
+                        {{ form.tipo_impresora }}
+                        {% for error in form.tipo_impresora.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.estado.label_tag }}
+                        {{ form.estado }}
+                        {% for error in form.estado.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.lugar.label_tag }}
+                        {{ form.lugar }}
+                        {% for error in form.lugar.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="impresora-pane-especificaciones" role="tabpanel"
+                 aria-labelledby="impresora-tab-especificaciones">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        {{ form.fabricante.label_tag }}
+                        {{ form.fabricante }}
+                        {% for error in form.fabricante.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.modelo.label_tag }}
+                        {{ form.modelo }}
+                        {% for error in form.modelo.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label d-block">Tóner extra</label>
+                        <div class="form-check form-switch">
+                            {{ form.requiere_toner_extra }}
+                            <label class="form-check-label" for="{{ form.requiere_toner_extra.id_for_label }}">
+                                Suministrar un tóner adicional con esta impresora
+                            </label>
+                        </div>
+                        {% for error in form.requiere_toner_extra.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.insumo_toner_extra.label_tag }}
+                        {{ form.insumo_toner_extra }}
+                        {% if form.insumo_toner_extra.help_text %}
+                            <div class="form-text">{{ form.insumo_toner_extra.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.insumo_toner_extra.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.cantidad_toner_extra.label_tag }}
+                        {{ form.cantidad_toner_extra }}
+                        {% for error in form.cantidad_toner_extra.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-12">
+                        {{ form.comentarios.label_tag }}
+                        {{ form.comentarios }}
+                        {% if form.comentarios.help_text %}
+                            <div class="form-text">{{ form.comentarios.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.comentarios.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="impresora-pane-compra" role="tabpanel"
+                 aria-labelledby="impresora-tab-compra">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        {{ form.proveedor.label_tag }}
+                        {{ form.proveedor }}
+                        {% for error in form.proveedor.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.fecha_adquisicion.label_tag }}
+                        {{ form.fecha_adquisicion }}
+                        {% for error in form.fecha_adquisicion.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-2">
+                        {{ form.moneda.label_tag }}
+                        {{ form.moneda }}
+                        {% for error in form.moneda.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.valor_adquisicion.label_tag }}
+                        {{ form.valor_adquisicion }}
+                        {% for error in form.valor_adquisicion.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.tipo_garantia.label_tag }}
+                        {{ form.tipo_garantia }}
+                        {% for error in form.tipo_garantia.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.anos_garantia.label_tag }}
+                        {{ form.anos_garantia }}
+                        {% for error in form.anos_garantia.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="impresora-pane-notas" role="tabpanel" aria-labelledby="impresora-tab-notas">
+                <div class="row g-3">
+                    <div class="col-12">
+                        {{ form.comentarios.label_tag }}
+                        {{ form.comentarios }}
+                        <small class="text-muted">Agregue cualquier observación adicional sobre esta impresora.</small>
+                        {% for error in form.comentarios.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

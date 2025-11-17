@@ -1,0 +1,161 @@
+<!-- Sección de Información Básica -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Información Básica</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="id_nombre" class="form-label">
+                        Nombre <span class="text-danger">*</span>
+                    </label>
+                    {{ form.nombre }}
+                    {% if form.nombre.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.nombre.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="id_numero_inventario" class="form-label">
+                        Número de Inventario <span class="text-danger">*</span>
+                    </label>
+                    {{ form.numero_inventario }}
+                    {% if form.numero_inventario.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.numero_inventario.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="id_numero_serie" class="form-label">
+                        Número de Serie
+                    </label>
+                    {{ form.numero_serie }}
+                    {% if form.numero_serie.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.numero_serie.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="id_estado" class="form-label">
+                        Estado <span class="text-danger">*</span>
+                    </label>
+                    {{ form.estado }}
+                    {% if form.estado.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.estado.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="id_ubicacion" class="form-label">
+                        Ubicación <span class="text-danger">*</span>
+                    </label>
+                    {{ form.ubicacion }}
+                    {% if form.ubicacion.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.ubicacion.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% if form.marca %}
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="id_marca" class="form-label">
+                        Marca
+                    </label>
+                    {{ form.marca }}
+                    {% if form.marca.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.marca.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if form.modelo %}
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="id_modelo" class="form-label">
+                        Modelo
+                    </label>
+                    {{ form.modelo }}
+                    {% if form.modelo.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.modelo.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% if form.usuario_asignado %}
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="id_usuario_asignado" class="form-label">
+                        Usuario Asignado
+                    </label>
+                    {{ form.usuario_asignado }}
+                    {% if form.usuario_asignado.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.usuario_asignado.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        {% if form.descripcion %}
+        <div class="mb-3">
+            <label for="id_descripcion" class="form-label">
+                Descripción
+            </label>
+            {{ form.descripcion }}
+            {% if form.descripcion.errors %}
+                <div class="invalid-feedback d-block">
+                    {% for error in form.descripcion.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>

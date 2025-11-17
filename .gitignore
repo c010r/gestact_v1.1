@@ -1,0 +1,42 @@
+# Entornos virtuales
+venv/
+ENV/
+.venv/
+
+# Cache de Python y bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos temporales y logs
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+
+# Configuración local
+.env
+.env.*
+*.local
+
+# Archivos generados por Django
+staticfiles/
+media/
+
+# Herramientas y editores
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Cobertura y testing
+htmlcov/
+.coverage
+.coverage.*
+.pytest_cache/
+
+# Otros
+*.swp
+*.swo

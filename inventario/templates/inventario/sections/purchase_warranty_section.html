@@ -1,0 +1,137 @@
+<!-- Sección de Información de Compra y Garantía -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-shopping-cart"></i> Información de Compra y Garantía</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% if form.fecha_compra %}
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="id_fecha_compra" class="form-label">
+                        Fecha de Compra
+                    </label>
+                    {{ form.fecha_compra }}
+                    {% if form.fecha_compra.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.fecha_compra.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            {% if form.precio_compra %}
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="id_precio_compra" class="form-label">
+                        Precio de Compra
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        {{ form.precio_compra }}
+                    </div>
+                    {% if form.precio_compra.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.precio_compra.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="row">
+            {% if form.proveedor %}
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="id_proveedor" class="form-label">
+                        Proveedor
+                    </label>
+                    {{ form.proveedor }}
+                    {% if form.proveedor.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.proveedor.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            {% if form.numero_factura %}
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="id_numero_factura" class="form-label">
+                        Número de Factura
+                    </label>
+                    {{ form.numero_factura }}
+                    {% if form.numero_factura.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.numero_factura.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="row">
+            {% if form.fecha_vencimiento_garantia %}
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="id_fecha_vencimiento_garantia" class="form-label">
+                        Vencimiento de Garantía
+                    </label>
+                    {{ form.fecha_vencimiento_garantia }}
+                    {% if form.fecha_vencimiento_garantia.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.fecha_vencimiento_garantia.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            {% if form.tipo_garantia %}
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="id_tipo_garantia" class="form-label">
+                        Tipo de Garantía
+                    </label>
+                    {{ form.tipo_garantia }}
+                    {% if form.tipo_garantia.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.tipo_garantia.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if form.observaciones_garantia %}
+        <div class="mb-3">
+            <label for="id_observaciones_garantia" class="form-label">
+                Observaciones de Garantía
+            </label>
+            {{ form.observaciones_garantia }}
+            {% if form.observaciones_garantia.errors %}
+                <div class="invalid-feedback d-block">
+                    {% for error in form.observaciones_garantia.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>

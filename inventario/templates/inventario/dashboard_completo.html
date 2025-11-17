@@ -1,0 +1,988 @@
+{% extends 'inventario/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Dashboard - ASSE-GestACT{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --dashboard-hero-bg: linear-gradient(135deg, #0f172a 0%, #1d4ed8 45%, #38bdf8 100%);
+    --dashboard-hero-overlay: radial-gradient(circle at top right, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 60%);
+    --dashboard-hero-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+    --dashboard-hero-text: #f8fafc;
+    --dashboard-hero-muted: rgba(241, 245, 249, 0.78);
+    --dashboard-hero-badge-bg: rgba(255, 255, 255, 0.18);
+    --dashboard-hero-highlight-bg: rgba(15, 23, 42, 0.22);
+    --dashboard-hero-highlight-border: rgba(255, 255, 255, 0.12);
+    --dashboard-hero-progress-track: rgba(255, 255, 255, 0.25);
+    --dashboard-hero-progress-bar: linear-gradient(90deg, #22d3ee, #38bdf8);
+    --dashboard-card-bg: rgba(255, 255, 255, 0.92);
+    --dashboard-card-shadow: 0 22px 40px rgba(15, 23, 42, 0.12);
+    --dashboard-card-border: rgba(15, 23, 42, 0.08);
+    --dashboard-icon-bg: rgba(15, 23, 42, 0.08);
+    --dashboard-icon-color: #0f172a;
+    --dashboard-muted-icon: #94a3b8;
+    --dashboard-muted-text: #64748b;
+    --dashboard-pill-bg: rgba(15, 23, 42, 0.08);
+    --dashboard-pill-color: #0f172a;
+    --dashboard-warning-bg: rgba(249, 115, 22, 0.15);
+    --dashboard-warning-color: #c2410c;
+    --dashboard-success-bg: rgba(34, 197, 94, 0.18);
+    --dashboard-success-color: #047857;
+    --dashboard-info-bg: rgba(37, 99, 235, 0.12);
+    --dashboard-info-color: #1d4ed8;
+    --dashboard-restock-bg: rgba(15, 23, 42, 0.05);
+    --dashboard-bitacora-bg: rgba(15, 23, 42, 0.06);
+    --dashboard-bitacora-icon-bg: rgba(56, 189, 248, 0.18);
+    --dashboard-bitacora-icon-color: #0284c7;
+}
+
+:root[data-theme="dark"] {
+    --dashboard-hero-bg: linear-gradient(135deg, #020617 0%, #0f172a 45%, #312e81 100%);
+    --dashboard-hero-overlay: radial-gradient(circle at top right, rgba(148, 163, 184, 0.28) 0%, rgba(15, 23, 42, 0) 60%);
+    --dashboard-hero-shadow: 0 28px 60px rgba(2, 6, 23, 0.6);
+    --dashboard-hero-text: #f8fafc;
+    --dashboard-hero-muted: rgba(226, 232, 240, 0.7);
+    --dashboard-hero-badge-bg: rgba(148, 163, 184, 0.2);
+    --dashboard-hero-highlight-bg: rgba(15, 23, 42, 0.55);
+    --dashboard-hero-highlight-border: rgba(148, 163, 184, 0.25);
+    --dashboard-hero-progress-track: rgba(148, 163, 184, 0.3);
+    --dashboard-hero-progress-bar: linear-gradient(90deg, #38bdf8, #818cf8);
+    --dashboard-card-bg: rgba(15, 23, 42, 0.7);
+    --dashboard-card-shadow: 0 30px 60px rgba(2, 6, 23, 0.55);
+    --dashboard-card-border: rgba(148, 163, 184, 0.18);
+    --dashboard-icon-bg: rgba(148, 163, 184, 0.2);
+    --dashboard-icon-color: #e2e8f0;
+    --dashboard-muted-icon: #74839e;
+    --dashboard-muted-text: #94a3b8;
+    --dashboard-pill-bg: rgba(148, 163, 184, 0.22);
+    --dashboard-pill-color: #e2e8f0;
+    --dashboard-warning-bg: rgba(249, 115, 22, 0.24);
+    --dashboard-warning-color: #fb923c;
+    --dashboard-success-bg: rgba(34, 197, 94, 0.26);
+    --dashboard-success-color: #86efac;
+    --dashboard-info-bg: rgba(59, 130, 246, 0.25);
+    --dashboard-info-color: #bfdbfe;
+    --dashboard-restock-bg: rgba(148, 163, 184, 0.12);
+    --dashboard-bitacora-bg: rgba(37, 99, 235, 0.18);
+    --dashboard-bitacora-icon-bg: rgba(37, 99, 235, 0.36);
+    --dashboard-bitacora-icon-color: #c7d2fe;
+}
+
+.dashboard-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.dashboard-hero {
+    position: relative;
+    overflow: hidden;
+    border: none;
+    border-radius: 20px;
+    background: var(--dashboard-hero-bg);
+    color: var(--dashboard-hero-text);
+    box-shadow: var(--dashboard-hero-shadow);
+}
+.dashboard-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 1;
+    background: var(--dashboard-hero-overlay);
+}
+.dashboard-hero .card-body {
+    position: relative;
+    z-index: 2;
+    padding: 2.5rem;
+}
+.hero-grid {
+    display: grid;
+    gap: 2.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    align-items: center;
+}
+.hero-badge {
+    display: inline-block;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    background: var(--dashboard-hero-badge-bg);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.hero-title {
+    font-size: 2.1rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+.hero-description {
+    margin: 0;
+    color: var(--dashboard-hero-muted);
+}
+.hero-metrics {
+    display: grid;
+    gap: 1.25rem;
+    margin-top: 1.75rem;
+}
+.hero-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+.hero-metric-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--dashboard-hero-muted);
+}
+.hero-metric-value {
+    font-size: 1.95rem;
+    font-weight: 700;
+}
+.hero-highlight {
+    background: var(--dashboard-hero-highlight-bg);
+    border-radius: 18px;
+    padding: 1.75rem;
+    backdrop-filter: blur(6px);
+    box-shadow: inset 0 0 0 1px var(--dashboard-hero-highlight-border);
+}
+.hero-highlight-value {
+    font-size: 2.75rem;
+    font-weight: 700;
+    display: block;
+}
+.hero-progress {
+    margin-top: 1rem;
+}
+.hero-progress .progress {
+    height: 8px;
+    border-radius: 999px;
+    background-color: var(--dashboard-hero-progress-track);
+}
+.hero-progress .progress-bar {
+    background: var(--dashboard-hero-progress-bar);
+}
+.hero-highlight-stats {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+.hero-highlight-stats span {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: var(--dashboard-hero-muted);
+}
+.metric-card {
+    border: none;
+    border-radius: 18px;
+    padding: 1.6rem;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.2);
+}
+.metric-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), transparent);
+    opacity: 0.6;
+}
+.metric-card > * {
+    position: relative;
+    z-index: 2;
+}
+.metric-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.metric-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.24);
+    display: grid;
+    place-items: center;
+    font-size: 1.5rem;
+}
+.metric-actions {
+    display: flex;
+    gap: 0.35rem;
+}
+.metric-link {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: inherit;
+    background: rgba(15, 23, 42, 0.18);
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+.metric-link:hover {
+    background: rgba(15, 23, 42, 0.35);
+    transform: translateY(-2px);
+}
+.metric-card h3 {
+    font-size: 2.15rem;
+    font-weight: 700;
+    margin: 0;
+}
+.metric-card p {
+    margin: 0;
+    opacity: 0.85;
+}
+.metric-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+.metric-progress-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    opacity: 0.85;
+}
+.metric-progress .progress {
+    height: 7px;
+    background: rgba(15, 23, 42, 0.18);
+    border-radius: 999px;
+}
+.metric-progress .progress-bar {
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.9);
+}
+.glass-card {
+    border: 1px solid var(--dashboard-card-border);
+    border-radius: 18px;
+    background: var(--dashboard-card-bg);
+    backdrop-filter: blur(12px);
+    box-shadow: var(--dashboard-card-shadow);
+}
+.glass-card .card-header {
+    border: none;
+    background: transparent;
+    padding: 1.4rem 1.6rem 0;
+}
+.glass-card .card-body {
+    padding: 1.2rem 1.6rem 1.6rem;
+}
+.icon-bubble {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: var(--dashboard-icon-bg);
+    color: var(--dashboard-icon-color);
+    font-size: 1.1rem;
+}
+.empty-state {
+    text-align: center;
+    padding: 2.4rem 1rem;
+    color: var(--dashboard-muted-text);
+}
+.empty-state i {
+    font-size: 2.4rem;
+    display: block;
+    margin-bottom: 0.75rem;
+    color: var(--dashboard-muted-icon);
+}
+.timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+.timeline-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    align-items: flex-start;
+}
+.timeline-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-size: 1.2rem;
+    color: var(--dashboard-icon-color);
+    background: var(--dashboard-icon-bg);
+}
+.timeline-title {
+    font-weight: 600;
+    color: var(--color-text);
+    text-decoration: none;
+}
+.timeline-title:hover {
+    text-decoration: underline;
+}
+.timeline-subtitle {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--dashboard-muted-text);
+}
+.timeline-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--dashboard-muted-text);
+}
+.estado-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    background: var(--dashboard-pill-bg);
+    color: var(--dashboard-pill-color);
+    text-transform: capitalize;
+}
+.badge-soft {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    background: var(--dashboard-pill-bg);
+    color: var(--dashboard-pill-color);
+}
+.badge-soft-warning {
+    background: var(--dashboard-warning-bg);
+    color: var(--dashboard-warning-color);
+}
+.warranty-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.warranty-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    align-items: flex-start;
+}
+.warranty-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: var(--dashboard-warning-bg);
+    color: var(--dashboard-warning-color);
+    font-size: 1.2rem;
+}
+.warranty-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    font-size: 0.85rem;
+    color: var(--dashboard-muted-text);
+    margin-top: 0.4rem;
+}
+.insumo-grid {
+    display: grid;
+    gap: 0.9rem;
+}
+.insumo-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.3rem;
+}
+.insumo-stat {
+    padding: 1rem;
+    border-radius: 14px;
+    background: var(--dashboard-info-bg);
+    color: var(--dashboard-info-color);
+    text-align: center;
+}
+.insumo-stat-success {
+    background: var(--dashboard-success-bg);
+    color: var(--dashboard-success-color);
+}
+.insumo-stat-warning {
+    background: var(--dashboard-warning-bg);
+    color: var(--dashboard-warning-color);
+}
+.insumo-stat strong {
+    display: block;
+    font-size: 1.4rem;
+}
+.restock-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+.restock-item {
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    background: var(--dashboard-restock-bg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+.restock-item strong {
+    color: var(--color-text);
+}
+.bitacora-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+.bitacora-item {
+    padding: 1rem 1.1rem;
+    border-radius: 14px;
+    background: var(--dashboard-bitacora-bg);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    align-items: flex-start;
+}
+.bitacora-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: var(--dashboard-bitacora-icon-bg);
+    color: var(--dashboard-bitacora-icon-color);
+    font-size: 1.2rem;
+}
+.bitacora-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    font-size: 0.82rem;
+    color: var(--dashboard-muted-text);
+    margin-top: 0.3rem;
+}
+@media (max-width: 767px) {
+    .dashboard-hero .card-body {
+        padding: 2rem;
+    }
+    .hero-title {
+        font-size: 1.8rem;
+    }
+    .metric-card {
+        padding: 1.4rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-page fade-in">
+    <div class="card dashboard-hero">
+        <div class="card-body">
+            <div class="hero-grid">
+                <div class="hero-main">
+                    <span class="hero-badge">ASSE-GestACT</span>
+                    <h1 class="hero-title">Resumen del inventario</h1>
+                    <p class="hero-description">
+                        Monitorea el estado de tus activos y anticipa las necesidades del parque tecnológico.
+                    </p>
+                    <div class="hero-metrics">
+                        <div class="hero-metric">
+                            <span class="hero-metric-label">Activos totales</span>
+                            <span class="hero-metric-value">{{ total_assets|intcomma }}</span>
+                        </div>
+                        <div class="hero-metric">
+                            <span class="hero-metric-label">Activos operativos</span>
+                            <span class="hero-metric-value">{{ active_assets|intcomma }}</span>
+                        </div>
+                        <div class="hero-metric">
+                            <span class="hero-metric-label">Activos inactivos</span>
+                            <span class="hero-metric-value">{{ inactive_assets|intcomma }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-highlight">
+                    <span class="text-uppercase text-white-50 small">Salud de la operación</span>
+                    <span class="hero-highlight-value">{{ active_ratio }}%</span>
+                    <small class="d-block text-white-50">Equipos disponibles para uso</small>
+                    <div class="hero-progress">
+                        <div class="progress">
+                            <div class="progress-bar" data-progress="{{ active_ratio }}"></div>
+                        </div>
+                    </div>
+                    <div class="hero-highlight-stats">
+                        <span>
+                            Garantías próximas
+                            <strong>{{ pending_warranties }}</strong>
+                        </span>
+                        <span>
+                            Insumos por reponer
+                            <strong>{{ insumo_summary.por_reponer }}</strong>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for card in asset_cards %}
+        <div class="col-xxl-3 col-lg-4 col-md-6">
+            <div class="metric-card" data-gradient="{{ card.gradient }}">
+                <div class="metric-card-header">
+                    <span class="metric-icon">
+                        <i class="bi {{ card.icon }}"></i>
+                    </span>
+                    <div class="metric-actions">
+                        <a href="{{ card.list_url }}" class="metric-link" title="Ver listado">
+                            <i class="bi bi-arrow-right-short"></i>
+                        </a>
+                        <a href="{{ card.create_url }}" class="metric-link" title="Registrar nuevo">
+                            <i class="bi bi-plus-lg"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="metric-card-body">
+                    <h3>{{ card.total|intcomma }}</h3>
+                    <p>{{ card.label }}</p>
+                    {% if card.active is not None %}
+                    <div class="metric-progress">
+                        <div class="metric-progress-stats">
+                            <span>{{ card.active|default:0|intcomma }} activos</span>
+                            <span>{{ card.active_percentage|default:0 }}%</span>
+                        </div>
+                        <div class="progress">
+                                <div class="progress-bar" data-progress="{{ card.active_percentage|default:0 }}"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(() => {
+    document.querySelectorAll('[data-gradient]').forEach((element) => {
+        const gradient = element.getAttribute('data-gradient');
+        if (gradient) {
+            element.style.background = gradient;
+        }
+    });
+
+    document.querySelectorAll('[data-progress]').forEach((element) => {
+        const rawValue = Number(element.getAttribute('data-progress') || 0);
+        const clamped = Math.max(0, Math.min(rawValue, 100));
+        element.style.width = `${clamped}%`;
+    });
+})();
+</script>
+{% endblock %}
+            <div class="card glass-card h-100">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="icon-bubble"><i class="bi bi-pie-chart"></i></span>
+                        <div>
+                            <h5 class="mb-0">Distribución por tipo</h5>
+                            <small class="text-muted">Cantidad total por categoría</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if total_assets %}
+                        <canvas id="assetChart" height="260"></canvas>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-pie-chart"></i>
+                            <p>No hay datos registrados todavía.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-5">
+            <div class="card glass-card h-100">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="icon-bubble"><i class="bi bi-graph-up"></i></span>
+                        <div>
+                            <h5 class="mb-0">Estado operativo</h5>
+                            <small class="text-muted">Activos por estado actual</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if chart_estado_data %}
+                        <canvas id="estadoChart" height="260"></canvas>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-graph-down"></i>
+                            <p>No hay estados registrados.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+        <div class="col-xl-7">
+            <div class="card glass-card h-100">
+                <div class="card-header d-flex align-items-center gap-3">
+                    <span class="icon-bubble"><i class="bi bi-clock-history"></i></span>
+                    <div>
+                        <h5 class="mb-0">Actividad reciente</h5>
+                        <small class="text-muted">Últimos activos incorporados</small>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if recent_activity %}
+                        <div class="timeline">
+                            {% for item in recent_activity %}
+                            <div class="timeline-item">
+                                <div class="timeline-icon">
+                                    <i class="bi {{ item.icon }}"></i>
+                                </div>
+                                <div>
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                        <div>
+                                            {% if item.url %}
+                                                <a href="{{ item.url }}" class="timeline-title">{{ item.nombre|default:'Activo sin nombre' }}</a>
+                                            {% else %}
+                                                <span class="timeline-title">{{ item.nombre|default:'Activo sin nombre' }}</span>
+                                            {% endif %}
+                                            <span class="timeline-subtitle">{{ item.tipo }}</span>
+                                        </div>
+                                        {% if item.estado %}
+                                            <span class="estado-pill estado-{{ item.estado_slug }}">{{ item.estado }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="timeline-meta">
+                                        {% if item.identifier %}
+                                            <span><i class="bi bi-tag me-1"></i>{{ item.identifier }}</span>
+                                        {% endif %}
+                                        <span><i class="bi bi-calendar-event me-1"></i>{{ item.fecha|timesince }} atrás</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-inbox-fill"></i>
+                            <p>Sin actividad reciente.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-5">
+            <div class="card glass-card h-100">
+                <div class="card-header d-flex align-items-center gap-3">
+                    <span class="icon-bubble"><i class="bi bi-shield-exclamation"></i></span>
+                    <div>
+                        <h5 class="mb-0">Garantías por vencer</h5>
+                        <small class="text-muted">Próximos 30 días</small>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if warranty_alerts %}
+                        <ul class="warranty-list">
+                            {% for alert in warranty_alerts %}
+                            <li class="warranty-item">
+                                <div class="warranty-icon">
+                                    <i class="bi {{ alert.icon }}"></i>
+                                </div>
+                                <div>
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                        <div>
+                                            {% if alert.url %}
+                                                <a href="{{ alert.url }}" class="timeline-title">{{ alert.nombre|default:'Activo sin nombre' }}</a>
+                                            {% else %}
+                                                <span class="timeline-title">{{ alert.nombre|default:'Activo sin nombre' }}</span>
+                                            {% endif %}
+                                            <span class="badge-soft">{{ alert.tipo }}</span>
+                                        </div>
+                                        <span class="badge-soft badge-soft-warning">
+                                            <i class="bi bi-alarm me-1"></i>{{ alert.dias }} días
+                                        </span>
+                                    </div>
+                                    <div class="warranty-meta">
+                                        <span><i class="bi bi-calendar-check me-1"></i>{{ alert.fecha|date:'d/m/Y' }}</span>
+                                        {% if alert.estado %}
+                                            <span class="estado-pill estado-{{ alert.estado_slug }}">{{ alert.estado }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-calendar2-check"></i>
+                            <p>No hay garantías próximas a vencer.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+        <div class="col-xl-6">
+            <div class="card glass-card h-100">
+                <div class="card-header d-flex align-items-center gap-3">
+                    <span class="icon-bubble"><i class="bi bi-box-seam"></i></span>
+                    <div>
+                        <h5 class="mb-0">Stock de insumos</h5>
+                        <small class="text-muted">Disponibilidad y reposición</small>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="insumo-grid">
+                        <div class="insumo-stats">
+                            <div class="insumo-stat">
+                                <small>Total</small>
+                                <strong>{{ insumo_summary.total|intcomma }}</strong>
+                            </div>
+                            <div class="insumo-stat insumo-stat-success">
+                                <small>Disponible</small>
+                                <strong>{{ insumo_summary.disponible|intcomma }}</strong>
+                            </div>
+                            <div class="insumo-stat insumo-stat-warning">
+                                <small>Disponibilidad</small>
+                                <strong>{{ insumo_summary.porcentaje_disponible }}%</strong>
+                            </div>
+                        </div>
+                        {% if insumo_restock %}
+                            <div class="restock-list">
+                                {% for insumo in insumo_restock %}
+                                <div class="restock-item">
+                                    <div>
+                                        <strong>{{ insumo.nombre }}</strong>
+                                        <div class="text-muted small">
+                                            Punto de reorden: {{ insumo.punto_reorden }}
+                                        </div>
+                                    </div>
+                                    <span class="badge-soft">
+                                        {{ insumo.disponible }} {{ insumo.unidad|default:'u.' }}
+                                    </span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-check2-circle"></i>
+                                <p>No hay insumos en nivel crítico.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card glass-card h-100">
+                <div class="card-header d-flex align-items-center gap-3">
+                    <span class="icon-bubble"><i class="bi bi-activity"></i></span>
+                    <div>
+                        <h5 class="mb-0">Bitácora de movimientos</h5>
+                        <small class="text-muted">Últimos eventos registrados</small>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if bitacora_feed %}
+                        <div class="bitacora-feed">
+                            {% for event in bitacora_feed %}
+                            <div class="bitacora-item">
+                                <div class="bitacora-icon">
+                                    <i class="bi {{ event.icon }}"></i>
+                                </div>
+                                <div>
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                        <div>
+                                            {% if event.url %}
+                                                <a href="{{ event.url }}" class="timeline-title">{{ event.nombre|default:'Activo sin nombre' }}</a>
+                                            {% else %}
+                                                <span class="timeline-title">{{ event.nombre|default:'Activo sin nombre' }}</span>
+                                            {% endif %}
+                                            <span class="badge-soft">{{ event.tipo_dispositivo }}</span>
+                                        </div>
+                                        <span class="badge-soft">{{ event.tipo_evento }}</span>
+                                    </div>
+                                    <p class="text-muted small mb-2">{{ event.descripcion|default:'Sin descripción disponible.' }}</p>
+                                    <div class="bitacora-meta">
+                                        {% if event.responsable %}
+                                            <span><i class="bi bi-person-circle me-1"></i>{{ event.responsable }}</span>
+                                        {% endif %}
+                                        <span><i class="bi bi-clock me-1"></i>{{ event.fecha|timesince }} atrás</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-journal-minus"></i>
+                            <p>No hay eventos registrados.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'inventario/vendor/chartjs/js/chart.umd.min.js' %}"></script>
+{{ chart_asset_labels|json_script:"asset-chart-labels" }}
+{{ chart_asset_data|json_script:"asset-chart-data" }}
+{{ chart_asset_colors|json_script:"asset-chart-colors" }}
+{{ chart_estado_labels|json_script:"estado-chart-labels" }}
+{{ chart_estado_data|json_script:"estado-chart-data" }}
+{{ chart_estado_colors|json_script:"estado-chart-colors" }}
+<script>
+(() => {
+    document.querySelectorAll('[data-gradient]').forEach((element) => {
+        const gradient = element.getAttribute('data-gradient');
+        if (gradient) {
+            element.style.background = gradient;
+        }
+    });
+
+    document.querySelectorAll('[data-progress]').forEach((element) => {
+        const rawValue = Number(element.getAttribute('data-progress') || 0);
+        const clamped = Math.max(0, Math.min(rawValue, 100));
+        element.style.width = `${clamped}%`;
+    });
+
+    if (typeof Chart === 'undefined') {
+        return;
+    }
+
+    const assetLabelsEl = document.getElementById('asset-chart-labels');
+    const assetDataEl = document.getElementById('asset-chart-data');
+    const assetColorsEl = document.getElementById('asset-chart-colors');
+
+    if (assetLabelsEl && assetDataEl && assetColorsEl) {
+        const assetLabels = JSON.parse(assetLabelsEl.textContent);
+        const assetData = JSON.parse(assetDataEl.textContent);
+        const assetColors = JSON.parse(assetColorsEl.textContent);
+        const assetCanvas = document.getElementById('assetChart');
+
+        if (assetCanvas && assetData.reduce((acc, val) => acc + val, 0) > 0) {
+            new Chart(assetCanvas, {
+                type: 'doughnut',
+                data: {
+                    labels: assetLabels,
+                    datasets: [
+                        {
+                            data: assetData,
+                            backgroundColor: assetColors,
+                            borderWidth: 0,
+                            hoverOffset: 8,
+                        },
+                    ],
+                },
+                options: {
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                padding: 18,
+                                usePointStyle: true,
+                            },
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label(context) {
+                                    const value = context.parsed;
+                                    const total = assetData.reduce((acc, val) => acc + val, 0);
+                                    const percentage = total ? Math.round((value / total) * 100) : 0;
+                                    return `${context.label}: ${value} (${percentage}%)`;
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        }
+    }
+
+    const estadoLabelsEl = document.getElementById('estado-chart-labels');
+    const estadoDataEl = document.getElementById('estado-chart-data');
+    const estadoColorsEl = document.getElementById('estado-chart-colors');
+
+    if (estadoLabelsEl && estadoDataEl && estadoColorsEl) {
+        const estadoLabels = JSON.parse(estadoLabelsEl.textContent);
+        const estadoData = JSON.parse(estadoDataEl.textContent);
+        const estadoColors = JSON.parse(estadoColorsEl.textContent);
+        const estadoCanvas = document.getElementById('estadoChart');
+
+        if (estadoCanvas && estadoData.some((value) => value > 0)) {
+            new Chart(estadoCanvas, {
+                type: 'bar',
+                data: {
+                    labels: estadoLabels,
+                    datasets: [
+                        {
+                            data: estadoData,
+                            backgroundColor: estadoColors,
+                            borderRadius: 18,
+                            maxBarThickness: 42,
+                        },
+                    ],
+                },
+                options: {
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label(context) {
+                                    return `${context.parsed.x} activos`;
+                                },
+                            },
+                        },
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(15, 23, 42, 0.08)',
+                            },
+                            ticks: {
+                                precision: 0,
+                            },
+                        },
+                        y: {
+                            grid: { display: false },
+                        },
+                    },
+                },
+            });
+        }
+    }
+})();
+</script>
+{% endblock %}

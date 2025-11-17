@@ -1,0 +1,125 @@
+{% comment %}
+Macros reutilizables para campos de formulario
+{% endcomment %}
+
+{% comment %}
+Macro para sección de formulario
+Uso: {% include 'inventario/macros/form_fields.html' with section_title="Título" section_icon="fas fa-icon" %}
+{% endcomment %}
+{% if section_title %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            {% if section_icon %}<i class="{{ section_icon }}"></i>{% endif %}
+            {{ section_title }}
+        </h5>
+    </div>
+    <div class="card-body">
+        {{ section_content|safe }}
+    </div>
+</div>
+{% endif %}
+
+{% comment %}
+Macro para campo de texto básico
+{% endcomment %}
+{% if field_name %}
+<div class="mb-3">
+    <label for="id_{{ field_name }}" class="form-label">
+        {{ field_label }}
+        {% if field_required %}<span class="text-danger">*</span>{% endif %}
+    </label>
+    <input type="{{ field_type|default:'text' }}" 
+           class="form-control{% if field_errors %} is-invalid{% endif %}" 
+           id="id_{{ field_name }}" 
+           name="{{ field_name }}" 
+           value="{{ field_value|default:'' }}"
+           {% if field_placeholder %}placeholder="{{ field_placeholder }}"{% endif %}
+           {% if field_required %}required{% endif %}>
+    {% if field_help %}
+        <div class="form-text">{{ field_help }}</div>
+    {% endif %}
+    {% if field_errors %}
+        <div class="invalid-feedback">
+            {% for error in field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endif %}
+
+{% comment %}
+Macro para campo select
+{% endcomment %}
+{% if select_name %}
+<div class="mb-3">
+    <label for="id_{{ select_name }}" class="form-label">
+        {{ select_label }}
+        {% if select_required %}<span class="text-danger">*</span>{% endif %}
+    </label>
+    <select class="form-select{% if select_errors %} is-invalid{% endif %}" 
+            id="id_{{ select_name }}" 
+            name="{{ select_name }}"
+            {% if select_required %}required{% endif %}>
+        <option value="">{{ select_placeholder|default:'Seleccione una opción' }}</option>
+        {% for option in select_options %}
+            <option value="{{ option.value }}" 
+                    {% if option.value == select_value %}selected{% endif %}>
+                {{ option.label }}
+            </option>
+        {% endfor %}
+    </select>
+    {% if select_help %}
+        <div class="form-text">{{ select_help }}</div>
+    {% endif %}
+    {% if select_errors %}
+        <div class="invalid-feedback">
+            {% for error in select_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endif %}
+
+{% comment %}
+Macro para campo textarea
+{% endcomment %}
+{% if textarea_name %}
+<div class="mb-3">
+    <label for="id_{{ textarea_name }}" class="form-label">
+        {{ textarea_label }}
+        {% if textarea_required %}<span class="text-danger">*</span>{% endif %}
+    </label>
+    <textarea class="form-control{% if textarea_errors %} is-invalid{% endif %}" 
+              id="id_{{ textarea_name }}" 
+              name="{{ textarea_name }}"
+              rows="{{ textarea_rows|default:3 }}"
+              {% if textarea_placeholder %}placeholder="{{ textarea_placeholder }}"{% endif %}
+              {% if textarea_required %}required{% endif %}>{{ textarea_value|default:'' }}</textarea>
+    {% if textarea_help %}
+        <div class="form-text">{{ textarea_help }}</div>
+    {% endif %}
+    {% if textarea_errors %}
+        <div class="invalid-feedback">
+            {% for error in textarea_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endif %}
+
+{% comment %}
+Macro para grupo de campos en fila
+{% endcomment %}
+{% if row_fields %}
+<div class="row">
+    {% for field in row_fields %}
+        <div class="col-md-{{ field.col_size|default:6 }}">
+            {% include 'inventario/macros/form_fields.html' with field_name=field.name field_label=field.label field_type=field.type field_value=field.value field_required=field.required field_errors=field.errors field_help=field.help field_placeholder=field.placeholder %}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}

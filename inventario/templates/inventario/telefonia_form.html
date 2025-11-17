@@ -1,0 +1,228 @@
+{% extends 'inventario/base_device_form.html' %}
+
+{% block form_sections %}
+<div class="card">
+	<div class="card-body">
+		{% if form.non_field_errors %}
+		<div class="alert alert-danger mb-3">
+			<ul class="mb-0">
+				{% for error in form.non_field_errors %}
+				<li>{{ error }}</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+
+		<ul class="nav nav-tabs" id="telefoniaTabs" role="tablist">
+			<li class="nav-item" role="presentation">
+				<button class="nav-link active" id="telefonia-tab-basicos" data-bs-toggle="tab"
+						data-bs-target="#telefonia-pane-basicos" type="button" role="tab"
+						aria-controls="telefonia-pane-basicos" aria-selected="true">
+					Datos básicos
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="telefonia-tab-especificaciones" data-bs-toggle="tab"
+						data-bs-target="#telefonia-pane-especificaciones" type="button" role="tab"
+						aria-controls="telefonia-pane-especificaciones" aria-selected="false">
+					Especificaciones
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="telefonia-tab-comunicaciones" data-bs-toggle="tab"
+						data-bs-target="#telefonia-pane-comunicaciones" type="button" role="tab"
+						aria-controls="telefonia-pane-comunicaciones" aria-selected="false">
+					Comunicaciones
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="telefonia-tab-compra" data-bs-toggle="tab"
+						data-bs-target="#telefonia-pane-compra" type="button" role="tab"
+						aria-controls="telefonia-pane-compra" aria-selected="false">
+					Compra y garantía
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="telefonia-tab-notas" data-bs-toggle="tab"
+						data-bs-target="#telefonia-pane-notas" type="button" role="tab"
+						aria-controls="telefonia-pane-notas" aria-selected="false">
+					Notas
+				</button>
+			</li>
+		</ul>
+
+		<div class="tab-content pt-3" id="telefoniaTabsContent">
+			<div class="tab-pane fade show active" id="telefonia-pane-basicos" role="tabpanel"
+				 aria-labelledby="telefonia-tab-basicos">
+				<div class="row g-3">
+					<div class="col-md-6">
+						{{ form.nombre.label_tag }}
+						{{ form.nombre }}
+						{% for error in form.nombre.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.numero_inventario.label_tag }}
+						{{ form.numero_inventario }}
+						{% for error in form.numero_inventario.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.numero_serie.label_tag }}
+						{{ form.numero_serie }}
+						{% for error in form.numero_serie.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.tipo_telefonia.label_tag }}
+						{{ form.tipo_telefonia }}
+						{% for error in form.tipo_telefonia.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.estado.label_tag }}
+						{{ form.estado }}
+						{% for error in form.estado.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.lugar.label_tag }}
+						{{ form.lugar }}
+						{% for error in form.lugar.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="telefonia-pane-especificaciones" role="tabpanel"
+				 aria-labelledby="telefonia-tab-especificaciones">
+				<div class="row g-3">
+					<div class="col-md-4">
+						{{ form.fabricante.label_tag }}
+						{{ form.fabricante }}
+						{% for error in form.fabricante.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.modelo.label_tag }}
+						{{ form.modelo }}
+						{% for error in form.modelo.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.tipo_conexion.label_tag }}
+						{{ form.tipo_conexion }}
+						{% for error in form.tipo_conexion.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="telefonia-pane-comunicaciones" role="tabpanel"
+				 aria-labelledby="telefonia-tab-comunicaciones">
+				<div class="row g-3">
+					<div class="col-md-4">
+						{{ form.extension_interna.label_tag }}
+						{{ form.extension_interna }}
+						{% for error in form.extension_interna.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.numero_linea.label_tag }}
+						{{ form.numero_linea }}
+						{% for error in form.numero_linea.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.direccion_ip.label_tag }}
+						{{ form.direccion_ip }}
+						{% for error in form.direccion_ip.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.direccion_mac.label_tag }}
+						{{ form.direccion_mac }}
+						<small class="text-muted">Formato: AA:BB:CC:DD:EE:FF</small>
+						{% for error in form.direccion_mac.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="telefonia-pane-compra" role="tabpanel"
+				 aria-labelledby="telefonia-tab-compra">
+				<div class="row g-3">
+					<div class="col-md-6">
+						{{ form.proveedor.label_tag }}
+						{{ form.proveedor }}
+						{% for error in form.proveedor.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.fecha_adquisicion.label_tag }}
+						{{ form.fecha_adquisicion }}
+						{% for error in form.fecha_adquisicion.errors %}
+							<div   class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-2">
+						{{ form.moneda.label_tag }}
+						{{ form.moneda }}
+						{% for error in form.moneda.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.valor_adquisicion.label_tag }}
+						{{ form.valor_adquisicion }}
+						{% for error in form.valor_adquisicion.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.tipo_garantia.label_tag }}
+						{{ form.tipo_garantia }}
+						{% for error in form.tipo_garantia.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.anos_garantia.label_tag }}
+						{{ form.anos_garantia }}
+						{% for error in form.anos_garantia.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="telefonia-pane-notas" role="tabpanel"
+				 aria-labelledby="telefonia-tab-notas">
+				<div class="row g-3">
+					<div class="col-12">
+						{{ form.comentarios.label_tag }}
+						{{ form.comentarios }}
+						{% for error in form.comentarios.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

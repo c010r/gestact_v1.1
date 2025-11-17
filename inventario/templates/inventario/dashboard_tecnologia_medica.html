@@ -1,0 +1,345 @@
+{% extends 'inventario/base.html' %}
+{% load humanize %}
+
+{% block title %}Dashboard Tecnología Médica - ASSE-GestACT{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Header con selector de dashboard -->
+    <div class="row mb-4">
+        <div class="col-md-10">
+            <h1 class="display-6 fw-bold text-gradient mb-0">
+                <i class="bi bi-heart-pulse me-2" style="color: #dc2626;"></i>{{ dashboard_title }}
+            </h1>
+            <p class="text-muted">Gestión y monitoreo de equipos médicos</p>
+        </div>
+        <div class="col-md-2 text-end">
+            <a href="{% url 'inventario:dashboard' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-house me-1"></i>Inicio
+            </a>
+        </div>
+    </div>
+
+    <!-- Tarjetas de estadísticas -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="bi bi-heart-pulse display-5 text-danger mb-2"></i>
+                    <h3 class="card-title mb-0">{{ total_equipos|intcomma }}</h3>
+                    <p class="card-text text-muted">Total Equipos Médicos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="bi bi-check-circle display-5 text-success mb-2"></i>
+                    <h3 class="card-title mb-0">{{ equipos_activos|intcomma }}</h3>
+                    <p class="card-text text-muted">Equipos Activos</p>
+                    <small class="text-muted">{{ active_ratio }}% del total</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="bi bi-exclamation-triangle display-5 text-warning mb-2"></i>
+                    <h3 class="card-title mb-0">{{ equipos_criticos|intcomma }}</h3>
+                    <p class="card-text text-muted">Equipos Críticos</p>
+                    <small class="text-muted">Clase III y IV</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="bi bi-tools display-5 text-info mb-2"></i>
+                    <h3 class="card-title mb-0">{{ alertas_calibracion|add:alertas_mantenimiento }}</h3>
+                    <p class="card-text text-muted">Alertas Pendientes</p>
+                    <small class="text-muted">Calibración y mantenimiento</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Clasificación de Riesgo</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartClasificacion" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Equipos por Tipo</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartTipos" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertas de calibración y mantenimiento -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="bi bi-tools me-2"></i>Requieren Calibración
+                        <span class="badge bg-dark float-end">{{ alertas_calibracion }}</span>
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if equipos_calibracion %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Equipo</th>
+                                    <th>Tipo</th>
+                                    <th>Clasificación</th>
+                                    <th>Última</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for equipo in equipos_calibracion %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ equipo.url }}">{{ equipo.nombre|truncatewords:4 }}</a>
+                                    </td>
+                                    <td><small>{{ equipo.tipo }}</small></td>
+                                    <td><small>{{ equipo.clasificacion }}</small></td>
+                                    <td><small>{{ equipo.fecha_ultima|date:'d/m/Y'|default:'-' }}</small></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="p-4 text-center text-muted">
+                        <i class="bi bi-check-circle display-6"></i>
+                        <p class="mb-0 mt-2">No hay equipos que requieran calibración próxima</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-wrench me-2"></i>Requieren Mantenimiento
+                        <span class="badge bg-dark float-end">{{ alertas_mantenimiento }}</span>
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if equipos_mantenimiento %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Equipo</th>
+                                    <th>Tipo</th>
+                                    <th>Área</th>
+                                    <th>Última</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for equipo in equipos_mantenimiento %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ equipo.url }}">{{ equipo.nombre|truncatewords:4 }}</a>
+                                    </td>
+                                    <td><small>{{ equipo.tipo }}</small></td>
+                                    <td><small>{{ equipo.area }}</small></td>
+                                    <td><small>{{ equipo.fecha_ultima|date:'d/m/Y'|default:'-' }}</small></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="p-4 text-center text-muted">
+                        <i class="bi bi-check-circle display-6"></i>
+                        <p class="mb-0 mt-2">No hay equipos que requieran mantenimiento próximo</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Equipos recientes y bitácora -->
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Equipos Recientes</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if equipos_recientes %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Equipo</th>
+                                    <th>Tipo</th>
+                                    <th>Estado</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for equipo in equipos_recientes %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ equipo.url }}">{{ equipo.nombre|truncatewords:4 }}</a>
+                                    </td>
+                                    <td><small>{{ equipo.tipo }}</small></td>
+                                    <td>
+                                        <span class="badge bg-success">{{ equipo.estado }}</span>
+                                    </td>
+                                    <td><small>{{ equipo.fecha|date:'d/m/Y' }}</small></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="p-4 text-center text-muted">
+                        <p class="mb-0">No hay equipos registrados</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-journal-text me-2"></i>Bitácora Reciente</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if bitacora_feed %}
+                    <div class="list-group list-group-flush">
+                        {% for entry in bitacora_feed %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <i class="{{ entry.icon }} text-danger me-2"></i>
+                                    <strong>{{ entry.tipo_evento }}</strong>
+                                    <p class="mb-0 small">
+                                        {% if entry.url %}
+                                        <a href="{{ entry.url }}">{{ entry.nombre }}</a>
+                                        {% else %}
+                                        {{ entry.nombre }}
+                                        {% endif %}
+                                        - {{ entry.descripcion|truncatewords:8 }}
+                                    </p>
+                                </div>
+                                <small class="text-muted">{{ entry.fecha|date:'d/m H:i' }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="p-4 text-center text-muted">
+                        <p class="mb-0">No hay registros en la bitácora</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acceso rápido -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Acceso Rápido</h5>
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'inventario:tecnologia_medica_list' %}" class="btn btn-outline-danger">
+                            <i class="bi bi-list-ul me-1"></i>Ver Todos los Equipos
+                        </a>
+                        <a href="{% url 'inventario:tecnologia_medica_create' %}" class="btn btn-danger">
+                            <i class="bi bi-plus-circle me-1"></i>Agregar Nuevo Equipo
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// Gráfico de clasificación de riesgo
+const ctxClasificacion = document.getElementById('chartClasificacion');
+if (ctxClasificacion) {
+    new Chart(ctxClasificacion, {
+        type: 'doughnut',
+        data: {
+            labels: {{ clasificacion_labels|safe }},
+            datasets: [{
+                data: {{ clasificacion_data|safe }},
+                backgroundColor: {{ clasificacion_colors|safe }},
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+// Gráfico de equipos por tipo
+const ctxTipos = document.getElementById('chartTipos');
+if (ctxTipos) {
+    new Chart(ctxTipos, {
+        type: 'bar',
+        data: {
+            labels: {{ tipo_labels|safe }},
+            datasets: [{
+                label: 'Cantidad',
+                data: {{ tipo_data|safe }},
+                backgroundColor: {{ tipo_colors|safe }},
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}
+

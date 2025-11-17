@@ -1,0 +1,143 @@
+{% extends 'inventario/base_device_form.html' %}
+
+{% block form_sections %}
+<div class="card">
+	<div class="card-body">
+		{% if form.non_field_errors %}
+		<div class="alert alert-danger mb-3">
+			<ul class="mb-0">
+				{% for error in form.non_field_errors %}
+				<li>{{ error }}</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+
+		<ul class="nav nav-tabs" id="insumoTabs" role="tablist">
+			<li class="nav-item" role="presentation">
+				<button class="nav-link active" id="insumo-tab-basicos" data-bs-toggle="tab"
+						data-bs-target="#insumo-pane-basicos" type="button" role="tab"
+						aria-controls="insumo-pane-basicos" aria-selected="true">
+					Datos básicos
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="insumo-tab-inventario" data-bs-toggle="tab"
+						data-bs-target="#insumo-pane-inventario" type="button" role="tab"
+						aria-controls="insumo-pane-inventario" aria-selected="false">
+					Inventario
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="insumo-tab-notas" data-bs-toggle="tab"
+						data-bs-target="#insumo-pane-notas" type="button" role="tab"
+						aria-controls="insumo-pane-notas" aria-selected="false">
+					Notas
+				</button>
+			</li>
+		</ul>
+
+		<div class="tab-content pt-3" id="insumoTabsContent">
+			<div class="tab-pane fade show active" id="insumo-pane-basicos" role="tabpanel"
+				 aria-labelledby="insumo-tab-basicos">
+				<div class="row g-3">
+					<div class="col-md-6">
+						{{ form.nombre.label_tag }}
+						{{ form.nombre }}
+						{% for error in form.nombre.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.tipo_insumo.label_tag }}
+						{{ form.tipo_insumo }}
+						{% for error in form.tipo_insumo.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.proveedor.label_tag }}
+						{{ form.proveedor }}
+						{% for error in form.proveedor.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.unidad_medida.label_tag }}
+						{{ form.unidad_medida }}
+						{% for error in form.unidad_medida.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						<div class="form-check mt-2">
+							{{ form.activo }}
+							<label class="form-check-label" for="{{ form.activo.id_for_label }}">
+								{{ form.activo.label }}
+							</label>
+						</div>
+						{% for error in form.activo.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="insumo-pane-inventario" role="tabpanel"
+				 aria-labelledby="insumo-tab-inventario">
+				<div class="row g-3">
+					<div class="col-md-4">
+						{{ form.cantidad_total.label_tag }}
+						{{ form.cantidad_total }}
+						{% for error in form.cantidad_total.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.cantidad_disponible.label_tag }}
+						{{ form.cantidad_disponible }}
+						{% for error in form.cantidad_disponible.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.punto_reorden.label_tag }}
+						{{ form.punto_reorden }}
+						<small class="text-muted">Nivel que dispara alertas de reposición.</small>
+						{% for error in form.punto_reorden.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-2">
+						{{ form.moneda.label_tag }}
+						{{ form.moneda }}
+						{% for error in form.moneda.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-2">
+						{{ form.valor_unitario_estandar.label_tag }}
+						{{ form.valor_unitario_estandar }}
+						{% for error in form.valor_unitario_estandar.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="insumo-pane-notas" role="tabpanel"
+				 aria-labelledby="insumo-tab-notas">
+				<div class="row g-3">
+					<div class="col-12">
+						{{ form.descripcion.label_tag }}
+						{{ form.descripcion }}
+						{% for error in form.descripcion.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

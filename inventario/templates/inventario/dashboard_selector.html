@@ -1,0 +1,309 @@
+{% extends 'inventario/base.html' %}
+{% load static %}
+
+{% block title %}Seleccionar Dashboard - ASSE-GestACT{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --selector-gradient-ti: linear-gradient(135deg, #0f172a 0%, #1d4ed8 45%, #38bdf8 100%);
+    --selector-gradient-medica: linear-gradient(135deg, #7f1d1d 0%, #dc2626 45%, #f87171 100%);
+}
+
+.selector-container {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+}
+
+.selector-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.selector-header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #1d4ed8 0%, #dc2626 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+}
+
+.selector-subtitle {
+    font-size: 1.2rem;
+    color: #6b7280;
+    margin-bottom: 0;
+}
+
+.dashboard-option {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    height: 100%;
+    min-height: 400px;
+    text-decoration: none;
+    display: block;
+}
+
+.dashboard-option:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.option-ti {
+    background: var(--selector-gradient-ti);
+}
+
+.option-medica {
+    background: var(--selector-gradient-medica);
+}
+
+.option-content {
+    position: relative;
+    z-index: 2;
+    padding: 3rem 2rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.option-icon {
+    font-size: 5rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.9;
+}
+
+.option-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.option-description {
+    font-size: 1rem;
+    opacity: 0.9;
+    text-align: center;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.option-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem 0;
+    text-align: left;
+}
+
+.option-features li {
+    padding: 0.5rem 0;
+    font-size: 0.95rem;
+    opacity: 0.85;
+}
+
+.option-features li i {
+    margin-right: 0.5rem;
+    opacity: 1;
+}
+
+.option-button {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    color: white;
+    padding: 1rem 3rem;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.dashboard-option:hover .option-button {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.05);
+}
+
+.option-ti:hover .option-button {
+    color: #1d4ed8;
+}
+
+.option-medica:hover .option-button {
+    color: #dc2626;
+}
+
+.option-overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .selector-header h1 {
+        font-size: 2rem;
+    }
+    
+    .dashboard-option {
+        min-height: 350px;
+        margin-bottom: 2rem;
+    }
+    
+    .option-icon {
+        font-size: 3.5rem;
+    }
+    
+    .option-title {
+        font-size: 1.5rem;
+    }
+}
+
+[data-bs-theme="dark"] .selector-subtitle {
+    color: #9ca3af;
+}
+
+[data-bs-theme="dark"] .dashboard-option {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="selector-container fade-in">
+    <div class="container">
+        <div class="selector-header">
+            <h1>
+                <i class="bi bi-heart-pulse me-2"></i>
+                Bienvenido a ASSE-GestACT
+            </h1>
+            <p class="selector-subtitle">
+                Selecciona el módulo al que deseas acceder
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Opción: Activos Informáticos -->
+            <div class="col-lg-6">
+                <a href="{% url 'inventario:dashboard_informatica' %}" class="dashboard-option option-ti">
+                    <div class="option-overlay"></div>
+                    <div class="option-content">
+                        <div class="option-icon">
+                            <i class="bi bi-laptop"></i>
+                        </div>
+                        <h2 class="option-title">Activos Informáticos</h2>
+                        <p class="option-description">
+                            Gestión de infraestructura tecnológica y equipos de TI
+                        </p>
+                        <ul class="option-features">
+                            <li><i class="bi bi-check-circle-fill"></i> Computadoras y Servidores</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Impresoras y Monitores</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Networking y Telefonía</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Software e Insumos TI</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Periféricos</li>
+                        </ul>
+                        <div class="option-button">
+                            Acceder a Dashboard TI
+                            <i class="bi bi-arrow-right ms-2"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Opción: Tecnología Médica -->
+            <div class="col-lg-6">
+                <a href="{% url 'inventario:dashboard_medica' %}" class="dashboard-option option-medica">
+                    <div class="option-overlay"></div>
+                    <div class="option-content">
+                        <div class="option-icon">
+                            <i class="bi bi-heart-pulse"></i>
+                        </div>
+                        <h2 class="option-title">Tecnología Médica</h2>
+                        <p class="option-description">
+                            Gestión de equipos médicos y biomédicos
+                        </p>
+                        <ul class="option-features">
+                            <li><i class="bi bi-check-circle-fill"></i> Equipos de UCI y Emergencia</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Monitoreo de Pacientes</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Calibración y Mantenimiento</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Clasificación de Riesgo</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Cumplimiento Normativo</li>
+                        </ul>
+                        <div class="option-button">
+                            Acceder a Dashboard Médico
+                            <i class="bi bi-arrow-right ms-2"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Información adicional -->
+        <div class="row mt-5">
+            <div class="col-12 text-center">
+                <p class="text-muted">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Ambos módulos tienen acceso al <strong>Sistema de Órdenes de Servicio</strong> compartido
+                </p>
+            </div>
+        </div>
+
+        <!-- Accesos rápidos -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <a href="{% url 'inventario:orden_servicio_list' %}" class="btn btn-outline-primary w-100">
+                                    <i class="bi bi-tools me-2"></i>Órdenes de Servicio
+                                </a>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="{% url 'inventario:reports_menu' %}" class="btn btn-outline-secondary w-100">
+                                    <i class="bi bi-graph-up me-2"></i>Reportes
+                                </a>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="{% url 'inventario:configuracion_lugares' %}" class="btn btn-outline-info w-100">
+                                    <i class="bi bi-gear me-2"></i>Configuración
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Animación al cargar
+document.addEventListener('DOMContentLoaded', function() {
+    const options = document.querySelectorAll('.dashboard-option');
+    options.forEach((option, index) => {
+        setTimeout(() => {
+            option.style.opacity = '0';
+            option.style.transform = 'translateY(20px)';
+            option.offsetHeight; // Force reflow
+            option.style.transition = 'all 0.5s ease';
+            option.style.opacity = '1';
+            option.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}
+

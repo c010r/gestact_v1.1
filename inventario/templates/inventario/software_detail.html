@@ -1,0 +1,162 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Software {{ object.nombre }} - ASSE-GestACT{% endblock %}
+
+{% block extra_css %}
+<style>
+[data-bs-theme="dark"] .card {
+    background-color: #1a1d20;
+    border: 1px solid #2d3238;
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.3);
+}
+
+[data-bs-theme="dark"] .card-header {
+    background-color: #2d3238;
+    border-bottom: 1px solid #404448;
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .card-body {
+    background-color: #1a1d20;
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .badge {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-bs-theme="dark"] .table {
+    color: #e9ecef;
+    border-color: #2d3238;
+}
+
+[data-bs-theme="dark"] .table thead th {
+    background-color: #2d3238;
+    border-color: #404448;
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .table tbody td {
+    border-color: #2d3238;
+}
+
+[data-bs-theme="dark"] .table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="row align-items-center mb-4">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center gap-3">
+                <div class="icon-circle bg-gradient-primary text-white">
+                    <i class="bi bi-window-stack"></i>
+                </div>
+                <div>
+                    <h1 class="display-6 fw-bold text-gradient mb-0">{{ object.nombre }}</h1>
+                    <p class="text-muted mb-0">{{ object.descripcion|default:'Sin descripción registrada.' }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'inventario:software_update' object.pk %}" class="btn btn-warning text-dark">
+                <i class="bi bi-pencil me-2"></i>Editar
+            </a>
+            <a href="{% url 'inventario:software_list' %}" class="btn btn-secondary text-white">
+                <i class="bi bi-arrow-left me-2"></i>Volver
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="bi bi-info-circle me-2"></i>Detalles generales</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row gy-3">
+                        <div class="col-md-6">
+                            <small class="text-muted text-uppercase">Tipo de software</small>
+                            <p class="fw-semibold mb-0">{{ object.tipo_software|default:'-' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted text-uppercase">Versión</small>
+                            <p class="fw-semibold mb-0">{{ object.version|default:'-' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted text-uppercase">Proveedor</small>
+                            <p class="fw-semibold mb-0">{{ object.proveedor|default:'-' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted text-uppercase">Costo de licencia</small>
+                            <p class="fw-semibold mb-0">{{ object.costo_licencia|floatformat:2|default:'-' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted text-uppercase">Cantidad de licencias</small>
+                            <p class="fw-semibold mb-0">{{ object.cantidad_licencias }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted text-uppercase">Licencias en uso</small>
+                            <p class="fw-semibold mb-0">{{ object.licencias_en_uso }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted text-uppercase">Fecha de compra</small>
+                            <p class="fw-semibold mb-0">{{ object.fecha_compra|date:'d/m/Y'|default:'-' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted text-uppercase">Fecha de expiración</small>
+                            <p class="fw-semibold mb-0">{{ object.fecha_expiracion|date:'d/m/Y'|default:'-' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="bi bi-activity me-2"></i>Estado</h5>
+                    {% include 'inventario/partials/estado_badge.html' with estado=object.estado.nombre %}
+                </div>
+                <div class="card-body">
+                    <p class="mb-2"><strong>Responsable:</strong> {{ object.responsable|default:'No asignado' }}</p>
+                    <p class="mb-2"><strong>Observaciones:</strong></p>
+                    <p class="text-muted mb-0">{{ object.observaciones|default:'Sin observaciones registradas.' }}</p>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="bi bi-clock-history me-2"></i>Bitácora</h5>
+                    <a href="{% url 'inventario:bitacora_create' 'software' object.pk %}" class="btn btn-sm btn-primary text-white">
+                        <i class="bi bi-plus"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if bitacoras %}
+                        <div class="list-group list-group-flush">
+                            {% for registro in bitacoras %}
+                                <div class="list-group-item px-0">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="fw-semibold">{{ registro.titulo }}</span>
+                                        <small class="text-muted">{{ registro.fecha|date:'d/m/Y' }}</small>
+                                    </div>
+                                    <p class="mb-1 small text-muted">{{ registro.descripcion }}</p>
+                                    <small class="text-muted">Registrado por {% if registro.usuario_registro.is_authenticated %}{{ registro.usuario_registro.get_full_name|default:registro.usuario_registro.username }}{% else %}Usuario anónimo{% endif %}</small>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-journal-text display-6"></i>
+                            <p class="mb-0">Sin registros de bitácora.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,665 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Computadoras - ASSE-GestACT{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-6 fw-bold text-gradient mb-0">
+                <i class="bi bi-pc-display me-2"></i>Gestión de Computadoras
+            </h1>
+            <p class="text-muted">Administra el inventario de computadoras de la organización</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#modalCargaMasiva">
+                <i class="bi bi-cloud-upload me-2"></i>
+                Carga Masiva
+            </button>
+            <a href="{% url 'inventario:computadora_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>
+                Agregar Computadora
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="search" class="form-label">Buscar</label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           value="{{ request.GET.search }}" placeholder="Nombre, modelo, serie...">
+                </div>
+                <div class="col-md-2">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select class="form-select" id="estado" name="estado">
+                        <option value="">Todos</option>
+                        {% for estado in estados %}
+                            <option value="{{ estado.nombre }}" {% if request.GET.estado == estado.nombre %}selected{% endif %}>{{ estado.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="tipo" class="form-label">Tipo</label>
+                    <select class="form-select" id="tipo" name="tipo">
+                        <option value="">Todos</option>
+                        {% for tipo in tipos %}
+                            <option value="{{ tipo.nombre }}" {% if request.GET.tipo == tipo.nombre %}selected{% endif %}>{{ tipo.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="filtro-lugar-computadora" class="form-label">Ubicación</label>
+                    <div
+                        id="filtro-lugar-computadora"
+                        class="tree-select-filter"
+                        data-input-name="lugar"
+                        data-input-id="filtro-lugar-computadora"
+                        data-selected-value="{{ selected_lugar|default:''|escape }}"
+                        data-selected-label="{{ selected_lugar_label|default:''|escape }}"
+                        data-placeholder="Todas las ubicaciones">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="bi bi-search me-2"></i>Filtrar
+                        </button>
+                        <a href="{% url 'inventario:computadora_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-2"></i>Limpiar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-pc-display display-4 text-primary mb-2"></i>
+                    <h5 class="card-title">{{ total_computadoras }}</h5>
+                    <p class="card-text text-muted">Total Computadoras</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-check-circle display-4 text-success mb-2"></i>
+                    <h5 class="card-title">{{ computadoras_activas }}</h5>
+                    <p class="card-text text-muted">Activas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-tools display-4 text-warning mb-2"></i>
+                    <h5 class="card-title">{{ computadoras_mantenimiento }}</h5>
+                    <p class="card-text text-muted">En Mantenimiento</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-x-circle display-4 text-danger mb-2"></i>
+                    <h5 class="card-title">{{ computadoras_inactivas }}</h5>
+                    <p class="card-text text-muted">Inactivas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Computadoras Table -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-list me-2"></i>Lista de Computadoras
+            </h5>
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-secondary" onclick="exportData('excel')">
+                    <i class="bi bi-file-earmark-excel me-1"></i>Excel
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="exportData('pdf')">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+                </button>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if computadoras %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Número de Inventario</th>
+                                <th>Fabricante</th>
+                                <th>Modelo</th>
+                                <th>Tipo</th>
+                                <th>Estado</th>
+                                <th>Ubicación</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for computadora in computadoras %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-pc-display me-2 text-primary"></i>
+                                        <div>
+                                            <strong>{{ computadora.nombre }}</strong>
+                                            {% if computadora.numero_serie %}
+                                                <br><small class="text-muted">S/N: {{ computadora.numero_serie }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <code>{{ computadora.numero_inventario }}</code>
+                                </td>
+                                <td>{{ computadora.fabricante|default:"-" }}</td>
+                                <td>{{ computadora.modelo|default:"-" }}</td>
+                                <td>
+                                    {% if computadora.tipo_computadora %}
+                                        <span class="badge bg-info">{{ computadora.tipo_computadora.nombre }}</span>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if computadora.estado.nombre == 'Activo' %}
+                                        <span class="badge bg-success">{{ computadora.estado.nombre }}</span>
+                                    {% elif computadora.estado.nombre == 'Inactivo' %}
+                                        <span class="badge bg-danger">{{ computadora.estado.nombre }}</span>
+                                    {% elif computadora.estado.nombre == 'Mantenimiento' %}
+                                        <span class="badge bg-warning">{{ computadora.estado.nombre }}</span>
+                                    {% elif computadora.estado.nombre == 'Reparacion' %}
+                                        <span class="badge bg-secondary">{{ computadora.estado.nombre }}</span>
+                                    {% else %}
+                                        <span class="badge bg-light text-dark">{{ computadora.estado.nombre }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ computadora.lugar|default:"-" }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{% url 'inventario:computadora_detail' computadora.pk %}" 
+                                           class="btn btn-primary text-white" title="Ver detalles">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'inventario:computadora_update' computadora.pk %}" 
+                                           class="btn btn-warning text-dark" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-info text-white btn-facturacion"
+                                                data-tipo="computadora"
+                                                data-id="{{ computadora.pk }}"
+                                                data-nombre="{{ computadora.nombre }}"
+                                                data-serie="{{ computadora.numero_serie }}"
+                                                title="Enviar a Unidad"
+                                                onclick="FacturacionCarrito.agregar('computadora', {{ computadora.pk }})">
+                                            <i class="bi bi-receipt"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-warning text-white btn-servicio-proveedor"
+                                                data-tipo="computadora"
+                                                data-id="{{ computadora.pk }}"
+                                                data-nombre="{{ computadora.nombre }}"
+                                                data-serie="{{ computadora.numero_serie }}"
+                                                title="Enviar a Servicio"
+                                                onclick="ServicioProveedorCarrito.agregar('computadora', {{ computadora.pk }})">
+                                            <i class="bi bi-tools"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-danger text-white" 
+                                                title="Eliminar" onclick="confirmDelete('{{ computadora.pk }}', '{{ computadora.nombre }}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox display-1 text-muted mb-3"></i>
+                            <h4 class="text-muted">No se encontraron computadoras</h4>
+                            <p class="text-muted">No hay computadoras que coincidan con los filtros aplicados.</p>
+                            <a href="{% url 'inventario:computadora_create' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                Agregar Primera Computadora
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <nav aria-label="Paginación de computadoras">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.lugar %}&lugar={{ request.GET.lugar }}{% endif %}">
+                                    <i class="bi bi-chevron-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.lugar %}&lugar={{ request.GET.lugar }}{% endif %}">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        <li class="page-item active">
+                            <span class="page-link">
+                                {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                            </span>
+                        </li>
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.lugar %}&lugar={{ request.GET.lugar }}{% endif %}">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.lugar %}&lugar={{ request.GET.lugar }}{% endif %}">
+                                    <i class="bi bi-chevron-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Modal Carga Masiva -->
+<div class="modal fade" id="modalCargaMasiva" tabindex="-1" aria-labelledby="modalCargaMasivaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCargaMasivaLabel">
+                    <i class="bi bi-cloud-upload me-2"></i>Carga Masiva de Computadoras
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Paso 1: Seleccionar plantilla -->
+                <div id="paso1-plantilla">
+                    <h6 class="mb-3">Paso 1: Seleccione una plantilla</h6>
+                    <div class="mb-3">
+                        <label for="selectPlantilla" class="form-label">Plantilla Base</label>
+                        <select class="form-select" id="selectPlantilla">
+                            <option value="">Cargando plantillas...</option>
+                        </select>
+                        <small class="form-text text-muted">
+                            La plantilla contiene los datos base que se aplicarán a todos los dispositivos
+                        </small>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-primary" id="btnContinuarPaso2" disabled>
+                            Continuar <i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Paso 2: Ingresar números de serie -->
+                <div id="paso2-numeros" class="d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0">Paso 2: Ingrese los números de serie</h6>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnVolverPaso1">
+                            <i class="bi bi-arrow-left me-1"></i> Volver
+                        </button>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Plantilla seleccionada:</strong> <span id="nombrePlantillaSeleccionada"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="numerosSerieTextarea" class="form-label">
+                            Números de Serie <span class="text-danger">*</span>
+                        </label>
+                        <textarea 
+                            class="form-control font-monospace" 
+                            id="numerosSerieTextarea" 
+                            rows="8" 
+                            placeholder="Ingrese un número de serie por línea:&#10;ABC123&#10;DEF456&#10;GHI789"
+                        ></textarea>
+                        <small class="form-text text-muted">
+                            Ingrese un número de serie por línea. Se crearán automáticamente los dispositivos con los datos de la plantilla.
+                        </small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-success" id="btnCrearDispositivos">
+                            <i class="bi bi-cloud-upload me-2"></i>Crear Dispositivos
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Paso 3: Resultados -->
+                <div id="paso3-resultados" class="d-none">
+                    <h6 class="mb-3">Resultados de la Carga</h6>
+                    <div id="resultadosCargaMasiva"></div>
+                    <div class="alert alert-info mt-3">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Al cerrar este modal, la lista se actualizará automáticamente.
+                    </div>
+                    <div class="d-grid gap-2 mt-3">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                            <i class="bi bi-check-circle me-2"></i>Cerrar y Actualizar Lista
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="btnNuevaCarga">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Nueva Carga
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modalElement = document.getElementById('modalCargaMasiva');
+    const selectPlantilla = document.getElementById('selectPlantilla');
+    const btnContinuarPaso2 = document.getElementById('btnContinuarPaso2');
+    const btnVolverPaso1 = document.getElementById('btnVolverPaso1');
+    const btnCrearDispositivos = document.getElementById('btnCrearDispositivos');
+    const btnNuevaCarga = document.getElementById('btnNuevaCarga');
+    const numerosSerieTextarea = document.getElementById('numerosSerieTextarea');
+    
+    let plantillaSeleccionada = null;
+    window.dispositivosCreados = false;
+    
+    // Cargar plantillas cuando se abre el modal
+    modalElement.addEventListener('show.bs.modal', function() {
+        cargarPlantillas();
+        resetearModal();
+    });
+    
+    // Recargar la página cuando se cierra el modal si se crearon dispositivos
+    modalElement.addEventListener('hidden.bs.modal', function() {
+        if (window.dispositivosCreados) {
+            // Mostrar spinner de carga
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center';
+            loadingDiv.style.backgroundColor = 'rgba(0,0,0,0.5)';
+            loadingDiv.style.zIndex = '9999';
+            loadingDiv.innerHTML = `
+                <div class="text-center text-white">
+                    <div class="spinner-border mb-3" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <h5>Actualizando lista...</h5>
+                </div>
+            `;
+            document.body.appendChild(loadingDiv);
+            
+            // Recargar después de un pequeño delay
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+        }
+    });
+    
+    // Cargar lista de plantillas
+    function cargarPlantillas() {
+        fetch('/api/plantillas-dispositivo/?tipo_dispositivo=computadora')
+            .then(response => response.json())
+            .then(data => {
+                const plantillas = Array.isArray(data) ? data : (data.results || []);
+                
+                selectPlantilla.innerHTML = '<option value="">Seleccione una plantilla...</option>';
+                
+                if (plantillas.length === 0) {
+                    selectPlantilla.innerHTML += '<option value="" disabled>No hay plantillas disponibles</option>';
+                } else {
+                    plantillas.forEach(plantilla => {
+                        const option = document.createElement('option');
+                        option.value = plantilla.id;
+                        option.textContent = plantilla.nombre;
+                        option.dataset.plantilla = JSON.stringify(plantilla);
+                        selectPlantilla.appendChild(option);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar plantillas:', error);
+                selectPlantilla.innerHTML = '<option value="" disabled>Error al cargar plantillas</option>';
+            });
+    }
+    
+    // Habilitar botón continuar cuando se selecciona plantilla
+    selectPlantilla.addEventListener('change', function() {
+        if (this.value) {
+            btnContinuarPaso2.disabled = false;
+            const selectedOption = this.options[this.selectedIndex];
+            plantillaSeleccionada = JSON.parse(selectedOption.dataset.plantilla);
+        } else {
+            btnContinuarPaso2.disabled = true;
+            plantillaSeleccionada = null;
+        }
+    });
+    
+    // Continuar al paso 2
+    btnContinuarPaso2.addEventListener('click', function() {
+        if (!plantillaSeleccionada) return;
+        
+        document.getElementById('paso1-plantilla').classList.add('d-none');
+        document.getElementById('paso2-numeros').classList.remove('d-none');
+        document.getElementById('nombrePlantillaSeleccionada').textContent = plantillaSeleccionada.nombre;
+    });
+    
+    // Volver al paso 1
+    btnVolverPaso1.addEventListener('click', function() {
+        document.getElementById('paso2-numeros').classList.add('d-none');
+        document.getElementById('paso1-plantilla').classList.remove('d-none');
+    });
+    
+    // Crear dispositivos
+    btnCrearDispositivos.addEventListener('click', function() {
+        const numerosSerieText = numerosSerieTextarea.value.trim();
+        
+        if (!numerosSerieText) {
+            alert('Por favor ingrese al menos un número de serie');
+            return;
+        }
+        
+        const numeroserie = numerosSerieText.split('\n')
+            .map(ns => ns.trim())
+            .filter(ns => ns.length > 0);
+        
+        if (numeroserie.length === 0) {
+            alert('Por favor ingrese números de serie válidos');
+            return;
+        }
+        
+        // Deshabilitar botón y mostrar loading
+        btnCrearDispositivos.disabled = true;
+        btnCrearDispositivos.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creando...';
+        
+        procesarCargaMasiva(numeroserie);
+    });
+    
+    // Procesar carga masiva
+    async function procesarCargaMasiva(numeroserie) {
+        const resultados = [];
+        
+        for (const numeroSerie of numeroserie) {
+            try {
+                const resultado = await crearDispositivo(numeroSerie);
+                resultados.push({
+                    numero_serie: numeroSerie,
+                    success: true,
+                    data: resultado
+                });
+            } catch (error) {
+                resultados.push({
+                    numero_serie: numeroSerie,
+                    success: false,
+                    error: error.message || 'Error desconocido'
+                });
+            }
+        }
+        
+        mostrarResultados(resultados);
+    }
+    
+    // Crear un dispositivo
+    async function crearDispositivo(numeroSerie) {
+        const nombreGenerado = plantillaSeleccionada.modelo_nombre 
+            ? `${plantillaSeleccionada.modelo_nombre}/${numeroSerie}` 
+            : `Computadora/${numeroSerie}`;
+        
+        const dispositivoData = {
+            nombre: nombreGenerado,
+            numero_serie: numeroSerie,
+            fecha_adquisicion: plantillaSeleccionada.fecha_adquisicion || new Date().toISOString().split('T')[0],
+            estado: plantillaSeleccionada.estado,
+            lugar: plantillaSeleccionada.lugar,
+            tipo_computadora: plantillaSeleccionada.tipo_computadora,
+            fabricante: plantillaSeleccionada.fabricante,
+            modelo: plantillaSeleccionada.modelo,
+            proveedor: plantillaSeleccionada.proveedor,
+            tipo_garantia: plantillaSeleccionada.tipo_garantia,
+            anos_garantia: plantillaSeleccionada.anos_garantia,
+            valor_adquisicion: plantillaSeleccionada.valor_adquisicion,
+            comentarios: plantillaSeleccionada.comentarios,
+            direccion_ip: plantillaSeleccionada.direccion_ip,
+            direccion_mac: plantillaSeleccionada.direccion_mac
+        };
+        
+        const response = await fetch('/api/computadoras/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(dispositivoData)
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(JSON.stringify(errorData));
+        }
+        
+        return await response.json();
+    }
+    
+    // Mostrar resultados
+    function mostrarResultados(resultados) {
+        document.getElementById('paso2-numeros').classList.add('d-none');
+        document.getElementById('paso3-resultados').classList.remove('d-none');
+        
+        const exitosos = resultados.filter(r => r.success).length;
+        const fallidos = resultados.filter(r => !r.success).length;
+        
+        let html = `
+            <div class="alert alert-${exitosos > 0 ? 'success' : 'danger'}">
+                <h6><i class="bi bi-check-circle me-2"></i>Resumen</h6>
+                <p class="mb-0">
+                    <strong>Exitosos:</strong> ${exitosos} | 
+                    <strong>Fallidos:</strong> ${fallidos}
+                </p>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Número de Serie</th>
+                            <th>Estado</th>
+                            <th>Detalles</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        resultados.forEach(resultado => {
+            const badge = resultado.success 
+                ? '<span class="badge bg-success">Creado</span>'
+                : '<span class="badge bg-danger">Error</span>';
+            
+            const detalles = resultado.success
+                ? `ID: ${resultado.data.id}`
+                : `<small class="text-danger">${resultado.error}</small>`;
+            
+            html += `
+                <tr>
+                    <td><code>${resultado.numero_serie}</code></td>
+                    <td>${badge}</td>
+                    <td>${detalles}</td>
+                </tr>
+            `;
+        });
+        
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        document.getElementById('resultadosCargaMasiva').innerHTML = html;
+        
+        // Marcar que hay cambios para recargar
+        window.dispositivosCreados = exitosos > 0;
+    }
+    
+    // Nueva carga
+    btnNuevaCarga.addEventListener('click', function() {
+        resetearModal();
+    });
+    
+    // Resetear modal
+    function resetearModal() {
+        document.getElementById('paso1-plantilla').classList.remove('d-none');
+        document.getElementById('paso2-numeros').classList.add('d-none');
+        document.getElementById('paso3-resultados').classList.add('d-none');
+        
+        selectPlantilla.value = '';
+        numerosSerieTextarea.value = '';
+        btnContinuarPaso2.disabled = true;
+        btnCrearDispositivos.disabled = false;
+        btnCrearDispositivos.innerHTML = '<i class="bi bi-cloud-upload me-2"></i>Crear Dispositivos';
+        plantillaSeleccionada = null;
+        window.dispositivosCreados = false;
+    }
+    
+    // Obtener cookie CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+{% endblock %}

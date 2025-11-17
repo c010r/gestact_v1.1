@@ -1,0 +1,193 @@
+{% extends 'inventario/base_device_form.html' %}
+
+{% block form_sections %}
+<div class="card">
+	<div class="card-body">
+		{% if form.non_field_errors %}
+		<div class="alert alert-danger mb-3">
+			<ul class="mb-0">
+				{% for error in form.non_field_errors %}
+				<li>{{ error }}</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+
+		<ul class="nav nav-tabs" id="softwareTabs" role="tablist">
+			<li class="nav-item" role="presentation">
+				<button class="nav-link active" id="software-tab-basicos" data-bs-toggle="tab"
+						data-bs-target="#software-pane-basicos" type="button" role="tab"
+						aria-controls="software-pane-basicos" aria-selected="true">
+					Datos básicos
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="software-tab-detalles" data-bs-toggle="tab"
+						data-bs-target="#software-pane-detalles" type="button" role="tab"
+						aria-controls="software-pane-detalles" aria-selected="false">
+					Detalles
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="software-tab-licencias" data-bs-toggle="tab"
+						data-bs-target="#software-pane-licencias" type="button" role="tab"
+						aria-controls="software-pane-licencias" aria-selected="false">
+					Licenciamiento
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="software-tab-vigencia" data-bs-toggle="tab"
+						data-bs-target="#software-pane-vigencia" type="button" role="tab"
+						aria-controls="software-pane-vigencia" aria-selected="false">
+					Vigencia
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="software-tab-notas" data-bs-toggle="tab"
+						data-bs-target="#software-pane-notas" type="button" role="tab"
+						aria-controls="software-pane-notas" aria-selected="false">
+					Notas
+				</button>
+			</li>
+		</ul>
+
+		<div class="tab-content pt-3" id="softwareTabsContent">
+			<div class="tab-pane fade show active" id="software-pane-basicos" role="tabpanel"
+				 aria-labelledby="software-tab-basicos">
+				<div class="row g-3">
+					<div class="col-md-6">
+						{{ form.nombre.label_tag }}
+						{{ form.nombre }}
+						{% for error in form.nombre.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.estado.label_tag }}
+						{{ form.estado }}
+						{% for error in form.estado.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.tipo_software.label_tag }}
+						{{ form.tipo_software }}
+						{% for error in form.tipo_software.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.lugar.label_tag }}
+						{{ form.lugar }}
+						{% for error in form.lugar.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="software-pane-detalles" role="tabpanel"
+				 aria-labelledby="software-tab-detalles">
+				<div class="row g-3">
+					<div class="col-md-4">
+						{{ form.fabricante.label_tag }}
+						{{ form.fabricante }}
+						{% for error in form.fabricante.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.version.label_tag }}
+						{{ form.version }}
+						{% for error in form.version.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.numero_licencia.label_tag }}
+						{{ form.numero_licencia }}
+						{% for error in form.numero_licencia.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="software-pane-licencias" role="tabpanel"
+				 aria-labelledby="software-tab-licencias">
+				<div class="row g-3">
+					<div class="col-md-4">
+						{{ form.cantidad_licencias.label_tag }}
+						{{ form.cantidad_licencias }}
+						{% for error in form.cantidad_licencias.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.licencias_en_uso.label_tag }}
+						{{ form.licencias_en_uso }}
+						<small class="text-muted">Debe ser menor o igual a la cantidad disponible.</small>
+						{% for error in form.licencias_en_uso.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-2">
+						{{ form.moneda.label_tag }}
+						{{ form.moneda }}
+						{% for error in form.moneda.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-2">
+						{{ form.costo_total.label_tag }}
+						{{ form.costo_total }}
+						{% for error in form.costo_total.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.proveedor.label_tag }}
+						{{ form.proveedor }}
+						{% for error in form.proveedor.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="software-pane-vigencia" role="tabpanel"
+				 aria-labelledby="software-tab-vigencia">
+				<div class="row g-3">
+					<div class="col-md-6">
+						{{ form.fecha_adquisicion.label_tag }}
+						{{ form.fecha_adquisicion }}
+						{% for error in form.fecha_adquisicion.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.fecha_expiracion.label_tag }}
+						{{ form.fecha_expiracion }}
+						{% for error in form.fecha_expiracion.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="software-pane-notas" role="tabpanel"
+				 aria-labelledby="software-tab-notas">
+				<div class="row g-3">
+					<div class="col-12">
+						{{ form.notas.label_tag }}
+						{{ form.notas }}
+						{% for error in form.notas.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

@@ -1,0 +1,213 @@
+{% extends 'inventario/base.html' %}
+{% load static %}
+
+{% block title %}{% if bitacora_titulo %}{{ bitacora_titulo }}{% else %}Bitácora del Sistema{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bitacora-card {
+        border-left: 4px solid #007bff;
+        transition: all 0.3s ease;
+    }
+    .bitacora-card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    .evento-registro { border-left-color: #28a745; }
+    .evento-servicio_garantia { border-left-color: #ffc107; }
+    .evento-mantenimiento { border-left-color: #17a2b8; }
+    .evento-reparacion { border-left-color: #fd7e14; }
+    .evento-cambio_estado { border-left-color: #6f42c1; }
+    .evento-cambio_ubicacion { border-left-color: #20c997; }
+    .evento-asignacion_personal { border-left-color: #e83e8c; }
+    .evento-baja { border-left-color: #dc3545; }
+    .evento-actualizacion { border-left-color: #6c757d; }
+    .evento-otro { border-left-color: #343a40; }
+    
+    .badge-computadora { background-color: #007bff; }
+    .badge-impresora { background-color: #28a745; }
+    .badge-monitor { background-color: #ffc107; color: #212529; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-history"></i> {% if bitacora_titulo %}{{ bitacora_titulo }}{% else %}Bitácora del Sistema{% endif %}
+                    </h4>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#filtrosCollapse">
+                            <i class="fas fa-filter"></i> Filtros
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Filtros -->
+                <div class="collapse" id="filtrosCollapse">
+                    <div class="card-body border-bottom">
+                        <form method="get" class="row g-3">
+                            <div class="col-md-3">
+                                <label for="tipo_dispositivo" class="form-label">Tipo de Dispositivo</label>
+                                <select class="form-select" id="tipo_dispositivo" name="tipo_dispositivo">
+                                    <option value="">Todos</option>
+                                    {% for value, label in tipos_dispositivo %}
+                                        <option value="{{ value }}" {% if filtros.tipo_dispositivo == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="tipo_evento" class="form-label">Tipo de Evento</label>
+                                <select class="form-select" id="tipo_evento" name="tipo_evento">
+                                    <option value="">Todos</option>
+                                    {% for value, label in tipos_evento %}
+                                        <option value="{{ value }}" {% if filtros.tipo_evento == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="dispositivo_nombre" class="form-label">Nombre del Dispositivo</label>
+                                <input type="text" class="form-control" id="dispositivo_nombre" name="dispositivo_nombre" 
+                                       value="{{ filtros.dispositivo_nombre }}" placeholder="Buscar por nombre...">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="fecha_desde" class="form-label">Fecha Desde</label>
+                                <input type="date" class="form-control" id="fecha_desde" name="fecha_desde" 
+                                       value="{{ filtros.fecha_desde }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="fecha_hasta" class="form-label">Fecha Hasta</label>
+                                <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta" 
+                                       value="{{ filtros.fecha_hasta }}">
+                            </div>
+                            <div class="col-md-9 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="fas fa-search"></i> Filtrar
+                                </button>
+                                <a href="{% if bitacora_tipo == 'informatica' %}{% url 'inventario:bitacora_list_informatica' %}{% elif bitacora_tipo == 'medica' %}{% url 'inventario:bitacora_list_medica' %}{% else %}{% url 'inventario:bitacora_list' %}{% endif %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i> Limpiar
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    {% if bitacoras %}
+                        <div class="row">
+                            {% for bitacora in bitacoras %}
+                                <div class="col-12 mb-3">
+                                    <div class="card bitacora-card evento-{{ bitacora.tipo_evento }}">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-md-8">
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <span class="badge badge-{{ bitacora.tipo_dispositivo }} me-2">
+                                                            {{ bitacora.get_tipo_dispositivo_display }}
+                                                        </span>
+                                                        <h6 class="mb-0 me-2">{{ bitacora.dispositivo_nombre }}</h6>
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-clock"></i> 
+                                                            {{ bitacora.fecha_evento|date:"d/m/Y H:i" }}
+                                                        </small>
+                                                    </div>
+                                                    <h6 class="text-primary mb-1">
+                                                        {{ bitacora.get_tipo_evento_display }}
+                                                    </h6>
+                                                    <p class="mb-1">{{ bitacora.descripcion }}</p>
+                                                    {% if bitacora.observaciones %}
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-comment"></i> {{ bitacora.observaciones }}
+                                                        </small>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="col-md-4 text-end">
+                                                    {% if bitacora.valor_anterior or bitacora.valor_nuevo %}
+                                                        <div class="mb-2">
+                                                            {% if bitacora.valor_anterior %}
+                                                                <small class="text-muted d-block">
+                                                                    <strong>Anterior:</strong> {{ bitacora.valor_anterior }}
+                                                                </small>
+                                                            {% endif %}
+                                                            {% if bitacora.valor_nuevo %}
+                                                                <small class="text-success d-block">
+                                                                    <strong>Nuevo:</strong> {{ bitacora.valor_nuevo }}
+                                                                </small>
+                                                            {% endif %}
+                                                        </div>
+                                                    {% endif %}
+                                                    {% if bitacora.usuario_responsable %}
+                                                        <small class="text-muted d-block">
+                                                            <i class="fas fa-user"></i> {{ bitacora.usuario_responsable }}
+                                                        </small>
+                                                    {% endif %}
+                                                    <a href="{% url 'inventario:bitacora_dispositivo' bitacora.tipo_dispositivo bitacora.dispositivo_id %}" 
+                                                       class="btn btn-sm btn-outline-primary mt-2">
+                                                        <i class="fas fa-eye"></i> Ver Historial
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Paginación -->
+                        {% if is_paginated %}
+                            <nav aria-label="Paginación de bitácoras">
+                                <ul class="pagination justify-content-center">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">
+                                                <i class="fas fa-angle-double-left"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
+                                                <i class="fas fa-angle-left"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    <li class="page-item active">
+                                        <span class="page-link">
+                                            {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                                        </span>
+                                    </li>
+                                    
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
+                                                <i class="fas fa-angle-right"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}">
+                                                <i class="fas fa-angle-double-right"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No hay eventos en la bitácora</h5>
+                            <p class="text-muted">Los eventos se registrarán automáticamente cuando se realicen cambios en los dispositivos.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

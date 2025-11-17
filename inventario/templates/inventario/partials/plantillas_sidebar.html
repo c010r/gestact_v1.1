@@ -1,0 +1,139 @@
+<div class="card mb-3">
+    <div class="card-header">
+        <h6 class="card-title mb-0">
+            <i class="fas fa-save me-2"></i>Plantillas
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="d-grid gap-2">
+            <!-- Botón para guardar como plantilla -->
+            <button type="button" class="btn btn-outline-primary btn-sm" 
+                    onclick="plantillaManager.mostrarModalGuardarPlantilla()" 
+                    title="Guardar formulario actual como plantilla">
+                <i class="fas fa-save me-1"></i>Guardar como Plantilla
+            </button>
+            
+            <!-- Botón para cargar plantilla -->
+            <button type="button" class="btn btn-outline-success btn-sm" 
+                    onclick="plantillaManager.mostrarModalCargarPlantilla()" 
+                    title="Cargar datos desde una plantilla">
+                <i class="fas fa-folder-open me-1"></i>Cargar Plantilla
+            </button>
+            
+            <!-- Botón para gestionar plantillas -->
+            <button type="button" class="btn btn-outline-info btn-sm" 
+                    onclick="plantillaManager.mostrarModalGestionarPlantillas()" 
+                    title="Gestionar plantillas guardadas">
+                <i class="fas fa-cog me-1"></i>Gestionar Plantillas
+            </button>
+        </div>
+        
+        <hr class="my-3">
+        
+        <div class="text-muted small">
+            <i class="fas fa-info-circle me-1"></i>
+            Las plantillas te permiten guardar configuraciones comunes para reutilizar en nuevos dispositivos.
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Guardar Plantilla -->
+<div class="modal fade" id="modalGuardarPlantilla" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-save me-2"></i>Guardar como Plantilla
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formGuardarPlantilla">
+                    <div class="mb-3">
+                        <label for="nombrePlantilla" class="form-label">Nombre de la Plantilla</label>
+                        <input type="text" class="form-control" id="nombrePlantilla" 
+                               placeholder="Ej: Computadora Oficina Estándar">
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcionPlantilla" class="form-label">Descripción (opcional)</label>
+                        <textarea class="form-control" id="descripcionPlantilla" rows="3" 
+                                  placeholder="Describe para qué se usa esta plantilla..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="plantillaManager.guardarPlantilla()">
+                    <i class="fas fa-save me-1"></i>Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Cargar Plantilla -->
+<div class="modal fade" id="modalCargarPlantilla" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-folder-open me-2"></i>Cargar Plantilla
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="listaPlantillas">
+                    <div class="text-center py-4">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Cargando plantillas...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Gestionar Plantillas -->
+<div class="modal fade" id="modalGestionarPlantillas" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-cog me-2"></i>Gestionar Plantillas
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="gestionPlantillas">
+                    <div class="text-center py-4">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Cargando plantillas...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+// Inicializar el gestor de plantillas cuando se carga la página
+document.addEventListener('DOMContentLoaded', function() {
+    // Detectar el tipo de dispositivo desde la URL o contexto
+    const deviceType = '{{ device_type|default:"computadora" }}';
+    
+    // Inicializar el gestor de plantillas
+    window.plantillaManager = new PlantillaManager(deviceType);
+});
+</script>

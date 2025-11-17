@@ -1,0 +1,137 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Detalle de Networking - ASSE-GestACT{% endblock %}
+
+{% block extra_css %}
+<style>
+[data-bs-theme="dark"] .card {
+    background-color: #1a1d20;
+    border: 1px solid #2d3238;
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.3);
+}
+
+[data-bs-theme="dark"] .card-header {
+    background-color: #2d3238;
+    border-bottom: 1px solid #404448;
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .card-body {
+    background-color: #1a1d20;
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .badge {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1"><i class="bi bi-hdd-network me-2"></i>{{ object.nombre }}</h1>
+            <p class="text-muted mb-0">Información completa del dispositivo de red.</p>
+        </div>
+        <div class="btn-group">
+            <a href="{% url 'inventario:networking_update' object.pk %}" class="btn btn-warning text-dark">
+                <i class="bi bi-pencil me-2"></i>Editar
+            </a>
+            <a href="{% url 'inventario:networking_list' %}" class="btn btn-secondary text-white">
+                <i class="bi bi-arrow-left me-2"></i>Volver
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Datos generales</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Número de inventario</dt>
+                        <dd class="col-sm-8">{{ object.numero_inventario|default:'-' }}</dd>
+                        <dt class="col-sm-4">Número de serie</dt>
+                        <dd class="col-sm-8">{{ object.numero_serie|default:'-' }}</dd>
+                        <dt class="col-sm-4">Tipo</dt>
+                        <dd class="col-sm-8">{{ object.tipo_networking|default:'-' }}</dd>
+                        <dt class="col-sm-4">Fabricante</dt>
+                        <dd class="col-sm-8">{{ object.fabricante|default:'-' }}</dd>
+                        <dt class="col-sm-4">Modelo</dt>
+                        <dd class="col-sm-8">{{ object.modelo|default:'-' }}</dd>
+                        <dt class="col-sm-4">Estado</dt>
+                        <dd class="col-sm-8">
+                            {% include 'inventario/partials/estado_badge.html' with estado=object.estado.nombre %}
+                        </dd>
+                        <dt class="col-sm-4">Ubicación</dt>
+                        <dd class="col-sm-8">{{ object.lugar|default:'-' }}</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-diagram-3 me-2"></i>Datos de red</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Dirección IP</dt>
+                        <dd class="col-sm-8">{{ object.direccion_ip|default:'-' }}</dd>
+                        <dt class="col-sm-4">Dirección MAC</dt>
+                        <dd class="col-sm-8">{{ object.direccion_mac|default:'-' }}</dd>
+                        <dt class="col-sm-4">Firmware</dt>
+                        <dd class="col-sm-8">{{ object.firmware_version|default:'-' }}</dd>
+                        <dt class="col-sm-4">Cantidad de puertos</dt>
+                        <dd class="col-sm-8">{{ object.cantidad_puertos|default:'-' }}</dd>
+                        <dt class="col-sm-4">Comentarios</dt>
+                        <dd class="col-sm-8">{{ object.comentarios|default:'Sin comentarios' }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>Información de compra</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="mb-0">
+                        <dt>Proveedor</dt>
+                        <dd>{{ object.proveedor|default:'-' }}</dd>
+                        <dt>Fecha de adquisición</dt>
+                        <dd>{{ object.fecha_adquisicion|date:'d/m/Y'|default:'-' }}</dd>
+                        <dt>Valor de adquisición</dt>
+                        <dd>{{ object.valor_adquisicion|default:'-' }}</dd>
+                        <dt>Garantía</dt>
+                        <dd>{{ object.tipo_garantia|default:'-' }}</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-journal-text me-2"></i>Bitácora reciente</h5>
+                </div>
+                <div class="card-body">
+                    {% if bitacoras_recientes %}
+                        <ul class="list-group list-group-flush">
+                            {% for entrada in bitacoras_recientes %}
+                                <li class="list-group-item">
+                                    <div class="small text-muted">{{ entrada.fecha_evento|date:'d/m/Y H:i' }}</div>
+                                    <div>{{ entrada.descripcion|default:'(sin descripción)' }}</div>
+                                    <div class="text-muted small">Registrado por {{ entrada.usuario|default:'Sistema' }}</div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted mb-0">Sin registros en la bitácora.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

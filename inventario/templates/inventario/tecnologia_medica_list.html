@@ -1,0 +1,495 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Tecnología Médica - ASSE-GestACT{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h1 class="display-6 fw-bold text-gradient mb-0">
+                <i class="bi bi-heart-pulse me-2"></i>Tecnología Médica
+            </h1>
+            <p class="text-muted mb-0">Gestiona equipos médicos, ventiladores, monitores de pacientes y más.</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'inventario:tecnologia_medica_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Agregar Equipo Médico
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="search" class="form-label">Buscar</label>
+                    <input type="text" id="search" name="search" class="form-control"
+                           value="{{ request.GET.search }}" placeholder="Nombre, inventario, serie, registro...">
+                </div>
+                <div class="col-md-2">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select id="estado" name="estado" class="form-select">
+                        <option value="">Todos</option>
+                        {% for estado in estados %}
+                            <option value="{{ estado.id }}" {% if request.GET.estado == estado.id|stringformat:"s" %}selected{% endif %}>{{ estado.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="tipo" class="form-label">Tipo</label>
+                    <select id="tipo" name="tipo" class="form-select">
+                        <option value="">Todos</option>
+                        {% for tipo in tipos %}
+                            <option value="{{ tipo.id }}" {% if request.GET.tipo == tipo.id|stringformat:"s" %}selected{% endif %}>{{ tipo.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="clasificacion_riesgo" class="form-label">Clasificación</label>
+                    <select id="clasificacion_riesgo" name="clasificacion_riesgo" class="form-select">
+                        <option value="">Todas</option>
+                        <option value="clase_i" {% if request.GET.clasificacion_riesgo == "clase_i" %}selected{% endif %}>Clase I</option>
+                        <option value="clase_iia" {% if request.GET.clasificacion_riesgo == "clase_iia" %}selected{% endif %}>Clase IIa</option>
+                        <option value="clase_iib" {% if request.GET.clasificacion_riesgo == "clase_iib" %}selected{% endif %}>Clase IIb</option>
+                        <option value="clase_iii" {% if request.GET.clasificacion_riesgo == "clase_iii" %}selected{% endif %}>Clase III</option>
+                        <option value="clase_iv" {% if request.GET.clasificacion_riesgo == "clase_iv" %}selected{% endif %}>Clase IV</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end justify-content-end gap-2">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="bi bi-search me-2"></i>Filtrar
+                    </button>
+                    <a href="{% url 'inventario:tecnologia_medica_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle me-2"></i>Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0"><i class="bi bi-list-ul me-2"></i>Listado</h5>
+        </div>
+        <div class="card-body p-0">
+            <div id="orden-servicio-alerts" class="p-3 d-none"></div>
+            {% if object_list %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>N° Inventario</th>
+                                <th>Tipo</th>
+                                <th>Registro Sanitario</th>
+                                <th>Clasificación</th>
+                                <th>Estado</th>
+                                <th>Ubicación</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for equipo in object_list %}
+                            <tr>
+                                <td>
+                                    <strong>{{ equipo.nombre }}</strong>
+                                    {% if equipo.requiere_calibracion_proxima %}
+                                        <span class="badge bg-warning text-dark ms-1" title="Requiere calibración próxima">
+                                            <i class="bi bi-tools"></i>
+                                        </span>
+                                    {% endif %}
+                                    {% if equipo.requiere_mantenimiento_proximo %}
+                                        <span class="badge bg-info text-white ms-1" title="Requiere mantenimiento próximo">
+                                            <i class="bi bi-wrench"></i>
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td><code>{{ equipo.numero_inventario|default:'-' }}</code></td>
+                                <td>{{ equipo.tipo_tecnologia_medica.nombre|default:'-' }}</td>
+                                <td><small>{{ equipo.registro_sanitario|default:'-' }}</small></td>
+                                <td>
+                                    {% if equipo.clasificacion_riesgo %}
+                                        {% if equipo.clasificacion_riesgo == 'clase_i' %}
+                                            <span class="badge bg-success">Clase I</span>
+                                        {% elif equipo.clasificacion_riesgo == 'clase_iia' %}
+                                            <span class="badge bg-info">Clase IIa</span>
+                                        {% elif equipo.clasificacion_riesgo == 'clase_iib' %}
+                                            <span class="badge bg-warning">Clase IIb</span>
+                                        {% elif equipo.clasificacion_riesgo == 'clase_iii' %}
+                                            <span class="badge bg-orange">Clase III</span>
+                                        {% elif equipo.clasificacion_riesgo == 'clase_iv' %}
+                                            <span class="badge bg-danger">Clase IV</span>
+                                        {% endif %}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>{% include 'inventario/partials/estado_badge.html' with estado=equipo.estado.nombre %}</td>
+                                <td><small>{{ equipo.lugar.nombre|default:'-' }}</small></td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'inventario:tecnologia_medica_detail' equipo.pk %}" class="btn btn-primary text-white" title="Ver detalles">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'inventario:tecnologia_medica_update' equipo.pk %}" class="btn btn-warning text-dark" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                    <button type="button"
+                        class="btn btn-warning text-white btn-orden-servicio"
+                        data-activo-id="{{ equipo.pk }}"
+                        data-activo-nombre="{{ equipo.nombre }}"
+                        data-activo-serie="{{ equipo.numero_serie|default:'-' }}"
+                        data-activo-inventario="{{ equipo.numero_inventario|default:'-' }}"
+                        data-activo-ubicacion="{{ equipo.lugar.nombre|default:'-' }}"
+                        title="Registrar orden de servicio">
+                                            <i class="bi bi-tools"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-danger text-white" onclick="confirmDelete('{{ equipo.pk }}', '{{ equipo.nombre }}')" title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="py-5 text-center">
+                    <i class="bi bi-heart-pulse display-1 text-muted mb-3"></i>
+                    <h5 class="text-muted">No se encontraron equipos médicos</h5>
+                    <p class="text-muted">Ajusta los filtros o registra un nuevo equipo médico.</p>
+                    <a href="{% url 'inventario:tecnologia_medica_create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Registrar equipo médico
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if is_paginated %}
+    <nav class="mt-4" aria-label="Paginación">
+        <ul class="pagination justify-content-center mb-0">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}&{{ request.GET.urlencode }}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<div class="modal fade" id="modalOrdenServicio" tabindex="-1" aria-hidden="true"
+     data-default-solicitante="{{ orden_servicio_default_solicitante|default:'' }}"
+     data-default-tipo-servicio="{{ orden_servicio_tipos.0.0|default:'mantenimiento_correctivo' }}"
+     data-default-prioridad="media">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="orden-servicio-rapida-form" class="needs-validation" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="tipo_dispositivo" value="tecnologia_medica">
+                <input type="hidden" name="dispositivo_id" id="orden-servicio-dispositivo-id">
+
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-tools me-2"></i>Nueva Orden de Servicio</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="orden-servicio-error" class="alert alert-danger d-none"></div>
+
+                    <div class="card bg-light border-0 mb-4">
+                        <div class="card-body py-3">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <small class="text-muted d-block">Activo</small>
+                                    <span class="fw-semibold" data-field="orden-servicio-activo-nombre">-</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted d-block">N° Serie</small>
+                                    <span data-field="orden-servicio-activo-serie">-</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted d-block">Ubicación</small>
+                                    <span data-field="orden-servicio-activo-ubicacion">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="orden-servicio-tipo" class="form-label">Tipo de servicio *</label>
+                            <select class="form-select" id="orden-servicio-tipo" name="tipo_servicio" required>
+                                {% for value, label in orden_servicio_tipos %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="orden-servicio-prioridad" class="form-label">Prioridad *</label>
+                            <select class="form-select" id="orden-servicio-prioridad" name="prioridad" required>
+                                {% for value, label in orden_servicio_prioridades %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="orden-servicio-fecha" class="form-label">Fecha estimada</label>
+                            <input type="date" class="form-control" id="orden-servicio-fecha" name="fecha_estimada">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="orden-servicio-tecnico" class="form-label">Técnico asignado</label>
+                            <input type="text" class="form-control" id="orden-servicio-tecnico" name="tecnico_asignado" placeholder="Opcional">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="orden-servicio-solicitante" class="form-label">Solicitante *</label>
+                            <input type="text" class="form-control" id="orden-servicio-solicitante" name="solicitante" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="orden-servicio-observaciones" class="form-label">Observaciones</label>
+                            <textarea class="form-control" id="orden-servicio-observaciones" name="observaciones" rows="2"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label for="orden-servicio-descripcion" class="form-label">Descripción del problema *</label>
+                            <textarea class="form-control" id="orden-servicio-descripcion" name="descripcion_problema" rows="3" required
+                                      placeholder="Describe la falla, síntomas o motivo del servicio"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="me-2"><i class="bi bi-save"></i></span>
+                        Crear orden de servicio
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDelete(itemId, itemName) {
+    if (!window.bootstrap) {
+        window.location.href = `/inventario/tecnologia-medica/${itemId}/eliminar/`;
+        return;
+    }
+    document.getElementById('deleteItemName').textContent = itemName;
+    document.getElementById('deleteForm').action = `/inventario/tecnologia-medica/${itemId}/eliminar/`;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+</script>
+<script>
+(function() {
+    const modalEl = document.getElementById('modalOrdenServicio');
+    if (!modalEl) {
+        return;
+    }
+
+    const modal = new bootstrap.Modal(modalEl);
+    const form = document.getElementById('orden-servicio-rapida-form');
+    const csrfTokenInput = form.querySelector('input[name="csrfmiddlewaretoken"]');
+    const hiddenId = document.getElementById('orden-servicio-dispositivo-id');
+    const errorBox = document.getElementById('orden-servicio-error');
+    const alertsContainer = document.getElementById('orden-servicio-alerts');
+
+    const tipoSelect = document.getElementById('orden-servicio-tipo');
+    const prioridadSelect = document.getElementById('orden-servicio-prioridad');
+    const fechaInput = document.getElementById('orden-servicio-fecha');
+    const tecnicoInput = document.getElementById('orden-servicio-tecnico');
+    const solicitanteInput = document.getElementById('orden-servicio-solicitante');
+    const descripcionInput = document.getElementById('orden-servicio-descripcion');
+    const observacionesInput = document.getElementById('orden-servicio-observaciones');
+
+    const assetNameField = modalEl.querySelector('[data-field="orden-servicio-activo-nombre"]');
+    const assetSerieField = modalEl.querySelector('[data-field="orden-servicio-activo-serie"]');
+    const assetUbicacionField = modalEl.querySelector('[data-field="orden-servicio-activo-ubicacion"]');
+
+    const defaultSolicitante = modalEl.dataset.defaultSolicitante || '';
+    const defaultTipoServicio = modalEl.dataset.defaultTipoServicio || '';
+    const defaultPrioridad = modalEl.dataset.defaultPrioridad || 'media';
+
+    const disableForm = (disabled) => {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = disabled;
+        }
+        [tipoSelect, prioridadSelect, fechaInput, tecnicoInput, solicitanteInput, descripcionInput, observacionesInput]
+            .forEach(el => {
+                if (el) {
+                    el.disabled = disabled;
+                }
+            });
+    };
+
+    const resetForm = () => {
+        form.classList.remove('was-validated');
+        form.reset();
+        hiddenId.value = '';
+        errorBox.classList.add('d-none');
+        errorBox.innerHTML = '';
+        if (defaultSolicitante) {
+            solicitanteInput.value = defaultSolicitante;
+        }
+        if (defaultTipoServicio) {
+            tipoSelect.value = defaultTipoServicio;
+        }
+        if (defaultPrioridad) {
+            prioridadSelect.value = defaultPrioridad;
+        }
+        descripcionInput.value = '';
+        observacionesInput.value = '';
+    };
+
+    const showAlert = (message, type = 'success', link = null) => {
+        if (!alertsContainer) {
+            return;
+        }
+        alertsContainer.classList.remove('d-none');
+        const alertEl = document.createElement('div');
+        alertEl.className = `alert alert-${type} alert-dismissible fade show`;
+        alertEl.role = 'alert';
+        alertEl.innerHTML = `
+            ${message}
+            ${link ? `<a href="${link}" class="alert-link ms-1">Ver detalle</a>` : ''}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        alertsContainer.appendChild(alertEl);
+    };
+
+    document.querySelectorAll('.btn-orden-servicio').forEach((button) => {
+        button.addEventListener('click', () => {
+            resetForm();
+            hiddenId.value = button.dataset.activoId || '';
+            assetNameField.textContent = button.dataset.activoNombre || '-';
+            assetSerieField.textContent = button.dataset.activoSerie || '-';
+            assetUbicacionField.textContent = button.dataset.activoUbicacion || '-';
+            modal.show();
+        });
+    });
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        if (!form.checkValidity()) {
+            form.classList.add('was-validated');
+            return;
+        }
+
+        if (!hiddenId.value) {
+            errorBox.textContent = 'No se pudo identificar el activo seleccionado.';
+            errorBox.classList.remove('d-none');
+            return;
+        }
+
+        disableForm(true);
+        errorBox.classList.add('d-none');
+        errorBox.innerHTML = '';
+
+        const payload = {
+            tipo_servicio: tipoSelect.value,
+            prioridad: prioridadSelect.value,
+            descripcion_problema: descripcionInput.value,
+            solicitante: solicitanteInput.value,
+            tipo_dispositivo: form.elements['tipo_dispositivo'].value,
+            dispositivo_id: parseInt(hiddenId.value, 10),
+        };
+
+        if (fechaInput.value) {
+            payload.fecha_estimada = fechaInput.value;
+        }
+        if (tecnicoInput.value) {
+            payload.tecnico_asignado = tecnicoInput.value;
+        }
+        if (observacionesInput.value) {
+            payload.observaciones = observacionesInput.value;
+        }
+
+        try {
+            const response = await fetch('/api/ordenes-servicio/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfTokenInput.value,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                const errors = [];
+                if (data && typeof data === 'object') {
+                    Object.entries(data).forEach(([field, messages]) => {
+                        if (Array.isArray(messages)) {
+                            errors.push(`${field}: ${messages.join(', ')}`);
+                        } else if (typeof messages === 'string') {
+                            errors.push(messages);
+                        }
+                    });
+                }
+
+                if (!errors.length) {
+                    errors.push('No se pudo crear la orden de servicio. Intente nuevamente.');
+                }
+
+                errorBox.innerHTML = errors.join('<br>');
+                errorBox.classList.remove('d-none');
+                return;
+            }
+
+            modal.hide();
+            const detalleUrl = `/inventario/ordenes-servicio/${data.id}/`;
+            showAlert(
+                `Orden de servicio <strong>${data.numero_orden}</strong> creada correctamente.`,
+                'success',
+                detalleUrl
+            );
+
+            if (data.pdf_url) {
+                window.open(data.pdf_url, '_blank', 'noopener');
+            }
+
+            if (window.ServicioProveedorCarrito && typeof window.ServicioProveedorCarrito.agregar === 'function') {
+                try {
+                    await window.ServicioProveedorCarrito.agregar('tecnologia_medica', payload.dispositivo_id);
+                } catch (error) {
+                    console.warn('No se pudo agregar el activo al carrito de servicio:', error);
+                }
+            }
+        } catch (error) {
+            errorBox.textContent = 'Error interno al crear la orden de servicio. Intente nuevamente.';
+            errorBox.classList.remove('d-none');
+        } finally {
+            disableForm(false);
+        }
+    });
+})();
+</script>
+{% include 'inventario/partials/delete_modal.html' with resource_label='equipo médico' %}
+{% endblock %}
+

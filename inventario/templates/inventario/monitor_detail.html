@@ -1,0 +1,424 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Monitor - {{ object.nombre }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-card {
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        background-color: #ffffff;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    /* Modo Oscuro */
+    [data-bs-theme="dark"] .detail-card {
+        background-color: #1a1d20;
+        box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.3);
+        border: 1px solid #2d3238;
+    }
+
+    [data-bs-theme="dark"] .detail-card .card-header {
+        background-color: #2d3238;
+        border-bottom: 1px solid #404448;
+        color: #e9ecef;
+    }
+
+    [data-bs-theme="dark"] .detail-card .card-body {
+        background-color: #1a1d20;
+        color: #e9ecef;
+    }
+
+    [data-bs-theme="dark"] .info-row {
+        border-bottom-color: #2d3238;
+    }
+
+    [data-bs-theme="dark"] .info-label {
+        color: #adb5bd;
+    }
+
+    [data-bs-theme="dark"] .info-value {
+        color: #e9ecef;
+    }
+
+    [data-bs-theme="dark"] .badge {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    [data-bs-theme="dark"] .table {
+        color: #e9ecef;
+        border-color: #2d3238;
+    }
+
+    [data-bs-theme="dark"] .table thead th {
+        background-color: #2d3238;
+        border-color: #404448;
+        color: #e9ecef;
+    }
+
+    [data-bs-theme="dark"] .table tbody td {
+        border-color: #2d3238;
+    }
+
+    [data-bs-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > * {
+        background-color: rgba(255, 255, 255, 0.02);
+    }
+    
+    .info-row {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .info-value {
+        color: #212529;
+    }
+    
+    .status-badge {
+        font-size: 0.875rem;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 0 0 15px 15px;
+    }
+    
+    .btn-action {
+        margin: 0 0.25rem;
+    }
+    
+    .timeline {
+        position: relative;
+        padding-left: 1.5rem;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 0.5rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #dee2e6;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        left: -1.25rem;
+        top: 0.25rem;
+        width: 0.75rem;
+        height: 0.75rem;
+        background: #007bff;
+        border-radius: 50%;
+        border: 2px solid white;
+        box-shadow: 0 0 0 2px #dee2e6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="page-header">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-1">
+                    <i class="fas fa-desktop me-2"></i>{{ object.nombre }}
+                </h1>
+                <p class="mb-0 opacity-75">
+                    <i class="fas fa-tag me-1"></i>{{ object.tipo_monitor.nombre }}
+                    {% if object.numero_serie %}
+                        | <i class="fas fa-hashtag me-1"></i>{{ object.numero_serie }}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'inventario:monitor_update' object.pk %}" class="btn btn-warning text-dark btn-action">
+                    <i class="fas fa-edit me-1"></i>Editar
+                </a>
+                <button type="button" class="btn btn-danger text-white btn-action" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="fas fa-trash me-1"></i>Eliminar
+                </button>
+                <a href="{% url 'inventario:monitor_list' %}" class="btn btn-secondary text-white btn-action">
+                    <i class="fas fa-arrow-left me-1"></i>Volver
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+
+    <div class="row">
+        <!-- Información Principal -->
+        <div class="col-lg-8">
+            <!-- Información Básica -->
+            <div class="card detail-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Información Básica</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Nombre:</div>
+                        <div class="col-sm-8 info-value">{{ object.nombre }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Número de Inventario:</div>
+                        <div class="col-sm-8 info-value">{{ object.numero_inventario|default:"No asignado" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Número de Serie:</div>
+                        <div class="col-sm-8 info-value">{{ object.numero_serie|default:"No asignado" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Estado:</div>
+                        <div class="col-sm-8 info-value">
+                            {% if object.estado.nombre == 'Activo' %}
+                                <span class="badge bg-success status-badge">{{ object.estado.nombre }}</span>
+                            {% elif object.estado.nombre == 'Mantenimiento' %}
+                                <span class="badge bg-warning status-badge">{{ object.estado.nombre }}</span>
+                            {% else %}
+                                <span class="badge bg-danger status-badge">{{ object.estado.nombre }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Fabricante:</div>
+                        <div class="col-sm-8 info-value">{{ object.fabricante.nombre|default:"No especificado" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Modelo:</div>
+                        <div class="col-sm-8 info-value">{{ object.modelo.nombre|default:"No especificado" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Tipo:</div>
+                        <div class="col-sm-8 info-value">{{ object.tipo_monitor.nombre|default:"No especificado" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Ubicación:</div>
+                        <div class="col-sm-8 info-value">{{ object.lugar.nombre|default:"No asignada" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Especificaciones de Pantalla -->
+            <div class="card detail-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-desktop"></i> Especificaciones de Pantalla</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Tamaño de Pantalla:</div>
+                        <div class="col-sm-8 info-value">
+                            {% if object.tamano_pantalla %}
+                                {{ object.tamano_pantalla }}" pulgadas
+                            {% else %}
+                                No especificado
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Resolución:</div>
+                        <div class="col-sm-8 info-value">{{ object.resolucion|default:"No especificada" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de Compra -->
+            <div class="card detail-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-shopping-cart"></i> Información de Compra</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Proveedor:</div>
+                        <div class="col-sm-8 info-value">{{ object.proveedor.nombre|default:"No especificado" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Fecha de Adquisición:</div>
+                        <div class="col-sm-8 info-value">{{ object.fecha_adquisicion|date:"d/m/Y"|default:"No especificada" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Valor de Adquisición:</div>
+                        <div class="col-sm-8 info-value">
+                            {% if object.valor_adquisicion %}
+                                {% if object.moneda == 'USD' %}
+                                    US${{ object.valor_adquisicion|floatformat:2 }}
+                                {% elif object.moneda == 'EUR' %}
+                                    €{{ object.valor_adquisicion|floatformat:2 }}
+                                {% else %}
+                                    ${{ object.valor_adquisicion|floatformat:2 }}
+                                {% endif %}
+                            {% else %}
+                                No especificado
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de Garantía -->
+            <div class="card detail-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-shield-alt"></i> Información de Garantía</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Tipo de Garantía:</div>
+                        <div class="col-sm-8 info-value">{{ object.tipo_garantia.nombre|default:"No especificado" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Años de Garantía:</div>
+                        <div class="col-sm-8 info-value">{{ object.anos_garantia|default:"No especificado" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Fecha de Finalización:</div>
+                        <div class="col-sm-8 info-value">
+                            {% if object.fecha_finalizacion_garantia %}
+                                {{ object.fecha_finalizacion_garantia|date:"d/m/Y" }}
+                                {% now "Y-m-d" as today %}
+                                {% if object.fecha_finalizacion_garantia|date:"Y-m-d" < today %}
+                                    <span class="badge bg-danger ms-2">Vencida</span>
+                                {% elif object.fecha_finalizacion_garantia|date:"Y-m-d" <= today|add_days:30 %}
+                                    <span class="badge bg-warning ms-2">Por vencer</span>
+                                {% else %}
+                                    <span class="badge bg-success ms-2">Vigente</span>
+                                {% endif %}
+                            {% else %}
+                                No especificada
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comentarios -->
+            {% if object.comentarios %}
+            <div class="card detail-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-comment"></i> Comentarios</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ object.comentarios|linebreaks }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Panel Lateral -->
+        <div class="col-lg-4">
+            <!-- Bitácora Reciente -->
+            <div class="card detail-card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Bitácora Reciente</h5>
+                </div>
+                <div class="card-body">
+                    {% if bitacoras_recientes %}
+                        <div class="timeline">
+                            {% for bitacora in bitacoras_recientes %}
+                                <div class="timeline-item">
+                                    <div class="timeline-marker"></div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-header">
+                                            <strong>{{ bitacora.get_tipo_evento_display }}</strong>
+                                        </div>
+                                        <div class="timeline-text">{{ bitacora.descripcion }}</div>
+                                        <small class="text-muted">
+                                            <i class="bi bi-clock me-1"></i>{{ bitacora.fecha_evento|date:"d/m/Y H:i" }}
+                                            {% if bitacora.usuario_responsable %}
+                                                | <i class="bi bi-person me-1"></i>{{ bitacora.usuario_responsable }}
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="{% url 'inventario:bitacora_dispositivo' 'monitor' object.pk %}" class="btn btn-primary text-white btn-sm">
+                                <i class="bi bi-plus me-1"></i>Registrar Evento
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="bi bi-clock-history text-muted" style="font-size: 2rem;"></i>
+                            <p class="text-muted mb-2">No hay eventos registrados</p>
+                            <a href="{% url 'inventario:bitacora_dispositivo' 'monitor' object.pk %}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-plus me-1"></i>Registrar Primer Evento
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Información de Registro -->
+            <div class="card detail-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información de Registro</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Creado:</div>
+                        <div class="col-sm-8 info-value">{{ object.fecha_creacion|date:"d/m/Y H:i" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Modificado:</div>
+                        <div class="col-sm-8 info-value">{{ object.fecha_modificacion|date:"d/m/Y H:i" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de que desea eliminar el monitor <strong>{{ object.nombre }}</strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Esta acción no se puede deshacer y eliminará toda la información asociada.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Cancelar
+                </button>
+                <form method="post" action="{% url 'inventario:monitor_delete' object.pk %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>Eliminar Monitor
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

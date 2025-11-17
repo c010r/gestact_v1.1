@@ -1,0 +1,210 @@
+{% extends 'inventario/base_device_form.html' %}
+
+{% block form_sections %}
+<div class="card">
+	<div class="card-body">
+		{% if form.non_field_errors %}
+		<div class="alert alert-danger mb-3">
+			<ul class="mb-0">
+				{% for error in form.non_field_errors %}
+				<li>{{ error }}</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+
+		<ul class="nav nav-tabs" id="perifericoTabs" role="tablist">
+			<li class="nav-item" role="presentation">
+				<button class="nav-link active" id="periferico-tab-basicos" data-bs-toggle="tab"
+						data-bs-target="#periferico-pane-basicos" type="button" role="tab"
+						aria-controls="periferico-pane-basicos" aria-selected="true">
+					Datos básicos
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="periferico-tab-especificaciones" data-bs-toggle="tab"
+						data-bs-target="#periferico-pane-especificaciones" type="button" role="tab"
+						aria-controls="periferico-pane-especificaciones" aria-selected="false">
+					Especificaciones
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="periferico-tab-conectividad" data-bs-toggle="tab"
+						data-bs-target="#periferico-pane-conectividad" type="button" role="tab"
+						aria-controls="periferico-pane-conectividad" aria-selected="false">
+					Conectividad
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="periferico-tab-compra" data-bs-toggle="tab"
+						data-bs-target="#periferico-pane-compra" type="button" role="tab"
+						aria-controls="periferico-pane-compra" aria-selected="false">
+					Compra y garantía
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="periferico-tab-notas" data-bs-toggle="tab"
+						data-bs-target="#periferico-pane-notas" type="button" role="tab"
+						aria-controls="periferico-pane-notas" aria-selected="false">
+					Notas
+				</button>
+			</li>
+		</ul>
+
+		<div class="tab-content pt-3" id="perifericoTabsContent">
+			<div class="tab-pane fade show active" id="periferico-pane-basicos" role="tabpanel"
+				 aria-labelledby="periferico-tab-basicos">
+				<div class="row g-3">
+					<div class="col-md-6">
+						{{ form.nombre.label_tag }}
+						{{ form.nombre }}
+						{% for error in form.nombre.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.numero_inventario.label_tag }}
+						{{ form.numero_inventario }}
+						{% for error in form.numero_inventario.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.numero_serie.label_tag }}
+						{{ form.numero_serie }}
+						{% for error in form.numero_serie.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.tipo_periferico.label_tag }}
+						{{ form.tipo_periferico }}
+						{% for error in form.tipo_periferico.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.estado.label_tag }}
+						{{ form.estado }}
+						{% for error in form.estado.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.lugar.label_tag }}
+						{{ form.lugar }}
+						{% for error in form.lugar.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="periferico-pane-especificaciones" role="tabpanel"
+				 aria-labelledby="periferico-tab-especificaciones">
+				<div class="row g-3">
+					<div class="col-md-4">
+						{{ form.fabricante.label_tag }}
+						{{ form.fabricante }}
+						{% for error in form.fabricante.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.modelo.label_tag }}
+						{{ form.modelo }}
+						{% for error in form.modelo.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.tipo_conexion.label_tag }}
+						{{ form.tipo_conexion }}
+						{% for error in form.tipo_conexion.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="periferico-pane-conectividad" role="tabpanel"
+				 aria-labelledby="periferico-tab-conectividad">
+				<div class="row g-3">
+					<div class="col-md-6">
+						<div class="form-check mt-2">
+							{{ form.es_inalambrico }}
+							<label class="form-check-label" for="{{ form.es_inalambrico.id_for_label }}">
+								{{ form.es_inalambrico.label }}
+							</label>
+						</div>
+						{% for error in form.es_inalambrico.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="periferico-pane-compra" role="tabpanel"
+				 aria-labelledby="periferico-tab-compra">
+				<div class="row g-3">
+					<div class="col-md-6">
+						{{ form.proveedor.label_tag }}
+						{{ form.proveedor }}
+						{% for error in form.proveedor.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.fecha_adquisicion.label_tag }}
+						{{ form.fecha_adquisicion }}
+						{% for error in form.fecha_adquisicion.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-2">
+						{{ form.moneda.label_tag }}
+						{{ form.moneda }}
+						{% for error in form.moneda.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.valor_adquisicion.label_tag }}
+						{{ form.valor_adquisicion }}
+						{% for error in form.valor_adquisicion.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.tipo_garantia.label_tag }}
+						{{ form.tipo_garantia }}
+						{% for error in form.tipo_garantia.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.anos_garantia.label_tag }}
+						{{ form.anos_garantia }}
+						{% for error in form.anos_garantia.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="periferico-pane-notas" role="tabpanel"
+				 aria-labelledby="periferico-tab-notas">
+				<div class="row g-3">
+					<div class="col-12">
+						{{ form.comentarios.label_tag }}
+						{{ form.comentarios }}
+						{% for error in form.comentarios.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

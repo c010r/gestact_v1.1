@@ -1,0 +1,230 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}{{ title }} - ASSE-GestACT{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3">
+                <i class="bi bi-tools me-2"></i>{{ title }}
+            </h1>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <ul class="nav nav-tabs" id="ordenTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="info-tab" data-bs-toggle="tab"
+                                data-bs-target="#info-pane" type="button">
+                            Información General
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="servicio-tab" data-bs-toggle="tab"
+                                data-bs-target="#servicio-pane" type="button">
+                            Servicio
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="costos-tab" data-bs-toggle="tab"
+                                data-bs-target="#costos-pane" type="button">
+                            Costos
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content pt-3">
+                    <!-- Información General -->
+                    <div class="tab-pane fade show active" id="info-pane">
+                        <div class="row g-3">
+                            <!-- Búsqueda de Activo por Número de Serie -->
+                            <div class="col-12">
+                                <div class="card bg-light border-primary">
+                                    <div class="card-body">
+                                        <h6 class="card-title mb-3">
+                                            <i class="bi bi-search me-2"></i>Vincular Activo por Número de Serie
+                                        </h6>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                {{ form.buscar_numero_serie.label_tag }}
+                                                {{ form.buscar_numero_serie }}
+                                                {% if form.buscar_numero_serie.help_text %}
+                                                <small class="form-text text-muted">{{ form.buscar_numero_serie.help_text }}</small>
+                                                {% endif %}
+                                                {% for error in form.buscar_numero_serie.errors %}
+                                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                                {% endfor %}
+                                                {% if object.pk %}
+                                                <div class="mt-2">
+                                                    <div class="alert alert-info mb-0">
+                                                        <small>
+                                                            <i class="bi bi-info-circle me-1"></i>
+                                                            <strong>Activo vinculado:</strong> {{ object.dispositivo_nombre }} 
+                                                            ({{ object.get_tipo_dispositivo_display }})
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                {{ form.tipo_servicio.label_tag }}
+                                {{ form.tipo_servicio }}
+                                {% for error in form.tipo_servicio.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-3">
+                                {{ form.prioridad.label_tag }}
+                                {{ form.prioridad }}
+                                {% for error in form.prioridad.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-3">
+                                {{ form.estado.label_tag }}
+                                {{ form.estado }}
+                                {% for error in form.estado.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.solicitante.label_tag }}
+                                {{ form.solicitante }}
+                                {% for error in form.solicitante.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.tecnico_asignado.label_tag }}
+                                {{ form.tecnico_asignado }}
+                                {% for error in form.tecnico_asignado.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-12">
+                                {{ form.descripcion_problema.label_tag }}
+                                {{ form.descripcion_problema }}
+                                {% for error in form.descripcion_problema.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Servicio -->
+                    <div class="tab-pane fade" id="servicio-pane">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                {{ form.fecha_estimada.label_tag }}
+                                {{ form.fecha_estimada }}
+                                {% for error in form.fecha_estimada.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.fecha_inicio.label_tag }}
+                                {{ form.fecha_inicio }}
+                                {% for error in form.fecha_inicio.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.fecha_finalizacion.label_tag }}
+                                {{ form.fecha_finalizacion }}
+                                {% for error in form.fecha_finalizacion.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-12">
+                                {{ form.diagnostico.label_tag }}
+                                {{ form.diagnostico }}
+                                {% for error in form.diagnostico.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-12">
+                                {{ form.solucion_aplicada.label_tag }}
+                                {{ form.solucion_aplicada }}
+                                {% for error in form.solucion_aplicada.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-12">
+                                {{ form.repuestos_utilizados.label_tag }}
+                                {{ form.repuestos_utilizados }}
+                                {% for error in form.repuestos_utilizados.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Costos -->
+                    <div class="tab-pane fade" id="costos-pane">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                {{ form.costo_mano_obra.label_tag }}
+                                {{ form.costo_mano_obra }}
+                                {% for error in form.costo_mano_obra.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.costo_repuestos.label_tag }}
+                                {{ form.costo_repuestos }}
+                                {% for error in form.costo_repuestos.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.moneda.label_tag }}
+                                {{ form.moneda }}
+                                {% for error in form.moneda.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-12">
+                                {{ form.observaciones.label_tag }}
+                                {{ form.observaciones }}
+                                {% for error in form.observaciones.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex justify-content-end gap-2">
+                    <a href="{% url 'inventario:orden_servicio_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle me-2"></i>Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-2"></i>{{ submit_text }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

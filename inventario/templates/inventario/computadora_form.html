@@ -1,0 +1,299 @@
+{% extends 'inventario/base_device_form.html' %}
+{% load static %}
+
+{% block form_sections %}
+<div class="card">
+    <div class="card-body">
+        <ul class="nav nav-tabs" id="tabsComputadora" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tab-datos-basicos" data-bs-toggle="tab"
+                        data-bs-target="#pane-datos-basicos" type="button" role="tab"
+                        aria-controls="pane-datos-basicos" aria-selected="true">
+                    Datos básicos
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-especificaciones" data-bs-toggle="tab"
+                        data-bs-target="#pane-especificaciones" type="button" role="tab"
+                        aria-controls="pane-especificaciones" aria-selected="false">
+                    Especificaciones
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-compra" data-bs-toggle="tab"
+                        data-bs-target="#pane-compra" type="button" role="tab"
+                        aria-controls="pane-compra" aria-selected="false">
+                    Compra y garantía
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-red" data-bs-toggle="tab"
+                        data-bs-target="#pane-red" type="button" role="tab"
+                        aria-controls="pane-red" aria-selected="false">
+                    Red y asociaciones
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-notas" data-bs-toggle="tab"
+                        data-bs-target="#pane-notas" type="button" role="tab"
+                        aria-controls="pane-notas" aria-selected="false">
+                    Notas
+                </button>
+            </li>
+        </ul>
+        <div class="tab-content pt-3" id="tabsComputadoraContent">
+            <div class="tab-pane fade show active" id="pane-datos-basicos" role="tabpanel"
+                 aria-labelledby="tab-datos-basicos">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.nombre.id_for_label }}" class="form-label">Nombre *</label>
+                        {{ form.nombre }}
+                        <small class="text-muted">Se genera automáticamente desde Modelo/Número de serie.</small>
+                        {% if form.nombre.errors %}
+                            <div class="invalid-feedback d-block">{{ form.nombre.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.numero_inventario.id_for_label }}" class="form-label">Número de inventario *</label>
+                        {{ form.numero_inventario }}
+                        <small class="text-muted">Se genera automáticamente desde UE/Modelo/Número de serie.</small>
+                        {% if form.numero_inventario.errors %}
+                            <div class="invalid-feedback d-block">{{ form.numero_inventario.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.numero_serie.id_for_label }}" class="form-label">Número de serie *</label>
+                        {{ form.numero_serie }}
+                        {% if form.numero_serie.errors %}
+                            <div class="invalid-feedback d-block">{{ form.numero_serie.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.tipo_computadora.id_for_label }}" class="form-label">Tipo de computadora *</label>
+                        <div class="input-group">
+                            {{ form.tipo_computadora }}
+                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal"
+                                    data-bs-target="#modalTipoComputadora" title="Nuevo tipo">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                        {% if form.tipo_computadora.errors %}
+                            <div class="invalid-feedback d-block">{{ form.tipo_computadora.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.estado.id_for_label }}" class="form-label">Estado *</label>
+                        <div class="input-group">
+                            {{ form.estado }}
+                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal"
+                                    data-bs-target="#modalEstado" title="Nuevo estado">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                        {% if form.estado.errors %}
+                            <div class="invalid-feedback d-block">{{ form.estado.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.lugar.id_for_label }}" class="form-label">Lugar *</label>
+                        {{ form.lugar }}
+                        {% if form.lugar.errors %}
+                            <div class="invalid-feedback d-block">{{ form.lugar.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="pane-especificaciones" role="tabpanel"
+                 aria-labelledby="tab-especificaciones">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.fabricante.id_for_label }}" class="form-label">Fabricante *</label>
+                        {{ form.fabricante }}
+                        {% if form.fabricante.errors %}
+                            <div class="invalid-feedback d-block">{{ form.fabricante.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.modelo.id_for_label }}" class="form-label">Modelo *</label>
+                        {{ form.modelo }}
+                        {% if form.modelo.errors %}
+                            <div class="invalid-feedback d-block">{{ form.modelo.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="{{ form.comentarios.id_for_label }}" class="form-label">Comentarios</label>
+                    {{ form.comentarios }}
+                    {% if form.comentarios.errors %}
+                        <div class="invalid-feedback d-block">{{ form.comentarios.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="pane-compra" role="tabpanel"
+                 aria-labelledby="tab-compra">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.proveedor.id_for_label }}" class="form-label">Proveedor</label>
+                        {{ form.proveedor }}
+                        {% if form.proveedor.errors %}
+                            <div class="invalid-feedback d-block">{{ form.proveedor.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label for="{{ form.moneda.id_for_label }}" class="form-label">Moneda</label>
+                        {{ form.moneda }}
+                        {% if form.moneda.errors %}
+                            <div class="invalid-feedback d-block">{{ form.moneda.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.valor_adquisicion.id_for_label }}" class="form-label">Valor de adquisición</label>
+                        {{ form.valor_adquisicion }}
+                        {% if form.valor_adquisicion.errors %}
+                            <div class="invalid-feedback d-block">{{ form.valor_adquisicion.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.fecha_adquisicion.id_for_label }}" class="form-label">Fecha de adquisición</label>
+                        {{ form.fecha_adquisicion }}
+                        {% if form.fecha_adquisicion.errors %}
+                            <div class="invalid-feedback d-block">{{ form.fecha_adquisicion.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.tipo_garantia.id_for_label }}" class="form-label">Tipo de garantía *</label>
+                        {{ form.tipo_garantia }}
+                        {% if form.tipo_garantia.errors %}
+                            <div class="invalid-feedback d-block">{{ form.tipo_garantia.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.anos_garantia.id_for_label }}" class="form-label">Años de garantía</label>
+                        {{ form.anos_garantia }}
+                        {% if form.anos_garantia.errors %}
+                            <div class="invalid-feedback d-block">{{ form.anos_garantia.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="pane-red" role="tabpanel"
+                 aria-labelledby="tab-red">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.direccion_ip.id_for_label }}" class="form-label">Dirección IP</label>
+                        {{ form.direccion_ip }}
+                        {% if form.direccion_ip.errors %}
+                            <div class="invalid-feedback d-block">{{ form.direccion_ip.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.direccion_mac.id_for_label }}" class="form-label">Dirección MAC</label>
+                        {{ form.direccion_mac }}
+                        {% if form.direccion_mac.errors %}
+                            <div class="invalid-feedback d-block">{{ form.direccion_mac.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.monitores_vinculados.id_for_label }}" class="form-label">Monitores vinculados</label>
+                        {{ form.monitores_vinculados }}
+                        {% if form.monitores_vinculados.errors %}
+                            <div class="invalid-feedback d-block">{{ form.monitores_vinculados.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.impresoras_vinculadas.id_for_label }}" class="form-label">Impresoras vinculadas</label>
+                        {{ form.impresoras_vinculadas }}
+                        {% if form.impresoras_vinculadas.errors %}
+                            <div class="invalid-feedback d-block">{{ form.impresoras_vinculadas.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="pane-notas" role="tabpanel" aria-labelledby="tab-notas">
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <label for="{{ form.comentarios.id_for_label }}" class="form-label">Comentarios</label>
+                        {{ form.comentarios }}
+                        <small class="text-muted">Agregue cualquier observación adicional sobre esta computadora.</small>
+                        {% if form.comentarios.errors %}
+                            <div class="invalid-feedback d-block">{{ form.comentarios.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalTipoComputadora" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-cpu"></i> Nuevo tipo de computadora</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="modal-tipo-nombre" class="form-label">Nombre *</label>
+                    <input type="text" class="form-control" id="modal-tipo-nombre">
+                </div>
+                <div class="mb-3">
+                    <label for="modal-tipo-comentarios" class="form-label">Comentarios</label>
+                    <textarea class="form-control" id="modal-tipo-comentarios" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="modal-tipo-guardar">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEstado" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-flag"></i> Nuevo estado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="modal-estado-nombre" class="form-label">Nombre *</label>
+                    <input type="text" class="form-control" id="modal-estado-nombre">
+                </div>
+                <div class="mb-3">
+                    <label for="modal-estado-comentarios" class="form-label">Comentarios</label>
+                    <textarea class="form-control" id="modal-estado-comentarios" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="modal-estado-guardar">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_form_js %}
+(function cargarScriptComputadora() {
+    const script = document.createElement('script');
+    script.src = "{% static 'inventario/js/computadora-form.js' %}";
+    document.head.appendChild(script);
+})();
+{% endblock %}

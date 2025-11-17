@@ -1,0 +1,113 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Detalle de Insumo - ASSE-GestACT{% endblock %}
+
+{% block extra_css %}
+<style>
+[data-bs-theme="dark"] .card {
+    background-color: #1a1d20;
+    border: 1px solid #2d3238;
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.3);
+}
+
+[data-bs-theme="dark"] .card-header {
+    background-color: #2d3238;
+    border-bottom: 1px solid #404448;
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .card-body {
+    background-color: #1a1d20;
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .badge {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1"><i class="bi bi-box-seam me-2"></i>{{ object.nombre }}</h1>
+            <p class="text-muted mb-0">Información clave del insumo y su disponibilidad.</p>
+        </div>
+        <div class="btn-group">
+            <a href="{% url 'inventario:insumo_update' object.pk %}" class="btn btn-warning text-dark">
+                <i class="bi bi-pencil me-2"></i>Editar
+            </a>
+            <a href="{% url 'inventario:insumo_list' %}" class="btn btn-secondary text-white">
+                <i class="bi bi-arrow-left me-2"></i>Volver
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Datos generales</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Tipo</dt>
+                        <dd class="col-sm-8">{{ object.tipo_insumo|default:'-' }}</dd>
+                        <dt class="col-sm-4">Proveedor</dt>
+                        <dd class="col-sm-8">{{ object.proveedor|default:'-' }}</dd>
+                        <dt class="col-sm-4">Unidad de medida</dt>
+                        <dd class="col-sm-8">{{ object.unidad_medida }}</dd>
+                        <dt class="col-sm-4">Descripción</dt>
+                        <dd class="col-sm-8">{{ object.descripcion|default:'Sin descripción' }}</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart-line me-2"></i>Inventario</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-sm-4">
+                            <div class="display-6 fw-bold">{{ object.cantidad_total }}</div>
+                            <p class="text-muted mb-0">Cantidad total</p>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="display-6 fw-bold">{{ object.cantidad_disponible }}</div>
+                            <p class="text-muted mb-0">Disponible</p>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="display-6 fw-bold">{{ object.punto_reorden }}</div>
+                            <p class="text-muted mb-0">Punto de reorden</p>
+                        </div>
+                    </div>
+                    {% if object.necesita_reorden %}
+                        <div class="alert alert-warning mt-4 mb-0" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Este insumo alcanzó su punto de reorden.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-clipboard-data me-2"></i>Estado</h5>
+                </div>
+                <div class="card-body">
+                    {% if object.activo %}
+                        <span class="badge bg-success">Activo</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Inactivo</span>
+                    {% endif %}
+                    <p class="text-muted mt-3 mb-0">Última actualización: {{ object.ultima_actualizacion|date:'d/m/Y H:i' }}</p>
+                    <p class="text-muted">Creado el {{ object.fecha_creacion|date:'d/m/Y' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

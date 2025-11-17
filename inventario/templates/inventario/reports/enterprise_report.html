@@ -1,0 +1,454 @@
+{% extends "inventario/base.html" %}
+{% load humanize %}
+
+{% block title %}Reporte Empresarial | ASSE-GestACT{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row align-items-center mb-4 g-3">
+        <div class="col">
+            <h1 class="h3 mb-1">Reporte empresarial</h1>
+            <p class="text-muted mb-0">
+                Período del {{ start_date|date:"d/m/Y" }} al {{ end_date|date:"d/m/Y" }}.
+            </p>
+            {% if segment_options|length > 1 %}
+                <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
+                    <span class="badge bg-primary-subtle text-primary-emphasis">
+                        {{ segment_label }}
+                    </span>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Segmento del reporte">
+                        {% for option in segment_options %}
+                            <a class="btn btn-sm {% if option.key == segment %}btn-primary{% else %}btn-outline-primary{% endif %}" href="?{{ option.query }}">
+                                {{ option.label }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <span class="badge bg-primary-subtle text-primary-emphasis d-inline-block mt-2">{{ segment_label }}</span>
+            {% endif %}
+        </div>
+        <div class="col-auto text-end">
+            <small class="text-muted d-block">Actualizado {{ generated_at|date:"d/m/Y H:i" }}</small>
+            <a class="link-secondary small" href="{% url 'inventario:reports_menu' %}">
+                <i class="bi bi-arrow-left"></i> Volver al centro de reportes
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-sm-6 col-lg-3">
+                    <label for="start" class="form-label">Desde</label>
+                    <input type="date" id="start" name="start" value="{{ start_date|date:'Y-m-d' }}" class="form-control">
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <label for="end" class="form-label">Hasta</label>
+                    <input type="date" id="end" name="end" value="{{ end_date|date:'Y-m-d' }}" class="form-control">
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <label class="form-label">Opciones</label>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-arrow-repeat"></i> Actualizar
+                    </button>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <label class="form-label">Descargar</label>
+                    <div class="btn-group w-100" role="group">
+                        <a class="btn btn-outline-secondary" href="?{{ base_query }}&download=pdf">
+                            <i class="bi bi-filetype-pdf"></i> PDF
+                        </a>
+                        {% if excel_available %}
+                            <a class="btn btn-outline-secondary" href="?{{ base_query }}&download=xlsx">
+                                <i class="bi bi-filetype-xlsx"></i> Excel
+                            </a>
+                        {% else %}
+                            <button class="btn btn-outline-secondary" type="button" disabled title="Instale openpyxl para habilitar la exportación a Excel">
+                                <i class="bi bi-filetype-xlsx"></i>
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-primary-subtle text-primary-emphasis">Garantías</span>
+                        <i class="bi bi-shield-check fs-3 text-primary"></i>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="fs-4 fw-semibold">{{ report.warranty.vigentes }}</div>
+                            <small class="text-muted">Vigentes</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-semibold text-warning">{{ report.warranty.por_vencer }}</div>
+                            <small class="text-muted">Por vencer</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-semibold text-danger">{{ report.warranty.vencidas }}</div>
+                            <small class="text-muted">Vencidas</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-success-subtle text-success-emphasis">Licencias</span>
+                        <i class="bi bi-key fs-3 text-success"></i>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="fs-4 fw-semibold">{{ report.licenses.vigentes }}</div>
+                            <small class="text-muted">Activas</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-semibold text-warning">{{ report.licenses.por_vencer }}</div>
+                            <small class="text-muted">Por vencer</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-semibold text-danger">{{ report.licenses.vencidas }}</div>
+                            <small class="text-muted">Expiradas</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-info-subtle text-info-emphasis">Obsolescencia</span>
+                        <i class="bi bi-hourglass-split fs-3 text-info"></i>
+                    </div>
+                    <div class="d-flex align-items-baseline gap-3">
+                        <div>
+                            <div class="fs-4 fw-semibold">{{ report.obsolescence.obsoletos }}</div>
+                            <small class="text-muted">Equipos obsoletos</small>
+                        </div>
+                        <div class="text-muted">
+                            {% if report.obsolescence.total_evaluados %}
+                                <span class="fw-semibold">
+                                    {% widthratio report.obsolescence.obsoletos report.obsolescence.total_evaluados 100 %}%
+                                </span>
+                                <small class="text-muted d-block">de {{ report.obsolescence.total_evaluados }}</small>
+                            {% else %}
+                                <small>No hay datos evaluados.</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <small class="text-muted d-block mt-2">Umbral {{ report.obsolescence.threshold_years }} años</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-danger-subtle text-danger-emphasis">Bajas</span>
+                        <i class="bi bi-box-arrow-down fs-3 text-danger"></i>
+                    </div>
+                    <div class="fs-4 fw-semibold">{{ report.bajas.total_bajas }}</div>
+                    <small class="text-muted d-block">Bajas registradas en el período</small>
+                    <div class="mt-3">
+                        <span class="fw-semibold">{{ total_deliveries }}</span>
+                        <small class="text-muted">Entregas realizadas</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="h5 mb-0">Detalle de garantías</h2>
+                        <span class="badge bg-light text-dark">{{ report.warranty.detalle|length }} registros</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if report.warranty.detalle %}
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Activo</th>
+                                        <th>Tipo</th>
+                                        <th>Vence</th>
+                                        <th>Estado</th>
+                                        <th class="text-end">Días restantes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in report.warranty.detalle|slice:":10" %}
+                                        <tr>
+                                            <td>{{ item.nombre }}</td>
+                                            <td>{{ item.tipo }}</td>
+                                            <td>{{ item.fecha|date:"d/m/Y" }}</td>
+                                            <td>
+                                                {% with estado=item.estado|default:""|lower %}
+                                                    {% if estado == "vigente" %}
+                                                        <span class="badge bg-success-subtle text-success-emphasis">Vigente</span>
+                                                    {% elif estado == "por_vencer" %}
+                                                        <span class="badge bg-warning-subtle text-warning-emphasis">Por vencer</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger-subtle text-danger-emphasis">Vencida</span>
+                                                    {% endif %}
+                                                {% endwith %}
+                                            </td>
+                                            <td class="text-end">{{ item.dias_restantes|default:"-" }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if report.warranty.detalle|length > 10 %}
+                            <small class="text-muted d-block mt-2">Mostrando los primeros 10 registros.</small>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-muted mb-0">No hay garantías registradas para el período seleccionado.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="h5 mb-0">Detalle de licencias</h2>
+                        <span class="badge bg-light text-dark">{{ report.licenses.detalle|length }} registros</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if report.licenses.detalle %}
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Software</th>
+                                        <th>Tipo</th>
+                                        <th>Vence</th>
+                                        <th>Estado</th>
+                                        <th class="text-end">Días restantes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in report.licenses.detalle|slice:":10" %}
+                                        <tr>
+                                            <td>{{ item.nombre }}</td>
+                                            <td>{{ item.tipo }}</td>
+                                            <td>{{ item.fecha|date:"d/m/Y" }}</td>
+                                            <td>
+                                                {% with estado=item.estado|default:""|lower %}
+                                                    {% if estado == "vigente" %}
+                                                        <span class="badge bg-success-subtle text-success-emphasis">Vigente</span>
+                                                    {% elif estado == "por_vencer" %}
+                                                        <span class="badge bg-warning-subtle text-warning-emphasis">Por vencer</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger-subtle text-danger-emphasis">Vencida</span>
+                                                    {% endif %}
+                                                {% endwith %}
+                                            </td>
+                                            <td class="text-end">{{ item.dias_restantes|default:"-" }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if report.licenses.detalle|length > 10 %}
+                            <small class="text-muted d-block mt-2">Mostrando los primeros 10 registros.</small>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-muted mb-0">No hay licencias registradas para el período seleccionado.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent">
+            <h2 class="h5 mb-0">Obsolescencia por categoría</h2>
+        </div>
+        <div class="card-body">
+            {% if report.obsolescence.por_tipo %}
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Total evaluados</th>
+                                <th>Obsoletos</th>
+                                <th>% Obsolescencia</th>
+                                <th>Antigüedad promedio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in report.obsolescence.por_tipo %}
+                                <tr>
+                                    <td>{{ item.tipo }}</td>
+                                    <td>{{ item.total }}</td>
+                                    <td>{{ item.obsoletos }}</td>
+                                    <td>{{ item.porcentaje }}%</td>
+                                    <td>{{ item.antiguedad_promedio }} años</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted mb-0">No se registran dispositivos evaluados para obsolescencia en el período seleccionado.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent">
+            <h2 class="h5 mb-0">Compras por año</h2>
+        </div>
+        <div class="card-body">
+            {% if report.annual_purchases %}
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Año</th>
+                                <th>Categoría</th>
+                                <th class="text-end">Cantidad</th>
+                                <th class="text-end">Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in report.annual_purchases %}
+                                <tr>
+                                    <td>{{ item.year }}</td>
+                                    <td>{{ item.tipo }}</td>
+                                    <td class="text-end">{{ item.cantidad }}</td>
+                                    <td class="text-end">${{ item.monto|floatformat:2 }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted mb-0">No se registran compras en el período seleccionado.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent">
+                    <h2 class="h5 mb-0">Entregas registradas</h2>
+                </div>
+                <div class="card-body">
+                    {% if report.monthly_deliveries or report.annual_deliveries %}
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <h3 class="h6 text-muted">Mensual</h3>
+                                {% if report.monthly_deliveries %}
+                                    <div class="table-responsive">
+                                        <table class="table table-sm align-middle mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Período</th>
+                                                    <th class="text-end">Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for item in report.monthly_deliveries %}
+                                                    <tr>
+                                                        <td>{{ item.periodo }}</td>
+                                                        <td class="text-end">{{ item.total }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted mb-0">Sin entregas mensuales registradas.</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <h3 class="h6 text-muted">Anual</h3>
+                                {% if report.annual_deliveries %}
+                                    <div class="table-responsive">
+                                        <table class="table table-sm align-middle mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Año</th>
+                                                    <th class="text-end">Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for item in report.annual_deliveries %}
+                                                    <tr>
+                                                        <td>{{ item.year }}</td>
+                                                        <td class="text-end">{{ item.total }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted mb-0">Sin entregas anuales registradas.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No se registran entregas en el período seleccionado.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent">
+                    <h2 class="h5 mb-0">Bajas detalladas</h2>
+                </div>
+                <div class="card-body">
+                    {% if report.bajas.detalle %}
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Activo</th>
+                                        <th>Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in report.bajas.detalle|slice:":12" %}
+                                        <tr>
+                                            <td>{{ item.tipo_dispositivo }}</td>
+                                            <td>{{ item.dispositivo_nombre }}</td>
+                                            <td>{{ item.fecha_evento|date:"d/m/Y H:i" }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if report.bajas.detalle|length > 12 %}
+                            <small class="text-muted d-block mt-2">Mostrando los primeros 12 registros.</small>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-muted mb-0">No se registran bajas en el período seleccionado.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

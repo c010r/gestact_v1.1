@@ -1,0 +1,419 @@
+{% extends 'inventario/base.html' %}
+{% load static %}
+{% load date_filters %}
+
+{% block title %}{{ object.nombre }} - Detalle Impresora{% endblock %}
+
+{% block extra_css %}
+<style>
+.detail-card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1.5rem;
+    background-color: #ffffff;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.detail-card .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    font-weight: 600;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Modo Oscuro */
+[data-bs-theme="dark"] .detail-card {
+    background-color: #1a1d20;
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.3);
+    border: 1px solid #2d3238;
+}
+
+[data-bs-theme="dark"] .detail-card .card-header {
+    background-color: #2d3238;
+    border-bottom: 1px solid #404448;
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .detail-card .card-body {
+    background-color: #1a1d20;
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .info-row {
+    border-bottom-color: #2d3238;
+}
+
+[data-bs-theme="dark"] .info-label {
+    color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .info-value {
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .badge {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-bs-theme="dark"] .table {
+    color: #e9ecef;
+    border-color: #2d3238;
+}
+
+[data-bs-theme="dark"] .table thead th {
+    background-color: #2d3238;
+    border-color: #404448;
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .table tbody td {
+    border-color: #2d3238;
+}
+
+[data-bs-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+[data-bs-theme="dark"] .alert {
+    background-color: #2d3238;
+    border-color: #404448;
+    color: #e9ecef;
+}
+
+.info-row {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.info-value {
+    color: #212529;
+}
+
+.status-badge {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+}
+
+.action-buttons .btn {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .action-buttons .btn {
+        width: 100%;
+        margin-right: 0;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">{{ object.nombre }}</h1>
+            <p class="text-muted mb-0">Detalle de Impresora</p>
+        </div>
+        <div class="action-buttons">
+            <a href="{% url 'inventario:impresora_update' object.pk %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <i class="fas fa-trash"></i> Eliminar
+            </button>
+            <a href="{% url 'inventario:impresora_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información Principal -->
+        <div class="col-lg-8">
+            <!-- Información Básica -->
+            <div class="card detail-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Información Básica</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Nombre:</div>
+                        <div class="col-sm-8 info-value">{{ object.nombre }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Número de Inventario:</div>
+                        <div class="col-sm-8 info-value">{{ object.numero_inventario|default:"No asignado" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Número de Serie:</div>
+                        <div class="col-sm-8 info-value">{{ object.numero_serie|default:"No asignado" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Estado:</div>
+                        <div class="col-sm-8 info-value">
+                            {% if object.estado.nombre == 'Activo' %}
+                                <span class="badge bg-success status-badge">{{ object.estado.nombre }}</span>
+                            {% elif object.estado.nombre == 'Mantenimiento' %}
+                                <span class="badge bg-warning status-badge">{{ object.estado.nombre }}</span>
+                            {% else %}
+                                <span class="badge bg-danger status-badge">{{ object.estado.nombre }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Fabricante:</div>
+                        <div class="col-sm-8 info-value">{{ object.fabricante.nombre|default:"No especificado" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Modelo:</div>
+                        <div class="col-sm-8 info-value">{{ object.modelo.nombre|default:"No especificado" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Tipo:</div>
+                        <div class="col-sm-8 info-value">{{ object.tipo_impresora.nombre|default:"No especificado" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Tóner extra:</div>
+                        <div class="col-sm-8 info-value">
+                            {% if object.requiere_toner_extra and object.insumo_toner_extra %}
+                                {{ object.insumo_toner_extra.nombre }}
+                                {% if object.cantidad_toner_extra %}
+                                    <span class="badge bg-info ms-2">
+                                        {{ object.cantidad_toner_extra }} unidad{% if object.cantidad_toner_extra != 1 %}es{% endif %}
+                                    </span>
+                                {% endif %}
+                            {% else %}
+                                No aplica
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Ubicación:</div>
+                        <div class="col-sm-8 info-value">{{ object.lugar.nombre|default:"No asignada" }}</div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- Información de Compra -->
+            <div class="card detail-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-shopping-cart"></i> Información de Compra</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Proveedor:</div>
+                        <div class="col-sm-8 info-value">{{ object.proveedor.nombre|default:"No especificado" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Fecha de Adquisición:</div>
+                        <div class="col-sm-8 info-value">{{ object.fecha_adquisicion|date:"d/m/Y"|default:"No especificada" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Valor de Adquisición:</div>
+                        <div class="col-sm-8 info-value">
+                            {% if object.valor_adquisicion %}
+                                {% if object.moneda == 'USD' %}
+                                    US${{ object.valor_adquisicion|floatformat:2 }}
+                                {% elif object.moneda == 'EUR' %}
+                                    €{{ object.valor_adquisicion|floatformat:2 }}
+                                {% else %}
+                                    ${{ object.valor_adquisicion|floatformat:2 }}
+                                {% endif %}
+                            {% else %}
+                                No especificado
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de Garantía -->
+            <div class="card detail-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-shield-alt"></i> Información de Garantía</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Tipo de Garantía:</div>
+                        <div class="col-sm-8 info-value">{{ object.tipo_garantia.nombre|default:"No especificado" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Años de Garantía:</div>
+                        <div class="col-sm-8 info-value">{{ object.anos_garantia|default:"No especificado" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-4 info-label">Fecha de Finalización:</div>
+                        <div class="col-sm-8 info-value">
+                            {% if object.fecha_finalizacion_garantia %}
+                                {{ object.fecha_finalizacion_garantia|date:"d/m/Y" }}
+                                {% now "Y-m-d" as today %}
+                                {% if object.fecha_finalizacion_garantia|date:"Y-m-d" < today %}
+                                    <span class="badge bg-danger ms-2">Vencida</span>
+                                {% elif object.fecha_finalizacion_garantia|date:"Y-m-d" <= today|add_days:30 %}
+                                    <span class="badge bg-warning ms-2">Por vencer</span>
+                                {% else %}
+                                    <span class="badge bg-success ms-2">Vigente</span>
+                                {% endif %}
+                            {% else %}
+                                No especificada
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comentarios -->
+            {% if object.comentarios %}
+            <div class="card detail-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-comment"></i> Comentarios</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ object.comentarios|linebreaks }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Panel Lateral -->
+        <div class="col-lg-4">
+            <!-- Bitácora Reciente -->
+            <div class="card detail-card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-history"></i> Bitácora Reciente</h5>
+                    <a href="{% url 'inventario:bitacora_dispositivo' 'impresora' object.pk %}" class="btn btn-sm btn-info text-white">
+                        <i class="fas fa-eye"></i> Ver Todo
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if bitacoras_recientes %}
+                        {% for bitacora in bitacoras_recientes %}
+                            <div class="mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 text-primary">{{ bitacora.get_tipo_evento_display }}</h6>
+                                        <p class="mb-1 small">{{ bitacora.descripcion }}</p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock"></i> {{ bitacora.fecha_evento|date:"d/m/Y H:i" }}
+                                            {% if bitacora.usuario_responsable %}
+                                                <br><i class="fas fa-user"></i> {{ bitacora.usuario_responsable }}
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        <div class="text-center">
+                            <a href="{% url 'inventario:bitacora_dispositivo' 'impresora' object.pk %}" class="btn btn-primary text-white btn-sm">
+                                <i class="fas fa-plus"></i> Registrar Evento
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-history text-muted" style="font-size: 2rem;"></i>
+                            <p class="text-muted mb-2">No hay eventos registrados</p>
+                            <a href="{% url 'inventario:bitacora_dispositivo' 'impresora' object.pk %}" class="btn btn-primary text-white btn-sm">
+                                <i class="fas fa-plus"></i> Registrar Primer Evento
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Acciones Rápidas -->
+            <div class="card detail-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bolt"></i> Acciones Rápidas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'inventario:impresora_update' object.pk %}" class="btn btn-warning text-dark">
+                            <i class="fas fa-edit"></i> Editar Impresora
+                        </a>
+                        <button type="button" class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#historyModal">
+                            <i class="fas fa-history"></i> Ver Historial
+                        </button>
+                        <a href="#" class="btn btn-success text-white">
+                            <i class="fas fa-print"></i> Imprimir Ficha
+                        </a>
+                        <a href="#" class="btn btn-primary text-white">
+                            <i class="fas fa-download"></i> Exportar PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de Registro -->
+            <div class="card detail-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-clock"></i> Información de Registro</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row info-row">
+                        <div class="col-sm-5 info-label">Creado:</div>
+                        <div class="col-sm-7 info-value">{{ object.fecha_creacion|date:"d/m/Y H:i" }}</div>
+                    </div>
+                    <div class="row info-row">
+                        <div class="col-sm-5 info-label">Modificado:</div>
+                        <div class="col-sm-7 info-value">{{ object.fecha_modificacion|date:"d/m/Y H:i" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de que desea eliminar la impresora <strong>{{ object.nombre }}</strong>?</p>
+                <p class="text-danger"><small>Esta acción no se puede deshacer.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="post" action="{% url 'inventario:impresora_delete' object.pk %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Historial -->
+<div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="historyModalLabel">Historial de {{ object.nombre }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">Funcionalidad de historial en desarrollo...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

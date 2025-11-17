@@ -1,0 +1,42 @@
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            {% if icon_class %}<i class="{{ icon_class }} me-2"></i>{% endif %}{{ title|default:'Datos' }}
+        </h5>
+    </div>
+    <div class="card-body">
+        {{ form.non_field_errors }}
+        <div class="row g-3">
+            {% for field in form.visible_fields %}
+                {% if field.field.widget.input_type == 'checkbox' %}
+                    <div class="col-12">
+                        <div class="form-check">
+                            {{ field }}
+                            <label class="form-check-label" for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                            </label>
+                        </div>
+                        {% for error in field.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {% if field.field.widget.input_type == 'textarea' %}
+                        <div class="col-12">
+                    {% else %}
+                        <div class="col-md-6">
+                    {% endif %}
+                            {{ field.label_tag }}
+                            {{ field }}
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>

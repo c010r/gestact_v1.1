@@ -1,0 +1,442 @@
+{% extends 'inventario/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Dashboard - ASSE-GestACT{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --dashboard-hero-bg: linear-gradient(135deg, #0f172a 0%, #1d4ed8 45%, #38bdf8 100%);
+    --dashboard-hero-overlay: radial-gradient(circle at top right, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 60%);
+    --dashboard-hero-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+    --dashboard-hero-text: #f8fafc;
+    --dashboard-hero-muted: rgba(241, 245, 249, 0.78);
+    --dashboard-hero-badge-bg: rgba(255, 255, 255, 0.18);
+    --dashboard-hero-highlight-bg: rgba(15, 23, 42, 0.22);
+    --dashboard-hero-highlight-border: rgba(255, 255, 255, 0.12);
+    --dashboard-hero-progress-track: rgba(255, 255, 255, 0.25);
+    --dashboard-hero-progress-bar: linear-gradient(90deg, #22d3ee, #38bdf8);
+}
+
+:root[data-theme="dark"] {
+    --dashboard-hero-bg: linear-gradient(135deg, #020617 0%, #0f172a 45%, #312e81 100%);
+    --dashboard-hero-overlay: radial-gradient(circle at top right, rgba(148, 163, 184, 0.28) 0%, rgba(15, 23, 42, 0) 60%);
+    --dashboard-hero-shadow: 0 28px 60px rgba(2, 6, 23, 0.6);
+    --dashboard-hero-text: #f8fafc;
+    --dashboard-hero-muted: rgba(226, 232, 240, 0.7);
+    --dashboard-hero-badge-bg: rgba(148, 163, 184, 0.2);
+    --dashboard-hero-highlight-bg: rgba(15, 23, 42, 0.55);
+    --dashboard-hero-highlight-border: rgba(148, 163, 184, 0.25);
+    --dashboard-hero-progress-track: rgba(148, 163, 184, 0.3);
+    --dashboard-hero-progress-bar: linear-gradient(90deg, #38bdf8, #818cf8);
+}
+
+.dashboard-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.dashboard-hero {
+    position: relative;
+    overflow: hidden;
+    border: none;
+    border-radius: 20px;
+    background: var(--dashboard-hero-bg);
+    color: var(--dashboard-hero-text);
+    box-shadow: var(--dashboard-hero-shadow);
+}
+
+.dashboard-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 1;
+    background: var(--dashboard-hero-overlay);
+}
+
+.dashboard-hero .card-body {
+    position: relative;
+    z-index: 2;
+    padding: 2.5rem;
+}
+
+.hero-grid {
+    display: grid;
+    gap: 2.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    align-items: center;
+}
+
+.hero-badge {
+    display: inline-block;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    background: var(--dashboard-hero-badge-bg);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.hero-title {
+    font-size: 2.1rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.hero-description {
+    margin: 0;
+    color: var(--dashboard-hero-muted);
+}
+
+.hero-metrics {
+    display: grid;
+    gap: 1.25rem;
+    margin-top: 1.75rem;
+}
+
+.hero-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.hero-metric-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--dashboard-hero-muted);
+}
+
+.hero-metric-value {
+    font-size: 1.95rem;
+    font-weight: 700;
+}
+
+.hero-highlight {
+    background: var(--dashboard-hero-highlight-bg);
+    border-radius: 18px;
+    padding: 1.75rem;
+    backdrop-filter: blur(6px);
+    box-shadow: inset 0 0 0 1px var(--dashboard-hero-highlight-border);
+}
+
+.hero-highlight-value {
+    font-size: 2.75rem;
+    font-weight: 700;
+    display: block;
+}
+
+.hero-progress {
+    margin-top: 1rem;
+}
+
+.hero-progress .progress {
+    height: 8px;
+    border-radius: 999px;
+    background-color: var(--dashboard-hero-progress-track);
+}
+
+.hero-progress .progress-bar {
+    background: var(--dashboard-hero-progress-bar);
+}
+
+.hero-highlight-stats {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.hero-highlight-stats span {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: var(--dashboard-hero-muted);
+}
+
+.metric-card {
+    border: none;
+    border-radius: 18px;
+    padding: 1.6rem;
+    color: #000;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.2);
+}
+
+.metric-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), transparent);
+    opacity: 0.6;
+}
+
+.metric-card > * {
+    position: relative;
+    z-index: 2;
+}
+
+.metric-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.metric-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    display: grid;
+    place-items: center;
+    font-size: 1.5rem;
+    color: #000;
+    font-weight: 900;
+    text-shadow: none;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.metric-icon i {
+    color: #000 !important;
+    font-weight: 900 !important;
+}
+
+.metric-actions {
+    display: flex;
+    gap: 0.35rem;
+}
+
+.metric-link {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: #000;
+    font-weight: 900;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    transition: all 0.2s ease;
+    text-shadow: none;
+}
+
+.metric-link i {
+    color: #000 !important;
+    font-weight: 900 !important;
+}
+
+.metric-link:hover {
+    background: rgba(255, 255, 255, 0.35);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.metric-card h3 {
+    font-size: 2.15rem;
+    font-weight: 700;
+    margin: 0;
+    color: #000;
+}
+
+.metric-card p {
+    color: #000;
+    margin: 0;
+    opacity: 0.85;
+}
+
+.metric-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.metric-progress-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    opacity: 0.85;
+}
+
+.metric-progress .progress {
+    height: 7px;
+    background: rgba(15, 23, 42, 0.18);
+    border-radius: 999px;
+}
+
+.metric-progress .progress-bar {
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+/* Forzar texto negro en modo oscuro */
+:root[data-theme="dark"] .metric-card {
+    color: #000 !important;
+}
+
+:root[data-theme="dark"] .metric-card h3 {
+    color: #000 !important;
+}
+
+:root[data-theme="dark"] .metric-card p {
+    color: #000 !important;
+}
+
+:root[data-theme="dark"] .metric-icon {
+    color: #000 !important;
+}
+
+:root[data-theme="dark"] .metric-icon i {
+    color: #000 !important;
+}
+
+:root[data-theme="dark"] .metric-link {
+    color: #000 !important;
+}
+
+:root[data-theme="dark"] .metric-link i {
+    color: #000 !important;
+}
+
+@media (max-width: 767px) {
+    .dashboard-hero .card-body {
+        padding: 2rem;
+    }
+    .hero-title {
+        font-size: 1.8rem;
+    }
+    .metric-card {
+        padding: 1.4rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-page fade-in">
+    <!-- Hero Section -->
+    <div class="card dashboard-hero">
+        <div class="card-body">
+            <div class="hero-grid">
+                <div class="hero-main">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="hero-badge">ASSE-GestACT</span>
+                            <h1 class="hero-title">Activos Informáticos</h1>
+                            <p class="hero-description">
+                                Monitorea el estado de tus activos y anticipa las necesidades del parque tecnológico.
+                            </p>
+                        </div>
+                        <a href="{% url 'inventario:dashboard' %}" class="btn btn-outline-light btn-sm">
+                            <i class="bi bi-house me-1"></i>Inicio
+                        </a>
+                    </div>
+                    <div class="hero-metrics">
+                        <div class="hero-metric">
+                            <span class="hero-metric-label">Activos totales</span>
+                            <span class="hero-metric-value">{{ total_assets|intcomma }}</span>
+                        </div>
+                        <div class="hero-metric">
+                            <span class="hero-metric-label">Activos operativos</span>
+                            <span class="hero-metric-value">{{ active_assets|intcomma }}</span>
+                        </div>
+                        <div class="hero-metric">
+                            <span class="hero-metric-label">Activos inactivos</span>
+                            <span class="hero-metric-value">{{ inactive_assets|intcomma }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-highlight">
+                    <span class="text-uppercase text-white-50 small">Salud de la operación</span>
+                    <span class="hero-highlight-value">{{ active_ratio }}%</span>
+                    <small class="d-block text-white-50">Equipos disponibles para uso</small>
+                    <div class="hero-progress">
+                        <div class="progress">
+                            <div class="progress-bar" data-progress="{{ active_ratio }}"></div>
+                        </div>
+                    </div>
+                    <div class="hero-highlight-stats">
+                        <span>
+                            Garantías próximas
+                            <strong>{{ pending_warranties }}</strong>
+                        </span>
+                        <span>
+                            Insumos por reponer
+                            <strong>{{ insumo_summary.por_reponer }}</strong>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de Dispositivos -->
+    <div class="row g-4">
+        {% for card in asset_cards %}
+        <div class="col-xxl-3 col-lg-4 col-md-6">
+            <div class="metric-card" data-gradient="{{ card.gradient }}">
+                <div class="metric-card-header">
+                    <span class="metric-icon">
+                        <i class="bi {{ card.icon }}"></i>
+                    </span>
+                    <div class="metric-actions">
+                        <a href="{{ card.list_url }}" class="metric-link" title="Ver listado">
+                            <i class="bi bi-arrow-right-short"></i>
+                        </a>
+                        <a href="{{ card.create_url }}" class="metric-link" title="Registrar nuevo">
+                            <i class="bi bi-plus-lg"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="metric-card-body">
+                    <h3>{{ card.total|intcomma }}</h3>
+                    <p>{{ card.label }}</p>
+                    {% if card.active is not None %}
+                    <div class="metric-progress">
+                        <div class="metric-progress-stats">
+                            <span>{{ card.active|default:0|intcomma }} activos</span>
+                            <span>{{ card.active_percentage|default:0 }}%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" data-progress="{{ card.active_percentage|default:0 }}"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(() => {
+    // Aplicar gradientes a las tarjetas
+    document.querySelectorAll('[data-gradient]').forEach((element) => {
+        const gradient = element.getAttribute('data-gradient');
+        if (gradient) {
+            element.style.background = gradient;
+        }
+    });
+
+    // Animar las barras de progreso
+    document.querySelectorAll('[data-progress]').forEach((element) => {
+        const rawValue = Number(element.getAttribute('data-progress') || 0);
+        const clamped = Math.max(0, Math.min(rawValue, 100));
+        element.style.width = `${clamped}%`;
+    });
+})();
+</script>
+{% endblock %}

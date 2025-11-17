@@ -1,0 +1,353 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Monitores - ASSE-GestACT{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-6 fw-bold text-gradient mb-0">
+                <i class="bi bi-display me-2"></i>Gestión de Monitores
+            </h1>
+            <p class="text-muted">Administra el inventario de monitores de la organización</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#modalCargaMasiva">
+                <i class="bi bi-cloud-upload me-2"></i>
+                Carga Masiva
+            </button>
+            <a href="{% url 'inventario:monitor_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Agregar Monitor
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="search" class="form-label">Buscar</label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           value="{{ request.GET.search }}" placeholder="Nombre, modelo, serie...">
+                </div>
+                <div class="col-md-2">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select class="form-select" id="estado" name="estado">
+                        <option value="">Todos</option>
+                        {% for estado in estados %}
+                            <option value="{{ estado.nombre }}" {% if request.GET.estado == estado.nombre %}selected{% endif %}>{{ estado.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="tipo" class="form-label">Tipo</label>
+                    <select class="form-select" id="tipo" name="tipo">
+                        <option value="">Todos</option>
+                        {% for tipo in tipos %}
+                            <option value="{{ tipo.nombre }}" {% if request.GET.tipo == tipo.nombre %}selected{% endif %}>{{ tipo.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="filtro-lugar-monitor" class="form-label">Ubicación</label>
+                    <div
+                        id="filtro-lugar-monitor"
+                        class="tree-select-filter"
+                        data-input-name="lugar"
+                        data-input-id="filtro-lugar-monitor"
+                        data-selected-value="{{ selected_lugar|default:''|escape }}"
+                        data-selected-label="{{ selected_lugar_label|default:''|escape }}"
+                        data-placeholder="Todas las ubicaciones">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="bi bi-search me-2"></i>Filtrar
+                        </button>
+                        <a href="{% url 'inventario:monitor_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-2"></i>Limpiar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-display display-4 text-primary mb-2"></i>
+                    <h5 class="card-title">{{ total_monitores }}</h5>
+                    <p class="card-text text-muted">Total Monitores</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-check-circle display-4 text-success mb-2"></i>
+                    <h5 class="card-title">{{ monitores_activos }}</h5>
+                    <p class="card-text text-muted">Activos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-tools display-4 text-warning mb-2"></i>
+                    <h5 class="card-title">{{ monitores_mantenimiento }}</h5>
+                    <p class="card-text text-muted">En Mantenimiento</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-x-circle display-4 text-danger mb-2"></i>
+                    <h5 class="card-title">{{ monitores_inactivos }}</h5>
+                    <p class="card-text text-muted">Inactivos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monitores Table -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-list me-2"></i>Lista de Monitores
+            </h5>
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-secondary" onclick="exportData('excel')">
+                    <i class="bi bi-file-earmark-excel me-1"></i>Excel
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="exportData('pdf')">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+                </button>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if object_list %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Número de Inventario</th>
+                                <th>Fabricante</th>
+                                <th>Modelo</th>
+                                <th>Tamaño</th>
+                                <th>Tipo</th>
+                                <th>Estado</th>
+                                <th>Ubicación</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for monitor in object_list %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-display me-2 text-primary"></i>
+                                        <div>
+                                            <strong>{{ monitor.nombre }}</strong>
+                                            {% if monitor.numero_serie %}
+                                                <br><small class="text-muted">S/N: {{ monitor.numero_serie }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <code>{{ monitor.numero_inventario }}</code>
+                                </td>
+                                <td>{{ monitor.fabricante|default:"-" }}</td>
+                                <td>{{ monitor.modelo|default:"-" }}</td>
+                                <td>
+                                    {% if monitor.tamano_pantalla %}
+                                        <span class="badge bg-info">{{ monitor.tamano_pantalla }}"</span>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if monitor.tipo_monitor %}
+                                        <span class="badge bg-secondary">{{ monitor.tipo_monitor.nombre }}</span>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if monitor.estado.nombre == 'Activo' %}
+                                        <span class="badge bg-success">{{ monitor.estado.nombre }}</span>
+                                    {% elif monitor.estado.nombre == 'Inactivo' %}
+                                        <span class="badge bg-danger">{{ monitor.estado.nombre }}</span>
+                                    {% elif monitor.estado.nombre == 'Mantenimiento' %}
+                                        <span class="badge bg-warning">{{ monitor.estado.nombre }}</span>
+                                    {% elif monitor.estado.nombre == 'Reparacion' %}
+                                        <span class="badge bg-secondary">{{ monitor.estado.nombre }}</span>
+                                    {% else %}
+                                        <span class="badge bg-light text-dark">{{ monitor.estado.nombre }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ monitor.lugar|default:"-" }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{% url 'inventario:monitor_detail' monitor.pk %}" 
+                                           class="btn btn-primary text-white" title="Ver detalles">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'inventario:monitor_update' monitor.pk %}" 
+                                           class="btn btn-warning text-dark" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-info text-white btn-facturacion"
+                                                data-tipo="monitor"
+                                                data-id="{{ monitor.pk }}"
+                                                data-nombre="{{ monitor.nombre }}"
+                                                data-serie="{{ monitor.numero_serie }}"
+                                                title="Enviar a Unidad"
+                                                onclick="FacturacionCarrito.agregar('monitor', {{ monitor.pk }})">
+                                            <i class="bi bi-receipt"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-warning text-white btn-servicio-proveedor"
+                                                data-tipo="monitor"
+                                                data-id="{{ monitor.pk }}"
+                                                data-nombre="{{ monitor.nombre }}"
+                                                data-serie="{{ monitor.numero_serie }}"
+                                                title="Enviar a Servicio"
+                                                onclick="ServicioProveedorCarrito.agregar('monitor', {{ monitor.pk }})">
+                                            <i class="bi bi-tools"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-danger text-white" 
+                                                title="Eliminar" onclick="confirmDelete('{{ monitor.pk }}', '{{ monitor.nombre }}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-display display-1 text-muted mb-3"></i>
+                    <h5 class="text-muted">No se encontraron monitores</h5>
+                    <p class="text-muted">No hay monitores registrados que coincidan con los filtros aplicados.</p>
+                    <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#modalCargaMasiva">
+                <i class="bi bi-cloud-upload me-2"></i>
+                Carga Masiva
+            </button>
+            <a href="{% url 'inventario:monitor_create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Agregar Primer Monitor
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Paginación de monitores" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.lugar %}&lugar={{ request.GET.lugar }}{% endif %}">
+                        <i class="bi bi-chevron-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.lugar %}&lugar={{ request.GET.lugar }}{% endif %}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.lugar %}&lugar={{ request.GET.lugar }}{% endif %}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.lugar %}&lugar={{ request.GET.lugar }}{% endif %}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.lugar %}&lugar={{ request.GET.lugar }}{% endif %}">
+                        <i class="bi bi-chevron-double-right"></i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<!-- Modal de Confirmación de Eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de que desea eliminar el monitor <strong id="deleteItemName"></strong>?</p>
+                <p class="text-muted">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="post" id="deleteForm" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-2"></i>Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDelete(monitorId, monitorNombre) {
+    document.getElementById('deleteItemName').textContent = monitorNombre;
+    document.getElementById('deleteForm').action = `/inventario/monitores/${monitorId}/delete/`;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+
+function exportData(format) {
+    const params = new URLSearchParams(window.location.search);
+    params.set('export', format);
+    window.location.href = '?' + params.toString();
+}
+
+// Auto-submit form on filter change
+document.addEventListener('DOMContentLoaded', function() {
+    const filterSelects = document.querySelectorAll('#estado, #tipo');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            this.form.submit();
+        });
+    });
+});
+</script>
+{% endblock %}

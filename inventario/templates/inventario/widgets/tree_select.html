@@ -1,0 +1,51 @@
+{% load static %}
+{# Template para el widget de árbol interactivo #}
+<div class="tree-select-container" data-tree="{{ tree_data }}" data-tipos-nivel="{{ tipo_niveles_data|default:'[]' }}">
+    {# Input oculto que contiene el valor real #}
+    <input type="hidden" 
+           name="{{ widget.name }}" 
+           value="{{ selected_value|default:'' }}"
+           class="tree-select-input"
+           {% include "django/forms/widgets/attrs.html" %}>
+    
+    {# Display que muestra el valor seleccionado #}
+    <div class="input-group">
+        <div class="tree-select-display">
+            <div class="tree-select-content">
+                <span class="tree-select-placeholder{% if selected_value %} d-none{% endif %}">
+                    Seleccione una ubicación...
+                </span>
+                <span class="tree-select-value{% if not selected_value %} d-none{% endif %}">
+                    {% if selected_value %}
+                        {# Aquí se mostrará el nombre completo vía JavaScript #}
+                    {% endif %}
+                </span>
+            </div>
+            <span class="tree-select-arrow">▼</span>
+        </div>
+        <button type="button" class="btn btn-outline-secondary tree-select-add-btn" 
+                data-bs-toggle="modal" data-bs-target="#modalNuevoLugar" 
+                title="Agregar nuevo lugar">
+            <i class="bi bi-plus"></i>
+        </button>
+    </div>
+    
+    {# Dropdown con el árbol #}
+    <div class="tree-select-dropdown">
+        {# Campo de búsqueda #}
+        <div class="tree-search">
+            <input type="text" 
+                   placeholder="Buscar ubicación..." 
+                   autocomplete="off">
+        </div>
+        
+        {# Lista del árbol (se construye vía JavaScript) #}
+        <ul class="tree-list"></ul>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert alert-warning">
+    <small>Error al cargar el árbol: {{ error }}</small>
+</div>
+{% endif %}

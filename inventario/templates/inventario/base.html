@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ASSE-GestACT - Sistema de Gestión de Activos Informáticos{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>💻</text></svg>">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="{% static 'inventario/vendor/bootstrap/css/bootstrap.min.css' %}">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="{% static 'inventario/vendor/bootstrap-icons/bootstrap-icons.css' %}">
+
+    <link rel="stylesheet" href="{% static 'inventario/css/custom.css' %}">
+    <!-- Widget árbol jerárquico -->
+    <link rel="stylesheet" href="{% static 'inventario/css/tree-select.css' %}">
+    
+    <script>
+    (function () {
+        try {
+            var storageKey = 'asse-gestit-theme';
+            var storedTheme = localStorage.getItem(storageKey);
+            var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            var theme = storedTheme || (prefersDark ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.setAttribute('data-bs-theme', theme);
+            document.documentElement.classList.add('theme-initialized');
+        } catch (error) {
+            document.documentElement.setAttribute('data-theme', 'light');
+            document.documentElement.setAttribute('data-bs-theme', 'light');
+        }
+    })();
+    </script>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg app-navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'inventario:dashboard' %}">
+                <i class="bi bi-pc-display me-2"></i>
+                ASSE-GestACT
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'inventario:dashboard' %}">
+                            <i class="bi bi-house me-1"></i>Inicio
+                        </a>
+                    </li>
+                    
+                    {% if menu_type == 'informatica' %}
+                    <!-- MENÚ PARA ACTIVOS INFORMÁTICOS -->
+                    
+                    <!-- Menú desplegable: Hardware -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-laptop me-1"></i>Hardware
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><h6 class="dropdown-header"><i class="bi bi-pc"></i> Computadoras</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:computadora_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todas</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:computadora_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nueva</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            
+                            <li><h6 class="dropdown-header"><i class="bi bi-display"></i> Monitores</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:monitor_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todos</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:monitor_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nuevo</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            
+                            <li><h6 class="dropdown-header"><i class="bi bi-printer"></i> Impresoras</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:impresora_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todas</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:impresora_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nueva</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            
+                            <li><h6 class="dropdown-header"><i class="bi bi-usb-plug"></i> Periféricos</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:periferico_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todos</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:periferico_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nuevo</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Menú desplegable: Redes y Comunicaciones -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-router me-1"></i>Redes
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><h6 class="dropdown-header"><i class="bi bi-hdd-network"></i> Networking</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:networking_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todos</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:networking_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nuevo</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            
+                            <li><h6 class="dropdown-header"><i class="bi bi-telephone"></i> Telefonía</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:telefonia_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todas</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:telefonia_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nueva</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Menú desplegable: Recursos (Software e Insumos TI) -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-boxes me-1"></i>Recursos
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><h6 class="dropdown-header"><i class="bi bi-window"></i> Software</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:software_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todos</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:software_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nuevo</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            
+                            <li><h6 class="dropdown-header"><i class="bi bi-box-seam"></i> Insumos</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:insumo_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todos</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:insumo_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nuevo</a></li>
+                        </ul>
+                    </li>
+                    
+                    {% elif menu_type == 'medica' %}
+                    <!-- MENÚ PARA TECNOLOGÍA MÉDICA -->
+                    
+                    <!-- Menú desplegable: Equipos Médicos -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-heart-pulse me-1"></i>Equipos Médicos
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><h6 class="dropdown-header"><i class="bi bi-heart-pulse"></i> Tecnología Médica</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:tecnologia_medica_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todos</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:tecnologia_medica_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nuevo</a></li>
+                        </ul>
+                    </li>
+                    
+                    {% endif %}
+                    
+                    {% if menu_type == 'informatica' or menu_type == 'medica' %}
+                    <!-- Menú desplegable: Servicio y Mantenimiento (COMPARTIDO) -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-tools me-1"></i>Servicio
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><h6 class="dropdown-header"><i class="bi bi-clipboard-check"></i> Órdenes de Servicio</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:orden_servicio_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todas</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:orden_servicio_create' %}"><i class="bi bi-plus-circle me-2"></i>Nueva Orden</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    
+                    {% if menu_type == 'informatica' %}
+                    <!-- Bitácora - Activos Informáticos -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'inventario:bitacora_list_informatica' %}">
+                            <i class="bi bi-clock-history me-1"></i>Bitácora
+                        </a>
+                    </li>
+                    {% elif menu_type == 'medica' %}
+                    <!-- Bitácora - Tecnología Médica -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'inventario:bitacora_list_medica' %}">
+                            <i class="bi bi-clock-history me-1"></i>Bitácora
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if menu_type == 'informatica' or menu_type == 'medica' %}
+                    <!-- Reportes -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bar-chart-line me-1"></i>Reportes
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'inventario:historico_remitos' %}">
+                                    <i class="bi bi-receipt me-2"></i>Historial de Remitos
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'inventario:reports_enterprise' %}?segment=informatica">
+                                    <i class="bi bi-graph-up-arrow me-2"></i>Reporte Empresarial (TI)
+                                </a>
+                            </li>
+                            {% if menu_type == 'medica' %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'inventario:reports_enterprise' %}?segment=medica">
+                                        <i class="bi bi-heart-pulse me-2"></i>Reporte Tecnología Médica
+                                    </a>
+                                </li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'inventario:reports_menu' %}">
+                                    <i class="bi bi-file-earmark-bar-graph me-2"></i>Centro de Reportes
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Configuración -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-gear me-1"></i>Configuración
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'inventario:configuracion_lugares' %}">
+                                    <i class="bi bi-geo-alt me-2"></i>Jerarquía de lugares
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                </ul>
+
+                <div class="d-flex align-items-center gap-2">
+                    {% if user.is_authenticated %}
+                        <!-- Usuario autenticado -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" 
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle me-1"></i>
+                                {{ user.get_full_name|default:user.username }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'auth:logout' %}">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <!-- Usuario no autenticado -->
+                        <a href="{% url 'auth:login' %}" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar Sesión
+                        </a>
+                    {% endif %}
+
+                    <button class="theme-toggle" type="button" id="themeToggle" aria-label="Cambiar tema" data-theme-toggle>
+                        <i class="bi bi-sun-fill theme-icon theme-icon-light" aria-hidden="true"></i>
+                        <i class="bi bi-moon-stars-fill theme-icon theme-icon-dark" aria-hidden="true"></i>
+                        <span class="visually-hidden">Cambiar modo de color</span>
+                    </button>
+
+                    {% if user.is_authenticated %}
+                        <button class="btn btn-facturacion position-relative" type="button"
+                                data-bs-toggle="modal" data-bs-target="#modalCarritoFacturacion"
+                                title="Carrito de Envío a Unidades">
+                            <i class="bi bi-receipt"></i>
+                            <span class="badge facturacion-counter position-absolute top-0 start-100 translate-middle"
+                                  id="facturacion-counter" style="display:none;">0</span>
+                        </button>
+                        <button class="btn btn-servicio-proveedor position-relative" type="button"
+                                data-bs-toggle="modal" data-bs-target="#modalCarritoServicioProveedor"
+                                title="Carrito de Envío a Servicio">
+                            <i class="bi bi-tools"></i>
+                            <span class="badge servicio-proveedor-counter position-absolute top-0 start-100 translate-middle"
+                                  id="servicio-proveedor-counter" style="display:none;">0</span>
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="app-main container-fluid py-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer text-center py-3 mt-5">
+        <div class="container">
+            <p class="text-muted mb-0">&copy; 2025 ASSE-GestACT - Sistema de Gestión de Activos Informáticos</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="{% static 'inventario/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    
+    <!-- Auto-hide alerts after 5 seconds -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            setTimeout(function() {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }, 5000); // 5 segundos
+        });
+    });
+    </script>
+    
+    <!-- Widget de fecha en español -->
+    <script src="{% static 'inventario/js/date-widget.js' %}"></script>
+    <!-- Widget árbol jerárquico -->
+    <script src="{% static 'inventario/js/tree-select.js' %}"></script>
+    <script src="{% static 'inventario/js/filter-tree.js' %}"></script>
+    <!-- Modal de creación de lugares -->
+    <script src="{% static 'inventario/js/lugar-modal.js' %}"></script>
+    <!-- Facturación -->
+    <script src="{% static 'inventario/js/facturacion.js' %}"></script>
+    <!-- Servicio Proveedor -->
+    <script src="{% static 'inventario/js/servicio-proveedor.js' %}"></script>
+    <!-- Tema claro/oscuro -->
+    <script src="{% static 'inventario/js/theme-toggle.js' %}"></script>
+
+    <div class="modal fade" id="modalCarritoFacturacion" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-receipt"></i> Carrito de Envío</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Destino *</label>
+                            <div id="facturacion-lugar-destino" class="tree-select-container"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Observaciones</label>
+                            <textarea class="form-control" id="facturacion-observaciones" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div id="facturacion-items-container" class="table-responsive"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" id="facturacion-limpiar">Limpiar</button>
+                    <button class="btn btn-primary" id="facturacion-emitir">Emitir Remito</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Carrito de Servicio a Proveedor -->
+    <div class="modal fade" id="modalCarritoServicioProveedor" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-tools"></i> Carrito de Envío a Servicio</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Proveedor de Servicio *</label>
+                            <select class="form-select" id="servicio-proveedor-select" required>
+                                <option value="">Seleccione un proveedor...</option>
+                                {% load inventario_tags %}
+                                {% get_proveedores as proveedores %}
+                                {% for proveedor in proveedores %}
+                                <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha Estimada de Retorno</label>
+                            <input type="date" class="form-control" id="servicio-fecha-estimada-retorno">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Motivo del Envío *</label>
+                            <textarea class="form-control" id="servicio-motivo-envio" rows="2" 
+                                      placeholder="Ej: Reparación de placa madre, Calibración anual, etc." required></textarea>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Observaciones</label>
+                            <textarea class="form-control" id="servicio-observaciones" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div id="servicio-proveedor-items-container" class="table-responsive"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" id="servicio-limpiar">Limpiar</button>
+                    <button class="btn btn-primary" id="servicio-emitir">Emitir Envío</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para agregar nuevo lugar con jerarquía completa -->
+    <div class="modal fade" id="modalNuevoLugar" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-geo-alt"></i> Crear Jerarquía de Lugares</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info mb-3">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Instrucciones:</strong> Puede crear toda la jerarquía de lugares en este formulario.
+                        Complete los niveles que necesite, desde la raíz (Unidad Ejecutora) hasta el nivel más específico (Puesto).
+                        Los niveles que deje vacíos serán omitidos.
+                    </div>
+
+                    <!-- Selector de lugar padre existente -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <strong><i class="bi bi-link-45deg"></i> Opción 1: Partir desde un lugar existente</strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="modal-lugar-padre-existente" class="form-label">Lugar Padre (Opcional)</label>
+                                <select class="form-select" id="modal-lugar-padre-existente">
+                                    <option value="">Crear desde la raíz (nueva UE)</option>
+                                </select>
+                                <small class="text-muted">
+                                    Si selecciona un lugar existente, los nuevos lugares se crearán debajo de él.
+                                    Si no selecciona nada, creará una nueva jerarquía completa desde la raíz.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulario de jerarquía completa -->
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <strong><i class="bi bi-diagram-3"></i> Opción 2: Definir jerarquía completa</strong>
+                        </div>
+                        <div class="card-body">
+                            <!-- Nivel 1: Unidad Ejecutora -->
+                            <div class="nivel-container mb-4 p-3 border rounded" id="nivel-1-container">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h6 class="mb-0 me-2">📁 Nivel 1: Unidad Ejecutora</h6>
+                                    <div class="form-check form-switch ms-auto">
+                                        <input class="form-check-input nivel-toggle" type="checkbox" 
+                                               id="nivel-1-activo" data-nivel="1">
+                                        <label class="form-check-label" for="nivel-1-activo">Crear</label>
+                                    </div>
+                                </div>
+                                <div class="nivel-fields" style="display:none;">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-1-nombre" placeholder="Nombre *">
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-1-codigo" placeholder="Código">
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-1-descripcion" placeholder="Descripción">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Nivel 2: Unidad Asistencial -->
+                            <div class="nivel-container mb-4 p-3 border rounded" id="nivel-2-container">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="text-muted me-2">└─</span>
+                                    <h6 class="mb-0 me-2">🏢 Nivel 2: Unidad Asistencial</h6>
+                                    <div class="form-check form-switch ms-auto">
+                                        <input class="form-check-input nivel-toggle" type="checkbox" 
+                                               id="nivel-2-activo" data-nivel="2">
+                                        <label class="form-check-label" for="nivel-2-activo">Crear</label>
+                                    </div>
+                                </div>
+                                <div class="nivel-fields" style="display:none;">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-2-nombre" placeholder="Nombre *">
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-2-codigo" placeholder="Código">
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-2-descripcion" placeholder="Descripción">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Nivel 3: Servicio -->
+                            <div class="nivel-container mb-4 p-3 border rounded" id="nivel-3-container">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="text-muted me-2">&nbsp;&nbsp;└─</span>
+                                    <h6 class="mb-0 me-2">🏥 Nivel 3: Servicio</h6>
+                                    <div class="form-check form-switch ms-auto">
+                                        <input class="form-check-input nivel-toggle" type="checkbox" 
+                                               id="nivel-3-activo" data-nivel="3">
+                                        <label class="form-check-label" for="nivel-3-activo">Crear</label>
+                                    </div>
+                                </div>
+                                <div class="nivel-fields" style="display:none;">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-3-nombre" placeholder="Nombre *">
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-3-codigo" placeholder="Código">
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-3-descripcion" placeholder="Descripción">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Nivel 4: Área -->
+                            <div class="nivel-container mb-4 p-3 border rounded" id="nivel-4-container">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="text-muted me-2">&nbsp;&nbsp;&nbsp;&nbsp;└─</span>
+                                    <h6 class="mb-0 me-2">📋 Nivel 4: Área</h6>
+                                    <div class="form-check form-switch ms-auto">
+                                        <input class="form-check-input nivel-toggle" type="checkbox" 
+                                               id="nivel-4-activo" data-nivel="4">
+                                        <label class="form-check-label" for="nivel-4-activo">Crear</label>
+                                    </div>
+                                </div>
+                                <div class="nivel-fields" style="display:none;">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-4-nombre" placeholder="Nombre *">
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-4-codigo" placeholder="Código">
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-4-descripcion" placeholder="Descripción">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Nivel 5: Sector -->
+                            <div class="nivel-container mb-4 p-3 border rounded" id="nivel-5-container">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="text-muted me-2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─</span>
+                                    <h6 class="mb-0 me-2">🔧 Nivel 5: Sector</h6>
+                                    <div class="form-check form-switch ms-auto">
+                                        <input class="form-check-input nivel-toggle" type="checkbox" 
+                                               id="nivel-5-activo" data-nivel="5">
+                                        <label class="form-check-label" for="nivel-5-activo">Crear</label>
+                                    </div>
+                                </div>
+                                <div class="nivel-fields" style="display:none;">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-5-nombre" placeholder="Nombre *">
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-5-codigo" placeholder="Código">
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-5-descripcion" placeholder="Descripción">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Nivel 6: Ubicación -->
+                            <div class="nivel-container mb-4 p-3 border rounded" id="nivel-6-container">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="text-muted me-2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─</span>
+                                    <h6 class="mb-0 me-2">📍 Nivel 6: Ubicación</h6>
+                                    <div class="form-check form-switch ms-auto">
+                                        <input class="form-check-input nivel-toggle" type="checkbox" 
+                                               id="nivel-6-activo" data-nivel="6">
+                                        <label class="form-check-label" for="nivel-6-activo">Crear</label>
+                                    </div>
+                                </div>
+                                <div class="nivel-fields" style="display:none;">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-6-nombre" placeholder="Nombre *">
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-6-codigo" placeholder="Código">
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-6-descripcion" placeholder="Descripción">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Nivel 7: Puesto -->
+                            <div class="nivel-container mb-4 p-3 border rounded" id="nivel-7-container">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="text-muted me-2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─</span>
+                                    <h6 class="mb-0 me-2">💺 Nivel 7: Puesto</h6>
+                                    <div class="form-check form-switch ms-auto">
+                                        <input class="form-check-input nivel-toggle" type="checkbox" 
+                                               id="nivel-7-activo" data-nivel="7">
+                                        <label class="form-check-label" for="nivel-7-activo">Crear</label>
+                                    </div>
+                                </div>
+                                <div class="nivel-fields" style="display:none;">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-7-nombre" placeholder="Nombre *">
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-7-codigo" placeholder="Código">
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   id="nivel-7-descripcion" placeholder="Descripción">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vista previa de la jerarquía -->
+                    <div class="card mt-3">
+                        <div class="card-header bg-light">
+                            <strong><i class="bi bi-eye"></i> Vista Previa de la Jerarquía</strong>
+                        </div>
+                        <div class="card-body">
+                            <div id="jerarquia-preview" class="text-muted">
+                                <em>Marque los niveles que desea crear para ver la vista previa...</em>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="modal-lugar-guardar-jerarquia">
+                        <i class="bi bi-save"></i> Guardar Jerarquía
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+ 
+ 
+ 
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

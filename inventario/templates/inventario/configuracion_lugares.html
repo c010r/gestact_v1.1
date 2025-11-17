@@ -1,0 +1,133 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Configuración de Lugares{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <form method="post" style="display:none;">
+        {% csrf_token %}
+    </form>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-2">
+                <i class="bi bi-diagram-3 me-2"></i>Configuración de Lugares
+            </h1>
+            <p class="text-muted mb-0">
+                Revise la jerarquía completa y utilice el botón "+" para crear nuevos nodos desde este panel.
+            </p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light d-flex align-items-center">
+                    <span class="fw-semibold">
+                        <i class="bi bi-diagram-2 me-2"></i>Jerarquía actual
+                    </span>
+                    <span class="badge bg-primary ms-auto">{{ total_lugares }} nodos activos</span>
+                </div>
+                <div class="card-body">
+                    <div class="tree-select-container" data-tree="{{ tree_data_json }}" data-tipos-nivel="{{ tipo_niveles_json|default:'[]' }}">
+                        <input type="hidden" name="configuracion_lugar" value="{{ selected_value }}" class="tree-select-input">
+                        <div class="input-group mb-3">
+                            <div class="tree-select-display">
+                                <div class="tree-select-content">
+                                    <span class="tree-select-placeholder {% if selected_value %}d-none{% endif %}">
+                                        Seleccione un lugar para ver sus detalles...
+                                    </span>
+                                    <span class="tree-select-value {% if not selected_value %}d-none{% endif %}"></span>
+                                </div>
+                                <span class="tree-select-arrow">▼</span>
+                            </div>
+                            <button type="button" class="btn btn-outline-secondary tree-select-add-btn" data-bs-toggle="modal" data-bs-target="#modalNuevoLugar" title="Agregar nuevo lugar">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                        <div class="tree-select-dropdown">
+                            <div class="tree-search">
+                                <input type="text" placeholder="Buscar ubicación..." autocomplete="off">
+                            </div>
+                            <ul class="tree-list"></ul>
+                        </div>
+                    </div>
+
+                    <div class="mt-4" id="configuracion-lugar-detalle">
+                        <em class="text-muted">Seleccione un nodo del árbol para ver la información resumida.</em>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light fw-semibold">
+                    <i class="bi bi-lightbulb me-2"></i>Sugerencias de uso
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled small mb-0">
+                        <li class="mb-2">
+                            <i class="bi bi-cursor me-1 text-primary"></i>
+                            Al seleccionar un nodo se muestra su ruta, nivel y código.
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-plus-circle me-1 text-success"></i>
+                            Use el botón "+" para abrir el modal y crear jerarquías completas.
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-arrow-repeat me-1 text-warning"></i>
+                            Tras guardar nuevos nodos, recargue la página para verlos reflejados aquí.
+                        </li>
+                        <li>
+                            <i class="bi bi-search me-1 text-info"></i>
+                            El cuadro de búsqueda filtra coincidencias y expande automáticamente la rama.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    const detalle = document.getElementById('configuracion-lugar-detalle');
+    if (!detalle) {
+        return;
+    }
+
+    document.addEventListener('tree-select:selection', function(event) {
+        const data = event.detail || {};
+        const item = data.item || null;
+        if (!item) {
+            return;
+        }
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'd-flex flex-column gap-1';
+
+        const titulo = document.createElement('strong');
+        titulo.textContent = item.nombre_completo || item.nombre || 'Sin nombre';
+        wrapper.appendChild(titulo);
+
+        const meta = document.createElement('span');
+        meta.className = 'text-muted small';
+        meta.textContent = 'Nivel ' + item.nivel + ' · ' + (item.tipo || 'Tipo sin definir');
+        wrapper.appendChild(meta);
+
+        if (item.codigo) {
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-secondary align-self-start';
+            badge.textContent = 'Código: ' + item.codigo;
+            wrapper.appendChild(badge);
+        }
+
+        detalle.replaceChildren(wrapper);
+    });
+
+})();
+</script>
+{% endblock %}

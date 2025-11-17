@@ -1,0 +1,297 @@
+{% extends 'inventario/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if object %}
+        Editar {{ object.nombre }} - {{ device_type|title }}
+    {% else %}
+        Nuevo {{ device_type|title }}
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    #validation-message {
+        position: sticky;
+        top: 70px;
+        z-index: 1040;
+        animation: slideDown 0.3s ease-out;
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                {% if object %}
+                    Editar {{ device_type|title }}
+                {% else %}
+                    Nuevo {{ device_type|title }}
+                {% endif %}
+            </h1>
+            <p class="text-muted mb-0">
+                {% if object %}
+                    Modificar información de {{ object.nombre }}
+                {% else %}
+                    Agregar nuevo {{ device_type }} al inventario
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <a href="{{ list_url }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+
+    <!-- Área de mensajes de validación -->
+    <div id="validation-message" class="alert alert-danger alert-dismissible fade d-none" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span id="validation-text"></span>
+        <button type="button" class="btn-close" onclick="document.getElementById('validation-message').classList.add('d-none')"></button>
+    </div>
+
+    <!-- Formulario -->
+    <form method="post" id="{{ form_id|default:'deviceForm' }}">
+        {% csrf_token %}
+        {% if redirect_to %}
+        <input type="hidden" name="next" value="{{ redirect_to }}">
+        {% endif %}
+        
+        <div class="row">
+            <!-- Columna Principal -->
+            <div class="col-lg-8">
+                {% block form_sections %}
+                <!-- Las secciones específicas del formulario se definen aquí -->
+                {% endblock %}
+            </div>
+            
+            <!-- Columna Lateral -->
+            <div class="col-lg-4">
+                {% if object %}
+                <!-- Bitácora Reciente -->
+                {% include 'inventario/partials/bitacora_sidebar.html' with device_type=device_type device_id=object.pk bitacoras=bitacoras_recientes %}
+                {% endif %}
+
+                <!-- Acciones Rápidas -->
+                {% include 'inventario/partials/form_actions_sidebar.html' with device_type=device_type object=object list_url=list_url detail_url=detail_url %}
+
+                <!-- Sistema de Plantillas -->
+                {% include 'inventario/partials/plantillas_sidebar.html' with device_type=device_type %}
+
+                <!-- Ayuda -->
+                {% include 'inventario/partials/help_sidebar.html' %}
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Función para mostrar mensaje de validación
+function mostrarMensajeValidacion(mensaje) {
+    const messageBox = document.getElementById('validation-message');
+    const messageText = document.getElementById('validation-text');
+    
+    if (messageBox && messageText) {
+        messageText.textContent = mensaje;
+        messageBox.classList.remove('d-none');
+        messageBox.classList.add('show');
+        
+        // Scroll suave al mensaje
+        messageBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Auto-ocultar después de 5 segundos
+        setTimeout(() => {
+            messageBox.classList.remove('show');
+            setTimeout(() => {
+                messageBox.classList.add('d-none');
+            }, 150);
+        }, 5000);
+    }
+}
+
+function resetForm() {
+    if (confirm('¿Está seguro de que desea restablecer el formulario? Se perderán todos los cambios no guardados.')) {
+        document.getElementById('{{ form_id }}').reset();
+    }
+}
+
+// Validación básica del formulario
+document.getElementById('{{ form_id }}').addEventListener('submit', function(e) {
+    const nombreField = document.getElementById('id_nombre');
+    if (nombreField) {
+        const nombre = nombreField.value.trim();
+        
+        if (!nombre) {
+            e.preventDefault();
+            // Marcar el campo como inválido visualmente
+            nombreField.classList.add('is-invalid');
+            nombreField.focus();
+            mostrarMensajeValidacion('El nombre del {{ device_type }} es obligatorio.');
+            return false;
+        }
+    }
+});
+
+// Agregar clases de Bootstrap a los campos del formulario
+document.addEventListener('DOMContentLoaded', function() {
+    // Aplicar clases a inputs
+    const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="number"], input[type="date"], textarea');
+    inputs.forEach(function(input) {
+        input.classList.add('form-control');
+    });
+    
+    // Aplicar clases a selects
+    const selects = document.querySelectorAll('select');
+    selects.forEach(function(select) {
+        select.classList.add('form-select');
+    });
+    
+    // Aplicar clases a checkboxes
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(function(checkbox) {
+        checkbox.classList.add('form-check-input');
+    });
+    
+    // Manejar validación de campos en tabs ocultos
+    const form = document.getElementById('{{ form_id|default:"deviceForm" }}');
+    if (form) {
+        // Deshabilitar validación HTML5 nativa para evitar errores "is not focusable"
+        form.setAttribute('novalidate', 'novalidate');
+        
+        form.addEventListener('submit', function(e) {
+            console.log('[BASE-FORM] Submit detectado, validando campos...');
+            // Hacer validación manual
+            let isValid = true;
+            let firstInvalidField = null;
+            let firstInvalidTabPane = null;
+            
+            // Revisar todos los campos requeridos
+            const requiredFields = form.querySelectorAll('[required]');
+            console.log('[BASE-FORM] Campos requeridos encontrados:', requiredFields.length);
+            
+            requiredFields.forEach(field => {
+                // Validar según el tipo de campo
+                let fieldValid = true;
+                
+                if (field.type === 'checkbox') {
+                    fieldValid = field.checked;
+                } else if (field.type === 'radio') {
+                    const radioGroup = form.querySelectorAll(`[name="${field.name}"]`);
+                    fieldValid = Array.from(radioGroup).some(radio => radio.checked);
+                } else {
+                    fieldValid = field.value.trim() !== '';
+                }
+                
+                console.log('[BASE-FORM] Campo:', field.name || field.id, 'Válido:', fieldValid, 'Valor:', field.value);
+                
+                // Si el campo no es válido
+                if (!fieldValid) {
+                    // Agregar clase de error
+                    field.classList.add('is-invalid');
+                    
+                    // Guardar el primer campo inválido
+                    if (!firstInvalidField) {
+                        firstInvalidField = field;
+                        firstInvalidTabPane = field.closest('.tab-pane');
+                    }
+                    
+                    isValid = false;
+                } else {
+                    // Quitar clase de error si el campo es válido
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            // Si hay errores de validación
+            if (!isValid) {
+                console.log('[BASE-FORM] ❌ BLOQUEANDO submit - campo inválido:', firstInvalidField.name || firstInvalidField.id);
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Obtener el nombre del campo para el mensaje
+                const fieldLabel = firstInvalidField ? form.querySelector(`label[for="${firstInvalidField.id}"]`) : null;
+                const fieldName = fieldLabel ? fieldLabel.textContent.replace('*', '').trim() : 'requerido';
+                
+                // Si el campo está en un tab oculto, activar ese tab
+                if (firstInvalidTabPane && !firstInvalidTabPane.classList.contains('show')) {
+                    const tabId = firstInvalidTabPane.getAttribute('id');
+                    const tabButton = document.querySelector(`[data-bs-target="#${tabId}"]`);
+                    
+                    if (tabButton) {
+                        const tab = new bootstrap.Tab(tabButton);
+                        tab.show();
+                        
+                        // Enfocar el campo después de cambiar de tab
+                        setTimeout(() => {
+                            firstInvalidField.focus();
+                            mostrarMensajeValidacion(`Por favor complete el campo: ${fieldName}`);
+                        }, 200);
+                    }
+                } else if (firstInvalidField) {
+                    // Si el campo está visible, solo enfocarlo
+                    firstInvalidField.focus();
+                    mostrarMensajeValidacion(`Por favor complete el campo: ${fieldName}`);
+                }
+                
+                return false;
+            } else {
+                console.log('[BASE-FORM] ✅ Todos los campos válidos, permitiendo submit');
+            }
+        });
+        
+        // Quitar la clase is-invalid cuando el usuario corrige el campo
+        form.addEventListener('input', function(e) {
+            if (e.target.classList.contains('is-invalid') && e.target.value.trim() !== '') {
+                e.target.classList.remove('is-invalid');
+            }
+        });
+        
+        form.addEventListener('change', function(e) {
+            if (e.target.classList.contains('is-invalid')) {
+                if (e.target.type === 'checkbox' && e.target.checked) {
+                    e.target.classList.remove('is-invalid');
+                } else if (e.target.type === 'radio' && e.target.checked) {
+                    const radioGroup = form.querySelectorAll(`[name="${e.target.name}"]`);
+                    radioGroup.forEach(radio => radio.classList.remove('is-invalid'));
+                }
+            }
+        });
+    }
+});
+
+{% block extra_form_js %}
+<!-- JavaScript específico del formulario -->
+{% endblock %}
+</script>
+
+<!-- Configuración global para el sistema de plantillas -->
+<script>
+window.deviceType = '{{ device_type }}';
+window.formId = '{{ form_id|default:"deviceForm" }}';
+console.log('Configuración global para plantillas:', { 
+    deviceType: window.deviceType, 
+    formId: window.formId,
+    formExists: !!document.getElementById(window.formId)
+});
+</script>
+
+<!-- Sistema de Plantillas -->
+<script src="{% static 'inventario/js/plantillas.js' %}"></script>
+{% endblock %}

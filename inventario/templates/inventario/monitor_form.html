@@ -1,0 +1,217 @@
+{% extends 'inventario/base_device_form.html' %}
+
+{% block form_sections %}
+<div class="card">
+    <div class="card-body">
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger mb-3">
+            <ul class="mb-0">
+                {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <ul class="nav nav-tabs" id="monitorTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="monitor-tab-basicos" data-bs-toggle="tab"
+                        data-bs-target="#monitor-pane-basicos" type="button" role="tab"
+                        aria-controls="monitor-pane-basicos" aria-selected="true">
+                    Datos básicos
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="monitor-tab-especificaciones" data-bs-toggle="tab"
+                        data-bs-target="#monitor-pane-especificaciones" type="button" role="tab"
+                        aria-controls="monitor-pane-especificaciones" aria-selected="false">
+                    Especificaciones
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="monitor-tab-pantalla" data-bs-toggle="tab"
+                        data-bs-target="#monitor-pane-pantalla" type="button" role="tab"
+                        aria-controls="monitor-pane-pantalla" aria-selected="false">
+                    Pantalla
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="monitor-tab-compra" data-bs-toggle="tab"
+                        data-bs-target="#monitor-pane-compra" type="button" role="tab"
+                        aria-controls="monitor-pane-compra" aria-selected="false">
+                    Compra y garantía
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="monitor-tab-notas" data-bs-toggle="tab"
+                        data-bs-target="#monitor-pane-notas" type="button" role="tab"
+                        aria-controls="monitor-pane-notas" aria-selected="false">
+                    Notas
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content pt-3" id="monitorTabsContent">
+            <div class="tab-pane fade show active" id="monitor-pane-basicos" role="tabpanel"
+                 aria-labelledby="monitor-tab-basicos">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        {{ form.nombre.label_tag }}
+                        {{ form.nombre }}
+                        <small class="text-muted">Utiliza fabricante y modelo para mantener consistencia.</small>
+                        {% for error in form.nombre.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.numero_inventario.label_tag }}
+                        {{ form.numero_inventario }}
+                        {% for error in form.numero_inventario.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.numero_serie.label_tag }}
+                        {{ form.numero_serie }}
+                        {% for error in form.numero_serie.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.estado.label_tag }}
+                        {{ form.estado }}
+                        {% for error in form.estado.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.lugar.label_tag }}
+                        {{ form.lugar }}
+                        {% for error in form.lugar.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="monitor-pane-especificaciones" role="tabpanel"
+                 aria-labelledby="monitor-tab-especificaciones">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        {{ form.tipo_monitor.label_tag }}
+                        {{ form.tipo_monitor }}
+                        {% for error in form.tipo_monitor.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.fabricante.label_tag }}
+                        {{ form.fabricante }}
+                        {% for error in form.fabricante.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.modelo.label_tag }}
+                        {{ form.modelo }}
+                        {% for error in form.modelo.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="monitor-pane-pantalla" role="tabpanel"
+                 aria-labelledby="monitor-tab-pantalla">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        {{ form.tamano_pantalla.label_tag }}
+                        <div class="input-group">
+                            {{ form.tamano_pantalla }}
+                            <span class="input-group-text">pulgadas</span>
+                        </div>
+                        {% for error in form.tamano_pantalla.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.resolucion.label_tag }}
+                        {{ form.resolucion }}
+                        <small class="text-muted">Ej: 1920x1080, 2560x1440.</small>
+                        {% for error in form.resolucion.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-12">
+                        {{ form.comentarios.label_tag }}
+                        {{ form.comentarios }}
+                        {% for error in form.comentarios.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="monitor-pane-compra" role="tabpanel"
+                 aria-labelledby="monitor-tab-compra">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        {{ form.proveedor.label_tag }}
+                        {{ form.proveedor }}
+                        {% for error in form.proveedor.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.fecha_adquisicion.label_tag }}
+                        {{ form.fecha_adquisicion }}
+                        {% for error in form.fecha_adquisicion.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-2">
+                        {{ form.moneda.label_tag }}
+                        {{ form.moneda }}
+                        {% for error in form.moneda.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.valor_adquisicion.label_tag }}
+                        {{ form.valor_adquisicion }}
+                        {% for error in form.valor_adquisicion.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.tipo_garantia.label_tag }}
+                        {{ form.tipo_garantia }}
+                        {% for error in form.tipo_garantia.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.anos_garantia.label_tag }}
+                        {{ form.anos_garantia }}
+                        {% for error in form.anos_garantia.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="monitor-pane-notas" role="tabpanel" aria-labelledby="monitor-tab-notas">
+                <div class="row g-3">
+                    <div class="col-12">
+                        {{ form.comentarios.label_tag }}
+                        {{ form.comentarios }}
+                        <small class="text-muted">Agregue cualquier observación adicional sobre este monitor.</small>
+                        {% for error in form.comentarios.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

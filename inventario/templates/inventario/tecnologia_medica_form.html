@@ -1,0 +1,301 @@
+{% extends 'inventario/base_device_form.html' %}
+
+{% block form_sections %}
+<div class="card">
+	<div class="card-body">
+		{% if form.non_field_errors %}
+		<div class="alert alert-danger mb-3">
+			<ul class="mb-0">
+				{% for error in form.non_field_errors %}
+				<li>{{ error }}</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+
+		<ul class="nav nav-tabs" id="tecnologiaMedicaTabs" role="tablist">
+			<li class="nav-item" role="presentation">
+				<button class="nav-link active" id="tecmed-tab-basicos" data-bs-toggle="tab"
+						data-bs-target="#tecmed-pane-basicos" type="button" role="tab"
+						aria-controls="tecmed-pane-basicos" aria-selected="true">
+					Datos básicos
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="tecmed-tab-especificaciones" data-bs-toggle="tab"
+						data-bs-target="#tecmed-pane-especificaciones" type="button" role="tab"
+						aria-controls="tecmed-pane-especificaciones" aria-selected="false">
+					Especificaciones
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="tecmed-tab-mantenimiento" data-bs-toggle="tab"
+						data-bs-target="#tecmed-pane-mantenimiento" type="button" role="tab"
+						aria-controls="tecmed-pane-mantenimiento" aria-selected="false">
+					Mantenimiento
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="tecmed-tab-compra" data-bs-toggle="tab"
+						data-bs-target="#tecmed-pane-compra" type="button" role="tab"
+						aria-controls="tecmed-pane-compra" aria-selected="false">
+					Compra y garantía
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="tecmed-tab-notas" data-bs-toggle="tab"
+						data-bs-target="#tecmed-pane-notas" type="button" role="tab"
+						aria-controls="tecmed-pane-notas" aria-selected="false">
+					Notas
+				</button>
+			</li>
+		</ul>
+
+		<div class="tab-content pt-3" id="tecnologiaMedicaTabsContent">
+			<!-- Datos básicos -->
+			<div class="tab-pane fade show active" id="tecmed-pane-basicos" role="tabpanel"
+				 aria-labelledby="tecmed-tab-basicos">
+				<div class="row g-3">
+					<div class="col-md-6">
+						{{ form.nombre.label_tag }}
+						{{ form.nombre }}
+						{% for error in form.nombre.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.numero_inventario.label_tag }}
+						{{ form.numero_inventario }}
+						{% for error in form.numero_inventario.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.numero_serie.label_tag }}
+						{{ form.numero_serie }}
+						{% for error in form.numero_serie.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.numero_activo_fijo.label_tag }}
+						{{ form.numero_activo_fijo }}
+						{% for error in form.numero_activo_fijo.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.registro_sanitario.label_tag }}
+						{{ form.registro_sanitario }}
+						{% for error in form.registro_sanitario.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.tipo_tecnologia_medica.label_tag }}
+						{{ form.tipo_tecnologia_medica }}
+						{% for error in form.tipo_tecnologia_medica.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.estado.label_tag }}
+						{{ form.estado }}
+						{% for error in form.estado.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-12">
+						{{ form.lugar.label_tag }}
+						{{ form.lugar }}
+						{% for error in form.lugar.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<!-- Especificaciones -->
+			<div class="tab-pane fade" id="tecmed-pane-especificaciones" role="tabpanel"
+				 aria-labelledby="tecmed-tab-especificaciones">
+				<div class="row g-3">
+					<div class="col-md-6">
+						{{ form.fabricante.label_tag }}
+						{{ form.fabricante }}
+						{% for error in form.fabricante.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.modelo.label_tag }}
+						{{ form.modelo }}
+						{% for error in form.modelo.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.clasificacion_riesgo.label_tag }}
+						{{ form.clasificacion_riesgo }}
+						{% for error in form.clasificacion_riesgo.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.area_aplicacion.label_tag }}
+						{{ form.area_aplicacion }}
+						{% for error in form.area_aplicacion.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.voltaje_operacion.label_tag }}
+						{{ form.voltaje_operacion }}
+						{% for error in form.voltaje_operacion.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.potencia.label_tag }}
+						{{ form.potencia }}
+						{% for error in form.potencia.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-12">
+						<div class="form-check">
+							{{ form.requiere_personal_especializado }}
+							{{ form.requiere_personal_especializado.label_tag }}
+						</div>
+						{% for error in form.requiere_personal_especializado.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<!-- Mantenimiento -->
+			<div class="tab-pane fade" id="tecmed-pane-mantenimiento" role="tabpanel"
+				 aria-labelledby="tecmed-tab-mantenimiento">
+				<div class="row g-3">
+					<div class="col-md-12">
+						<h6 class="border-bottom pb-2">Calibración</h6>
+					</div>
+					<div class="col-md-4">
+						<div class="form-check">
+							{{ form.requiere_calibracion }}
+							{{ form.requiere_calibracion.label_tag }}
+						</div>
+						{% for error in form.requiere_calibracion.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.frecuencia_calibracion_meses.label_tag }}
+						{{ form.frecuencia_calibracion_meses }}
+						{% for error in form.frecuencia_calibracion_meses.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.fecha_ultima_calibracion.label_tag }}
+						{{ form.fecha_ultima_calibracion }}
+						{% for error in form.fecha_ultima_calibracion.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-12">
+						<h6 class="border-bottom pb-2 mt-3">Mantenimiento Preventivo</h6>
+					</div>
+					<div class="col-md-4">
+						<div class="form-check">
+							{{ form.requiere_mantenimiento_preventivo }}
+							{{ form.requiere_mantenimiento_preventivo.label_tag }}
+						</div>
+						{% for error in form.requiere_mantenimiento_preventivo.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.frecuencia_mantenimiento_meses.label_tag }}
+						{{ form.frecuencia_mantenimiento_meses }}
+						{% for error in form.frecuencia_mantenimiento_meses.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.fecha_ultimo_mantenimiento.label_tag }}
+						{{ form.fecha_ultimo_mantenimiento }}
+						{% for error in form.fecha_ultimo_mantenimiento.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<!-- Compra y garantía -->
+			<div class="tab-pane fade" id="tecmed-pane-compra" role="tabpanel"
+				 aria-labelledby="tecmed-tab-compra">
+				<div class="row g-3">
+					<div class="col-md-6">
+						{{ form.proveedor.label_tag }}
+						{{ form.proveedor }}
+						{% for error in form.proveedor.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.fecha_adquisicion.label_tag }}
+						{{ form.fecha_adquisicion }}
+						{% for error in form.fecha_adquisicion.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.valor_adquisicion.label_tag }}
+						{{ form.valor_adquisicion }}
+						{% for error in form.valor_adquisicion.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-2">
+						{{ form.moneda.label_tag }}
+						{{ form.moneda }}
+						{% for error in form.moneda.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-3">
+						{{ form.tipo_garantia.label_tag }}
+						{{ form.tipo_garantia }}
+						{% for error in form.tipo_garantia.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+					<div class="col-md-3">
+						{{ form.anos_garantia.label_tag }}
+						{{ form.anos_garantia }}
+						{% for error in form.anos_garantia.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<!-- Notas -->
+			<div class="tab-pane fade" id="tecmed-pane-notas" role="tabpanel"
+				 aria-labelledby="tecmed-tab-notas">
+				<div class="row g-3">
+					<div class="col-md-12">
+						{{ form.comentarios.label_tag }}
+						{{ form.comentarios }}
+						{% for error in form.comentarios.errors %}
+							<div class="invalid-feedback d-block">{{ error }}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+

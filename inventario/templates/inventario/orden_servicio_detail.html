@@ -1,0 +1,166 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Orden de Servicio {{ orden.numero_orden }} - ASSE-GestACT{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">
+                <i class="bi bi-tools me-2"></i>{{ orden.numero_orden }}
+                {% if orden.esta_vencida %}
+                    <span class="badge bg-danger ms-2">Vencida</span>
+                {% endif %}
+            </h1>
+            <p class="text-muted mb-0">{{ orden.get_tipo_servicio_display }} - {{ orden.dispositivo_nombre }}</p>
+        </div>
+        <div class="btn-group">
+            <a href="{% url 'inventario:orden_servicio_update' orden.pk %}" class="btn btn-warning text-dark">
+                <i class="bi bi-pencil me-2"></i>Editar
+            </a>
+            <a href="{% url 'inventario:orden_servicio_list' %}" class="btn btn-secondary text-white">
+                <i class="bi bi-arrow-left me-2"></i>Volver
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información de la Orden</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Número de orden</dt>
+                        <dd class="col-sm-8"><code>{{ orden.numero_orden }}</code></dd>
+                        
+                        <dt class="col-sm-4">Tipo de servicio</dt>
+                        <dd class="col-sm-8">{{ orden.get_tipo_servicio_display }}</dd>
+                        
+                        <dt class="col-sm-4">Estado</dt>
+                        <dd class="col-sm-8">
+                            {% if orden.estado == 'completada' %}
+                                <span class="badge bg-success">{{ orden.get_estado_display }}</span>
+                            {% elif orden.estado == 'en_proceso' %}
+                                <span class="badge bg-primary">{{ orden.get_estado_display }}</span>
+                            {% elif orden.estado == 'pendiente' %}
+                                <span class="badge bg-warning">{{ orden.get_estado_display }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ orden.get_estado_display }}</span>
+                            {% endif %}
+                        </dd>
+                        
+                        <dt class="col-sm-4">Prioridad</dt>
+                        <dd class="col-sm-8">
+                            {% if orden.prioridad == 'critica' %}
+                                <span class="badge bg-danger">{{ orden.get_prioridad_display }}</span>
+                            {% elif orden.prioridad == 'alta' %}
+                                <span class="badge bg-warning">{{ orden.get_prioridad_display }}</span>
+                            {% else %}
+                                <span class="badge bg-info">{{ orden.get_prioridad_display }}</span>
+                            {% endif %}
+                        </dd>
+                        
+                        <dt class="col-sm-4">Dispositivo</dt>
+                        <dd class="col-sm-8">
+                            {{ orden.dispositivo_nombre }}
+                            <br><small class="text-muted">{{ orden.get_tipo_dispositivo_display }}</small>
+                            {% if orden.dispositivo_numero_serie %}
+                                <br><small class="text-muted">S/N: {{ orden.dispositivo_numero_serie }}</small>
+                            {% endif %}
+                        </dd>
+                        
+                        <dt class="col-sm-4">Solicitante</dt>
+                        <dd class="col-sm-8">{{ orden.solicitante }}</dd>
+                        
+                        <dt class="col-sm-4">Técnico asignado</dt>
+                        <dd class="col-sm-8">{{ orden.tecnico_asignado|default:'-' }}</dd>
+                        
+                        <dt class="col-sm-4">Descripción del problema</dt>
+                        <dd class="col-sm-8">{{ orden.descripcion_problema }}</dd>
+                        
+                        {% if orden.diagnostico %}
+                        <dt class="col-sm-4">Diagnóstico</dt>
+                        <dd class="col-sm-8">{{ orden.diagnostico }}</dd>
+                        {% endif %}
+                        
+                        {% if orden.solucion_aplicada %}
+                        <dt class="col-sm-4">Solución aplicada</dt>
+                        <dd class="col-sm-8">{{ orden.solucion_aplicada }}</dd>
+                        {% endif %}
+                        
+                        {% if orden.repuestos_utilizados %}
+                        <dt class="col-sm-4">Repuestos utilizados</dt>
+                        <dd class="col-sm-8">{{ orden.repuestos_utilizados }}</dd>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+
+            {% if orden.observaciones %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-chat-left-text me-2"></i>Observaciones</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ orden.observaciones }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-calendar me-2"></i>Fechas</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="mb-0">
+                        <dt>Fecha de solicitud</dt>
+                        <dd>{{ orden.fecha_solicitud|date:'d/m/Y H:i' }}</dd>
+                        
+                        <dt>Fecha estimada</dt>
+                        <dd>{{ orden.fecha_estimada|date:'d/m/Y'|default:'-' }}</dd>
+                        
+                        <dt>Fecha de inicio</dt>
+                        <dd>{{ orden.fecha_inicio|date:'d/m/Y H:i'|default:'-' }}</dd>
+                        
+                        <dt>Fecha de finalización</dt>
+                        <dd>{{ orden.fecha_finalizacion|date:'d/m/Y H:i'|default:'-' }}</dd>
+                        
+                        {% if orden.tiempo_resolucion %}
+                        <dt>Tiempo de resolución</dt>
+                        <dd>{{ orden.tiempo_resolucion }} horas</dd>
+                        {% endif %}
+                        
+                        {% if orden.dias_pendiente > 0 %}
+                        <dt>Días pendiente</dt>
+                        <dd><span class="badge bg-warning">{{ orden.dias_pendiente }} días</span></dd>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-currency-dollar me-2"></i>Costos</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="mb-0">
+                        <dt>Mano de obra</dt>
+                        <dd>{{ orden.get_moneda_display }}: {{ orden.costo_mano_obra|default:'0.00' }}</dd>
+                        
+                        <dt>Repuestos</dt>
+                        <dd>{{ orden.get_moneda_display }}: {{ orden.costo_repuestos|default:'0.00' }}</dd>
+                        
+                        <dt>Total</dt>
+                        <dd><strong>{{ orden.get_moneda_display }}: {{ orden.costo_total|default:'0.00' }}</strong></dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

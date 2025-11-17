@@ -1,0 +1,13 @@
+{% if estado %}
+    {% if estado == 'Activo' %}
+        <span class="badge bg-success">{{ estado }}</span>
+    {% elif estado == 'Mantenimiento' %}
+        <span class="badge bg-warning text-dark">{{ estado }}</span>
+    {% elif estado == 'Inactivo' %}
+        <span class="badge bg-danger">{{ estado }}</span>
+    {% else %}
+        <span class="badge bg-secondary">{{ estado }}</span>
+    {% endif %}
+{% else %}
+    <span class="badge bg-light text-muted">Sin estado</span>
+{% endif %}
