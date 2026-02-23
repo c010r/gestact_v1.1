@@ -323,6 +323,8 @@ fi
 # =============================================================================
 titulo "Ejecutando migraciones..."
 DJANGO_SETTINGS_MODULE=sgai.settings_production \
+    "$VENV_PYTHON" "$SCRIPT_DIR/manage.py" makemigrations --noinput
+DJANGO_SETTINGS_MODULE=sgai.settings_production \
     "$VENV_PYTHON" "$SCRIPT_DIR/manage.py" migrate --noinput
 
 titulo "Creando grupos de acceso..."
