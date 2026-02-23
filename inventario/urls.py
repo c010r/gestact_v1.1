@@ -125,7 +125,7 @@ urlpatterns = [
     
     # Frontend URLs
     # Dashboard Selector
-    path('', frontend_views.dashboard_selector, name='dashboard'),
+    path('dashboard/', frontend_views.dashboard_selector, name='dashboard'),
 
     # Dashboards Específicos
     path(
