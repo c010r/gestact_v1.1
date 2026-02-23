@@ -29,6 +29,8 @@
     --color-scrollbar-thumb: rgba(59, 130, 246, 0.5);
     --color-scrollbar-track: rgba(148, 163, 184, 0.2);
     --shadow-surface: 0 18px 35px rgba(15, 23, 42, 0.08);
+    --color-login-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --color-login-header: linear-gradient(135deg, #3b82f6, #1e40af);
 }
 
 :root[data-theme="dark"] {
@@ -60,6 +62,8 @@
     --color-scrollbar-thumb: rgba(96, 165, 250, 0.55);
     --color-scrollbar-track: rgba(15, 23, 42, 0.65);
     --shadow-surface: 0 20px 40px rgba(2, 6, 23, 0.45);
+    --color-login-bg: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+    --color-login-header: linear-gradient(135deg, #1d4ed8, #1e3a8a);
 }
 
 html.theme-initialized body {
@@ -1766,3 +1770,417 @@ html {
     font-weight: 500 !important;
     text-shadow: none !important;
 }
+
+/* ============================================================
+   GRADIENTES DE MÓDULO (reemplazan inline styles de dashboards)
+   ============================================================ */
+.bg-mod-informatica { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); }
+.bg-mod-medica      { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); }
+.bg-mod-generales   { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+.bg-mod-admin       { background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); }
+
+/* Sub-tipos: activos informáticos */
+.bg-mod-computadora { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); }
+.bg-mod-impresora   { background: linear-gradient(135deg, #f97316 0%, #fb923c 100%); }
+.bg-mod-monitor     { background: linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%); }
+.bg-mod-networking  { background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%); }
+.bg-mod-telefonia   { background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); }
+.bg-mod-periferico  { background: linear-gradient(135deg, #facc15 0%, #fde047 100%); }
+.bg-mod-insumo      { background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); }
+.bg-mod-software    { background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%); }
+
+/* Sub-tipos: activos generales */
+.bg-mod-mobiliario  { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+.bg-mod-vehiculo    { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+.bg-mod-herramienta { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+
+/* Variantes oscuras de gradientes */
+:root[data-theme="dark"] .bg-mod-informatica,
+[data-bs-theme="dark"]   .bg-mod-informatica { background: linear-gradient(135deg, #4f46e5 0%, #6d28d9 100%); }
+:root[data-theme="dark"] .bg-mod-medica,
+[data-bs-theme="dark"]   .bg-mod-medica      { background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%); }
+:root[data-theme="dark"] .bg-mod-generales,
+[data-bs-theme="dark"]   .bg-mod-generales   { background: linear-gradient(135deg, #d97706 0%, #92400e 100%); }
+:root[data-theme="dark"] .bg-mod-admin,
+[data-bs-theme="dark"]   .bg-mod-admin       { background: linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%); }
+:root[data-theme="dark"] .bg-mod-computadora,
+[data-bs-theme="dark"]   .bg-mod-computadora { background: linear-gradient(135deg, #4f46e5 0%, #6d28d9 100%); }
+:root[data-theme="dark"] .bg-mod-impresora,
+[data-bs-theme="dark"]   .bg-mod-impresora   { background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%); }
+:root[data-theme="dark"] .bg-mod-monitor,
+[data-bs-theme="dark"]   .bg-mod-monitor     { background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%); }
+:root[data-theme="dark"] .bg-mod-networking,
+[data-bs-theme="dark"]   .bg-mod-networking  { background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%); }
+:root[data-theme="dark"] .bg-mod-telefonia,
+[data-bs-theme="dark"]   .bg-mod-telefonia   { background: linear-gradient(135deg, #9d174d 0%, #be185d 100%); }
+:root[data-theme="dark"] .bg-mod-periferico,
+[data-bs-theme="dark"]   .bg-mod-periferico  { background: linear-gradient(135deg, #a16207 0%, #ca8a04 100%); }
+:root[data-theme="dark"] .bg-mod-insumo,
+[data-bs-theme="dark"]   .bg-mod-insumo      { background: linear-gradient(135deg, #9f1239 0%, #be123c 100%); }
+:root[data-theme="dark"] .bg-mod-software,
+[data-bs-theme="dark"]   .bg-mod-software    { background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%); }
+:root[data-theme="dark"] .bg-mod-herramienta,
+[data-bs-theme="dark"]   .bg-mod-herramienta { background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%); }
+:root[data-theme="dark"] .bg-mod-mobiliario,
+[data-bs-theme="dark"]   .bg-mod-mobiliario  { background: linear-gradient(135deg, #92400e 0%, #b45309 100%); }
+:root[data-theme="dark"] .bg-mod-vehiculo,
+[data-bs-theme="dark"]   .bg-mod-vehiculo    { background: linear-gradient(135deg, #065f46 0%, #047857 100%); }
+:root[data-theme="dark"] .bg-mod-vehiculo,
+[data-bs-theme="dark"]   .bg-mod-vehiculo    { background: linear-gradient(135deg, #065f46 0%, #047857 100%); }
+
+/* ============================================================
+   CLASES PARA VISTAS DE DETALLE (reemplazan inline styles)
+   ============================================================ */
+.detail-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: .5rem;
+    box-shadow: var(--shadow-surface);
+    margin-bottom: 1.5rem;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.detail-card .card-header,
+.detail-header {
+    background: var(--color-surface-alt);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-weight: 600;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.detail-card .card-body {
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+.detail-header {
+    border-radius: .5rem .5rem 0 0;
+    padding: 1rem 1.25rem;
+}
+
+.info-row {
+    display: flex;
+    flex-direction: column;
+    padding: .6rem 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    color: var(--color-text-muted);
+    font-size: .80rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: .15rem;
+}
+
+.info-value {
+    color: var(--color-text);
+    font-weight: 600;
+    font-size: .95rem;
+}
+
+/* ============================================================
+   LOGIN STANDALONE (no extiende base.html)
+   ============================================================ */
+.login-page {
+    background: var(--color-login-bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+}
+
+.login-card {
+    background: var(--color-surface);
+    border-radius: 20px;
+    box-shadow: var(--shadow-surface);
+    border: 1px solid var(--color-border);
+}
+
+.login-card-header {
+    background: var(--color-login-header);
+    color: #f8fafc;
+    border-radius: 20px 20px 0 0;
+    padding: 2rem 1.5rem;
+}
+
+.login-card .form-control {
+    background: var(--color-input-bg);
+    color: var(--color-input-text);
+    border: 2px solid var(--color-input-border);
+    border-radius: 10px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-card .form-control:focus {
+    border-color: var(--color-input-focus-border);
+    box-shadow: 0 0 0 0.25rem var(--color-input-focus-shadow);
+    background: var(--color-input-bg);
+    color: var(--color-input-text);
+}
+
+.login-card .form-label {
+    color: var(--color-text);
+}
+
+.login-card .card-footer {
+    background: var(--color-surface-alt);
+    color: var(--color-text-muted);
+    border-top: 1px solid var(--color-border);
+    border-radius: 0 0 20px 20px;
+}
+
+.login-card .btn-primary {
+    background: var(--color-login-header);
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.login-card .btn-primary:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.theme-toggle-login {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: background 0.2s ease, transform 0.2s ease;
+    font-size: 1.1rem;
+    z-index: 10;
+}
+
+.theme-toggle-login:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+}
+
+:root[data-theme="dark"] .theme-icon-light,
+[data-bs-theme="dark"]   .theme-icon-light { display: none; }
+:root[data-theme="light"] .theme-icon-dark,
+[data-bs-theme="light"]   .theme-icon-dark  { display: none; }
+
+/* ============================================================
+   DASHBOARDS — COMPONENTES UNIFICADOS
+   ============================================================ */
+
+/* ── dash-hero: cabecera compacta con gradiente de módulo ── */
+.dash-hero {
+    border-radius: 16px;
+    padding: 1.75rem 2rem;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.dash-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(145deg, rgba(255,255,255,0.1), transparent);
+    pointer-events: none;
+}
+
+.dash-hero > * { position: relative; z-index: 1; }
+
+.dash-hero-badge {
+    display: inline-block;
+    padding: 0.2rem 0.85rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.2);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.dash-hero-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0.4rem 0 0.4rem;
+    line-height: 1.2;
+}
+
+.dash-hero-subtitle {
+    margin: 0;
+    font-size: 0.92rem;
+    opacity: 0.82;
+}
+
+/* ── dash-stat: tarjeta de estadística compacta ── */
+.dash-stat {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    padding: 1.2rem 1rem;
+    text-align: center;
+    box-shadow: var(--shadow-surface);
+    height: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.dash-stat-icon {
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.dash-stat-value {
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1;
+    margin-bottom: 0.35rem;
+    display: block;
+}
+
+.dash-stat-label {
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* ── metric-card: tarjeta con gradiente por tipo de activo ── */
+.metric-card {
+    border: none;
+    border-radius: 18px;
+    padding: 1.6rem;
+    color: #000;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.2);
+}
+
+.metric-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(145deg, rgba(255,255,255,0.12), transparent);
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.metric-card > * { position: relative; z-index: 1; }
+
+.metric-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.metric-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    display: grid;
+    place-items: center;
+    font-size: 1.4rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.metric-icon i,
+.metric-card h3,
+.metric-card p,
+.metric-card small,
+.metric-card .metric-progress-stats {
+    color: #000 !important;
+}
+
+.metric-actions {
+    display: flex;
+    gap: 0.35rem;
+}
+
+.metric-link {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    transition: background 0.2s ease, transform 0.2s ease;
+    text-decoration: none;
+}
+
+.metric-link i { color: #000 !important; }
+
+.metric-link:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.metric-card h3 {
+    font-size: 2.1rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.metric-card p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.95rem;
+}
+
+.metric-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.metric-progress-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    opacity: 0.88;
+}
+
+.metric-progress .progress {
+    height: 7px;
+    background: rgba(15, 23, 42, 0.18);
+    border-radius: 999px;
+}
+
+.metric-progress .progress-bar {
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.9);
+    transition: width 0.6s ease;
+}
+
+/* ── Adaptaciones dark mode para metric-card ── */
+:root[data-theme="dark"] .metric-card,
+[data-bs-theme="dark"]   .metric-card { box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45); }
+
+/* ── Section spacing helper ── */
+.dashboard-page { display: flex; flex-direction: column; gap: 1.5rem; }

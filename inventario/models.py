@@ -846,7 +846,7 @@ class Monitor(models.Model):
         # Calcular fecha de finalización de garantía
         if self.fecha_adquisicion and self.anos_garantia:
             self.fecha_finalizacion_garantia = self.fecha_adquisicion + relativedelta(years=self.anos_garantia)
-        
+
         if not self.numero_inventario:
             descriptor = None
             if self.modelo_id:
@@ -863,20 +863,76 @@ class Monitor(models.Model):
             if generated:
                 self.numero_inventario = generated
 
+        is_new = self.pk is None
+        previous_state = None
+        previous_location = None
+
+        if not is_new:
+            try:
+                old = Monitor.objects.get(pk=self.pk)
+                previous_state = old.estado.nombre if old.estado else None
+                previous_location = old.lugar.nombre if old.lugar else None
+            except Monitor.DoesNotExist:
+                pass
+
+        self.full_clean()
         super().save(*args, **kwargs)
-    
+
+        if is_new:
+            Bitacora.registrar_evento(
+                tipo_dispositivo='monitor',
+                dispositivo_obj=self,
+                tipo_evento='registro',
+                descripcion=(
+                    f'Monitor registrado en el sistema. '
+                    f'Modelo: {self.modelo.nombre}, Fabricante: {self.fabricante.nombre}'
+                ),
+                observaciones=(
+                    f'Número de serie: {self.numero_serie}, '
+                    f'Ubicación: {self.lugar.nombre}'
+                )
+            )
+        else:
+            if previous_state and previous_state != self.estado.nombre:
+                Bitacora.registrar_evento(
+                    tipo_dispositivo='monitor',
+                    dispositivo_obj=self,
+                    tipo_evento='cambio_estado',
+                    descripcion=(
+                        f'Cambio de estado de {previous_state} '
+                        f'a {self.estado.nombre}'
+                    ),
+                    valor_anterior=previous_state,
+                    valor_nuevo=self.estado.nombre
+                )
+
+            if previous_location and previous_location != self.lugar.nombre:
+                Bitacora.registrar_evento(
+                    tipo_dispositivo='monitor',
+                    dispositivo_obj=self,
+                    tipo_evento='cambio_ubicacion',
+                    descripcion=(
+                        f'Cambio de ubicación de {previous_location} '
+                        f'a {self.lugar.nombre}'
+                    ),
+                    valor_anterior=previous_location,
+                    valor_nuevo=self.lugar.nombre
+                )
+
     def __str__(self):
         return f"{self.nombre} - {self.numero_serie}"
-    
+
     @property
     def garantia_vigente(self):
         """Verifica si la garantía está vigente"""
+        if not self.fecha_finalizacion_garantia:
+            return False
         return date.today() <= self.fecha_finalizacion_garantia
-    
+
     @property
     def dias_restantes_garantia(self):
         """Calcula los días restantes de garantía"""
-        if self.garantia_vigente:
+        if self.fecha_finalizacion_garantia and self.garantia_vigente:
             return (self.fecha_finalizacion_garantia - date.today()).days
         return 0
 
@@ -2151,8 +2207,11 @@ class Bitacora(models.Model):
         ('tecnologia_medica', 'Tecnología Médica'),
         ('insumo', 'Insumo'),
         ('software', 'Software'),
+        ('mobiliario', 'Mobiliario'),
+        ('vehiculo', 'Vehículo'),
+        ('herramienta', 'Herramienta'),
     ]
-    
+
     # Información del evento
     tipo_evento = models.CharField(
         max_length=50,
@@ -2873,9 +2932,15 @@ class EnvioServicioProveedor(models.Model):
     def save(self, *args, **kwargs) -> None:
         # Generate unique number if not set
         if not self.numero:
-            from datetime import datetime
-            timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-            self.numero = f"ENV-{timestamp}"
+            hoy = timezone.now()
+            base = hoy.strftime('%Y%m%d')
+            consecutivo = 1
+            while True:
+                posible = f"ENV-{base}-{consecutivo:03d}"
+                if not EnvioServicioProveedor.objects.filter(numero=posible).exists():
+                    self.numero = posible
+                    break
+                consecutivo += 1
         super().save(*args, **kwargs)
 
 
@@ -2970,8 +3035,11 @@ class OrdenServicio(models.Model):
         ('tecnologia_medica', 'Tecnología Médica'),
         ('insumo', 'Insumo'),
         ('software', 'Software'),
+        ('mobiliario', 'Mobiliario'),
+        ('vehiculo', 'Vehículo'),
+        ('herramienta', 'Herramienta'),
     ]
-    
+
     # Identificación de la orden
     numero_orden = models.CharField(
         max_length=50,
@@ -3263,4 +3331,658 @@ class OrdenServicio(models.Model):
         if self.estado in ['pendiente', 'en_proceso', 'en_espera_repuesto']:
             delta = timezone.now() - self.fecha_solicitud
             return delta.days
+        return 0
+
+
+# ============================================================================
+# ACTIVOS GENERALES
+# ============================================================================
+
+
+class TipoMobiliario(models.Model):
+    """Tabla de tipos para mobiliario y equipamiento de oficina"""
+
+    nombre = models.CharField(max_length=100, unique=True)
+    comentarios = models.TextField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Tipo de Mobiliario"
+        verbose_name_plural = "Tipos de Mobiliario"
+        ordering = ['nombre']
+
+    def __str__(self):
+        return self.nombre
+
+
+class Mobiliario(models.Model):
+    """Tabla de mobiliario y equipamiento de oficina"""
+
+    nombre = models.CharField(max_length=200)
+    estado = models.ForeignKey(
+        Estado,
+        on_delete=models.PROTECT,
+        verbose_name="Estado"
+    )
+    lugar = models.ForeignKey(
+        Lugares,
+        on_delete=models.PROTECT,
+        verbose_name="Lugar"
+    )
+    tipo_mobiliario = models.ForeignKey(
+        TipoMobiliario,
+        on_delete=models.PROTECT,
+        verbose_name="Tipo de Mobiliario"
+    )
+    fabricante = models.ForeignKey(
+        Fabricante,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name="Fabricante"
+    )
+    modelo = models.ForeignKey(
+        Modelo,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name="Modelo"
+    )
+    numero_serie = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Número de Serie"
+    )
+    numero_inventario = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Número de Inventario"
+    )
+    proveedor = models.ForeignKey(
+        Proveedor,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Proveedor"
+    )
+    tipo_garantia = models.ForeignKey(
+        TipoGarantia,
+        on_delete=models.PROTECT,
+        verbose_name="Tipo de Garantía"
+    )
+    fecha_adquisicion = models.DateField(verbose_name="Fecha de Adquisición")
+    anos_garantia = models.PositiveIntegerField(
+        verbose_name="Años de Garantía",
+        help_text="Número de años de garantía"
+    )
+    fecha_finalizacion_garantia = models.DateField(
+        verbose_name="Fecha de Finalización de Garantía",
+        editable=False,
+        null=True,
+        blank=True
+    )
+    valor_adquisicion = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name="Valor de Adquisición"
+    )
+    moneda = models.CharField(
+        max_length=3,
+        choices=MONEDA_CHOICES,
+        default='UYU',
+        verbose_name="Moneda"
+    )
+    material = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Material",
+        help_text="Ej: madera, metal, vidrio, plástico"
+    )
+    comentarios = models.TextField(blank=True, null=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_modificacion = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Mobiliario"
+        verbose_name_plural = "Mobiliario"
+        ordering = ['nombre']
+
+    def clean(self):
+        if self.modelo and self.fabricante:
+            if self.modelo.fabricante != self.fabricante:
+                raise ValidationError({
+                    'modelo': (
+                        'El modelo seleccionado no corresponde al '
+                        'fabricante indicado.'
+                    )
+                })
+
+    def save(self, *args, **kwargs):
+        if self.fecha_adquisicion and self.anos_garantia:
+            self.fecha_finalizacion_garantia = (
+                self.fecha_adquisicion + relativedelta(years=self.anos_garantia)
+            )
+        else:
+            self.fecha_finalizacion_garantia = None
+
+        if not self.numero_inventario:
+            descriptor = None
+            if self.modelo_id:
+                descriptor = self.modelo.nombre
+            elif self.tipo_mobiliario_id:
+                descriptor = self.tipo_mobiliario.nombre
+            elif self.fabricante_id:
+                descriptor = self.fabricante.nombre
+            generated = generar_numero_inventario(
+                lugar=getattr(self, "lugar", None),
+                descriptor=descriptor or self.nombre,
+                referencia=self.numero_serie,
+            )
+            if generated:
+                self.numero_inventario = generated
+
+        is_new = self.pk is None
+        previous_state = None
+        previous_location = None
+
+        if not is_new:
+            try:
+                old = Mobiliario.objects.get(pk=self.pk)
+                previous_state = old.estado.nombre if old.estado else None
+                previous_location = old.lugar.nombre if old.lugar else None
+            except Mobiliario.DoesNotExist:
+                pass
+
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+        if is_new:
+            Bitacora.registrar_evento(
+                tipo_dispositivo='mobiliario',
+                dispositivo_obj=self,
+                tipo_evento='registro',
+                descripcion='Mobiliario registrado en el sistema.',
+                observaciones=(
+                    f'S/N: {self.numero_serie or "N/A"}, '
+                    f'Ubicación: {self.lugar.nombre}'
+                )
+            )
+        else:
+            if previous_state and previous_state != self.estado.nombre:
+                Bitacora.registrar_evento(
+                    tipo_dispositivo='mobiliario',
+                    dispositivo_obj=self,
+                    tipo_evento='cambio_estado',
+                    descripcion=(
+                        f'Cambio de estado de {previous_state} '
+                        f'a {self.estado.nombre}'
+                    ),
+                    valor_anterior=previous_state,
+                    valor_nuevo=self.estado.nombre
+                )
+            if previous_location and previous_location != self.lugar.nombre:
+                Bitacora.registrar_evento(
+                    tipo_dispositivo='mobiliario',
+                    dispositivo_obj=self,
+                    tipo_evento='cambio_ubicacion',
+                    descripcion=(
+                        f'Cambio de ubicación de {previous_location} '
+                        f'a {self.lugar.nombre}'
+                    ),
+                    valor_anterior=previous_location,
+                    valor_nuevo=self.lugar.nombre
+                )
+
+    def __str__(self):
+        return self.nombre
+
+    @property
+    def garantia_vigente(self):
+        if not self.fecha_finalizacion_garantia:
+            return False
+        return date.today() <= self.fecha_finalizacion_garantia
+
+    @property
+    def dias_restantes_garantia(self):
+        if self.fecha_finalizacion_garantia and self.garantia_vigente:
+            return (self.fecha_finalizacion_garantia - date.today()).days
+        return 0
+
+
+class TipoVehiculo(models.Model):
+    """Tabla de tipos para vehículos de flota"""
+
+    nombre = models.CharField(max_length=100, unique=True)
+    comentarios = models.TextField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Tipo de Vehículo"
+        verbose_name_plural = "Tipos de Vehículo"
+        ordering = ['nombre']
+
+    def __str__(self):
+        return self.nombre
+
+
+class Vehiculo(models.Model):
+    """Tabla de vehículos y flota empresarial"""
+
+    nombre = models.CharField(max_length=200)
+    estado = models.ForeignKey(
+        Estado,
+        on_delete=models.PROTECT,
+        verbose_name="Estado"
+    )
+    lugar = models.ForeignKey(
+        Lugares,
+        on_delete=models.PROTECT,
+        verbose_name="Lugar"
+    )
+    tipo_vehiculo = models.ForeignKey(
+        TipoVehiculo,
+        on_delete=models.PROTECT,
+        verbose_name="Tipo de Vehículo"
+    )
+    fabricante = models.ForeignKey(
+        Fabricante,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name="Fabricante / Marca"
+    )
+    modelo = models.ForeignKey(
+        Modelo,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name="Modelo"
+    )
+    numero_serie = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Número de Serie / VIN"
+    )
+    numero_inventario = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Número de Inventario"
+    )
+    matricula = models.CharField(
+        max_length=20,
+        unique=True,
+        verbose_name="Matrícula",
+        help_text="Matrícula o patente del vehículo"
+    )
+    anio_fabricacion = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Año de Fabricación"
+    )
+    color = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name="Color"
+    )
+    proveedor = models.ForeignKey(
+        Proveedor,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Proveedor"
+    )
+    tipo_garantia = models.ForeignKey(
+        TipoGarantia,
+        on_delete=models.PROTECT,
+        verbose_name="Tipo de Garantía"
+    )
+    fecha_adquisicion = models.DateField(verbose_name="Fecha de Adquisición")
+    anos_garantia = models.PositiveIntegerField(
+        verbose_name="Años de Garantía",
+        help_text="Número de años de garantía"
+    )
+    fecha_finalizacion_garantia = models.DateField(
+        verbose_name="Fecha de Finalización de Garantía",
+        editable=False,
+        null=True,
+        blank=True
+    )
+    valor_adquisicion = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name="Valor de Adquisición"
+    )
+    moneda = models.CharField(
+        max_length=3,
+        choices=MONEDA_CHOICES,
+        default='UYU',
+        verbose_name="Moneda"
+    )
+    comentarios = models.TextField(blank=True, null=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_modificacion = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Vehículo"
+        verbose_name_plural = "Vehículos"
+        ordering = ['nombre']
+
+    def clean(self):
+        if self.modelo and self.fabricante:
+            if self.modelo.fabricante != self.fabricante:
+                raise ValidationError({
+                    'modelo': (
+                        'El modelo seleccionado no corresponde al '
+                        'fabricante indicado.'
+                    )
+                })
+
+    def save(self, *args, **kwargs):
+        if self.fecha_adquisicion and self.anos_garantia:
+            self.fecha_finalizacion_garantia = (
+                self.fecha_adquisicion + relativedelta(years=self.anos_garantia)
+            )
+        else:
+            self.fecha_finalizacion_garantia = None
+
+        if not self.numero_inventario:
+            descriptor = None
+            if self.modelo_id:
+                descriptor = self.modelo.nombre
+            elif self.tipo_vehiculo_id:
+                descriptor = self.tipo_vehiculo.nombre
+            elif self.fabricante_id:
+                descriptor = self.fabricante.nombre
+            generated = generar_numero_inventario(
+                lugar=getattr(self, "lugar", None),
+                descriptor=descriptor or self.nombre,
+                referencia=self.matricula or self.numero_serie,
+            )
+            if generated:
+                self.numero_inventario = generated
+
+        is_new = self.pk is None
+        previous_state = None
+        previous_location = None
+
+        if not is_new:
+            try:
+                old = Vehiculo.objects.get(pk=self.pk)
+                previous_state = old.estado.nombre if old.estado else None
+                previous_location = old.lugar.nombre if old.lugar else None
+            except Vehiculo.DoesNotExist:
+                pass
+
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+        if is_new:
+            Bitacora.registrar_evento(
+                tipo_dispositivo='vehiculo',
+                dispositivo_obj=self,
+                tipo_evento='registro',
+                descripcion='Vehículo registrado en el sistema.',
+                observaciones=(
+                    f'Matrícula: {self.matricula}, '
+                    f'Ubicación: {self.lugar.nombre}'
+                )
+            )
+        else:
+            if previous_state and previous_state != self.estado.nombre:
+                Bitacora.registrar_evento(
+                    tipo_dispositivo='vehiculo',
+                    dispositivo_obj=self,
+                    tipo_evento='cambio_estado',
+                    descripcion=(
+                        f'Cambio de estado de {previous_state} '
+                        f'a {self.estado.nombre}'
+                    ),
+                    valor_anterior=previous_state,
+                    valor_nuevo=self.estado.nombre
+                )
+            if previous_location and previous_location != self.lugar.nombre:
+                Bitacora.registrar_evento(
+                    tipo_dispositivo='vehiculo',
+                    dispositivo_obj=self,
+                    tipo_evento='cambio_ubicacion',
+                    descripcion=(
+                        f'Cambio de ubicación de {previous_location} '
+                        f'a {self.lugar.nombre}'
+                    ),
+                    valor_anterior=previous_location,
+                    valor_nuevo=self.lugar.nombre
+                )
+
+    def __str__(self):
+        return f"{self.nombre} ({self.matricula})"
+
+    @property
+    def garantia_vigente(self):
+        if not self.fecha_finalizacion_garantia:
+            return False
+        return date.today() <= self.fecha_finalizacion_garantia
+
+    @property
+    def dias_restantes_garantia(self):
+        if self.fecha_finalizacion_garantia and self.garantia_vigente:
+            return (self.fecha_finalizacion_garantia - date.today()).days
+        return 0
+
+
+class TipoHerramienta(models.Model):
+    """Tabla de tipos para herramientas e instrumental"""
+
+    nombre = models.CharField(max_length=100, unique=True)
+    comentarios = models.TextField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Tipo de Herramienta"
+        verbose_name_plural = "Tipos de Herramienta"
+        ordering = ['nombre']
+
+    def __str__(self):
+        return self.nombre
+
+
+class Herramienta(models.Model):
+    """Tabla de herramientas e instrumental"""
+
+    nombre = models.CharField(max_length=200)
+    estado = models.ForeignKey(
+        Estado,
+        on_delete=models.PROTECT,
+        verbose_name="Estado"
+    )
+    lugar = models.ForeignKey(
+        Lugares,
+        on_delete=models.PROTECT,
+        verbose_name="Lugar"
+    )
+    tipo_herramienta = models.ForeignKey(
+        TipoHerramienta,
+        on_delete=models.PROTECT,
+        verbose_name="Tipo de Herramienta"
+    )
+    fabricante = models.ForeignKey(
+        Fabricante,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name="Fabricante"
+    )
+    modelo = models.ForeignKey(
+        Modelo,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name="Modelo"
+    )
+    numero_serie = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Número de Serie"
+    )
+    numero_inventario = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Número de Inventario"
+    )
+    proveedor = models.ForeignKey(
+        Proveedor,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Proveedor"
+    )
+    tipo_garantia = models.ForeignKey(
+        TipoGarantia,
+        on_delete=models.PROTECT,
+        verbose_name="Tipo de Garantía"
+    )
+    fecha_adquisicion = models.DateField(verbose_name="Fecha de Adquisición")
+    anos_garantia = models.PositiveIntegerField(
+        verbose_name="Años de Garantía",
+        help_text="Número de años de garantía"
+    )
+    fecha_finalizacion_garantia = models.DateField(
+        verbose_name="Fecha de Finalización de Garantía",
+        editable=False,
+        null=True,
+        blank=True
+    )
+    valor_adquisicion = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name="Valor de Adquisición"
+    )
+    moneda = models.CharField(
+        max_length=3,
+        choices=MONEDA_CHOICES,
+        default='UYU',
+        verbose_name="Moneda"
+    )
+    requiere_calibracion = models.BooleanField(
+        default=False,
+        verbose_name="Requiere Calibración"
+    )
+    comentarios = models.TextField(blank=True, null=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_modificacion = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Herramienta"
+        verbose_name_plural = "Herramientas"
+        ordering = ['nombre']
+
+    def clean(self):
+        if self.modelo and self.fabricante:
+            if self.modelo.fabricante != self.fabricante:
+                raise ValidationError({
+                    'modelo': (
+                        'El modelo seleccionado no corresponde al '
+                        'fabricante indicado.'
+                    )
+                })
+
+    def save(self, *args, **kwargs):
+        if self.fecha_adquisicion and self.anos_garantia:
+            self.fecha_finalizacion_garantia = (
+                self.fecha_adquisicion + relativedelta(years=self.anos_garantia)
+            )
+        else:
+            self.fecha_finalizacion_garantia = None
+
+        if not self.numero_inventario:
+            descriptor = None
+            if self.modelo_id:
+                descriptor = self.modelo.nombre
+            elif self.tipo_herramienta_id:
+                descriptor = self.tipo_herramienta.nombre
+            elif self.fabricante_id:
+                descriptor = self.fabricante.nombre
+            generated = generar_numero_inventario(
+                lugar=getattr(self, "lugar", None),
+                descriptor=descriptor or self.nombre,
+                referencia=self.numero_serie,
+            )
+            if generated:
+                self.numero_inventario = generated
+
+        is_new = self.pk is None
+        previous_state = None
+        previous_location = None
+
+        if not is_new:
+            try:
+                old = Herramienta.objects.get(pk=self.pk)
+                previous_state = old.estado.nombre if old.estado else None
+                previous_location = old.lugar.nombre if old.lugar else None
+            except Herramienta.DoesNotExist:
+                pass
+
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+        if is_new:
+            Bitacora.registrar_evento(
+                tipo_dispositivo='herramienta',
+                dispositivo_obj=self,
+                tipo_evento='registro',
+                descripcion='Herramienta registrada en el sistema.',
+                observaciones=(
+                    f'S/N: {self.numero_serie or "N/A"}, '
+                    f'Ubicación: {self.lugar.nombre}'
+                )
+            )
+        else:
+            if previous_state and previous_state != self.estado.nombre:
+                Bitacora.registrar_evento(
+                    tipo_dispositivo='herramienta',
+                    dispositivo_obj=self,
+                    tipo_evento='cambio_estado',
+                    descripcion=(
+                        f'Cambio de estado de {previous_state} '
+                        f'a {self.estado.nombre}'
+                    ),
+                    valor_anterior=previous_state,
+                    valor_nuevo=self.estado.nombre
+                )
+            if previous_location and previous_location != self.lugar.nombre:
+                Bitacora.registrar_evento(
+                    tipo_dispositivo='herramienta',
+                    dispositivo_obj=self,
+                    tipo_evento='cambio_ubicacion',
+                    descripcion=(
+                        f'Cambio de ubicación de {previous_location} '
+                        f'a {self.lugar.nombre}'
+                    ),
+                    valor_anterior=previous_location,
+                    valor_nuevo=self.lugar.nombre
+                )
+
+    def __str__(self):
+        return self.nombre
+
+    @property
+    def garantia_vigente(self):
+        if not self.fecha_finalizacion_garantia:
+            return False
+        return date.today() <= self.fecha_finalizacion_garantia
+
+    @property
+    def dias_restantes_garantia(self):
+        if self.fecha_finalizacion_garantia and self.garantia_vigente:
+            return (self.fecha_finalizacion_garantia - date.today()).days
         return 0

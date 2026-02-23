@@ -1,0 +1,150 @@
+{% extends 'inventario/base_device_form.html' %}
+
+{% block form_sections %}
+<div class="card">
+	<div class="card-body">
+		{% if form.non_field_errors %}
+		<div class="alert alert-danger mb-3">
+			<ul class="mb-0">
+				{% for error in form.non_field_errors %}
+				<li>{{ error }}</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+
+		<ul class="nav nav-tabs" id="herramientaTabs" role="tablist">
+			<li class="nav-item" role="presentation">
+				<button class="nav-link active" id="her-tab-basicos" data-bs-toggle="tab"
+						data-bs-target="#her-pane-basicos" type="button" role="tab" aria-selected="true">
+					Datos básicos
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="her-tab-especificaciones" data-bs-toggle="tab"
+						data-bs-target="#her-pane-especificaciones" type="button" role="tab" aria-selected="false">
+					Especificaciones
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="her-tab-compra" data-bs-toggle="tab"
+						data-bs-target="#her-pane-compra" type="button" role="tab" aria-selected="false">
+					Compra y garantía
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="her-tab-notas" data-bs-toggle="tab"
+						data-bs-target="#her-pane-notas" type="button" role="tab" aria-selected="false">
+					Notas
+				</button>
+			</li>
+		</ul>
+
+		<div class="tab-content pt-3" id="herramientaTabsContent">
+			<div class="tab-pane fade show active" id="her-pane-basicos" role="tabpanel">
+				<div class="row g-3">
+					<div class="col-md-6">
+						{{ form.nombre.label_tag }}
+						{{ form.nombre }}
+						{% for error in form.nombre.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.numero_inventario.label_tag }}
+						{{ form.numero_inventario }}
+						{% for error in form.numero_inventario.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.numero_serie.label_tag }}
+						{{ form.numero_serie }}
+						{% for error in form.numero_serie.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.tipo_herramienta.label_tag }}
+						{{ form.tipo_herramienta }}
+						{% for error in form.tipo_herramienta.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.estado.label_tag }}
+						{{ form.estado }}
+						{% for error in form.estado.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.lugar.label_tag }}
+						{{ form.lugar }}
+						{% for error in form.lugar.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="her-pane-especificaciones" role="tabpanel">
+				<div class="row g-3">
+					<div class="col-md-4">
+						{{ form.fabricante.label_tag }}
+						{{ form.fabricante }}
+						{% for error in form.fabricante.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.modelo.label_tag }}
+						{{ form.modelo }}
+						{% for error in form.modelo.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-4 d-flex align-items-end">
+						<div class="form-check mb-2">
+							{{ form.requiere_calibracion }}
+							<label class="form-check-label" for="{{ form.requiere_calibracion.id_for_label }}">
+								{{ form.requiere_calibracion.label }}
+							</label>
+						</div>
+						{% for error in form.requiere_calibracion.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="her-pane-compra" role="tabpanel">
+				<div class="row g-3">
+					<div class="col-md-6">
+						{{ form.proveedor.label_tag }}
+						{{ form.proveedor }}
+						{% for error in form.proveedor.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.fecha_adquisicion.label_tag }}
+						{{ form.fecha_adquisicion }}
+						{% for error in form.fecha_adquisicion.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-2">
+						{{ form.moneda.label_tag }}
+						{{ form.moneda }}
+						{% for error in form.moneda.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.valor_adquisicion.label_tag }}
+						{{ form.valor_adquisicion }}
+						{% for error in form.valor_adquisicion.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-3">
+						{{ form.tipo_garantia.label_tag }}
+						{{ form.tipo_garantia }}
+						{% for error in form.tipo_garantia.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-3">
+						{{ form.anos_garantia.label_tag }}
+						{{ form.anos_garantia }}
+						{% for error in form.anos_garantia.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="her-pane-notas" role="tabpanel">
+				<div class="row g-3">
+					<div class="col-12">
+						{{ form.comentarios.label_tag }}
+						{{ form.comentarios }}
+						{% for error in form.comentarios.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

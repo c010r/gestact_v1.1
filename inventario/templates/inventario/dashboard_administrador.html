@@ -1,0 +1,204 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Dashboard Administrador - ASSE-GestACT{% endblock %}
+
+{% block content %}
+<div class="dashboard-page fade-in">
+
+    <!-- Hero -->
+    <div class="dash-hero bg-mod-admin">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+            <span class="dash-hero-badge">Administrador</span>
+            <span class="badge bg-white text-dark fs-6 px-3 py-2">
+                <i class="bi bi-person-badge me-1"></i>Panel Global
+            </span>
+        </div>
+        <h1 class="dash-hero-title"><i class="bi bi-shield-check me-2"></i>Panel de Administrador</h1>
+        <p class="dash-hero-subtitle">Visión consolidada de todos los módulos del sistema</p>
+    </div>
+
+    <!-- Estadísticas globales -->
+    <div class="row g-3">
+        <div class="col-6 col-md-3">
+            <div class="dash-stat">
+                <span class="dash-stat-icon" style="color: #6366f1;"><i class="bi bi-laptop"></i></span>
+                <span class="dash-stat-value">{{ total_informatica }}</span>
+                <span class="dash-stat-label">Activos Informáticos</span>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="dash-stat">
+                <span class="dash-stat-icon" style="color: #dc2626;"><i class="bi bi-heart-pulse"></i></span>
+                <span class="dash-stat-value">{{ total_medica }}</span>
+                <span class="dash-stat-label">Tecnología Médica</span>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="dash-stat">
+                <span class="dash-stat-icon" style="color: #f59e0b;"><i class="bi bi-building"></i></span>
+                <span class="dash-stat-value">{{ total_generales }}</span>
+                <span class="dash-stat-label">Activos Generales</span>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="dash-stat">
+                <span class="dash-stat-icon" style="color: #7c3aed;"><i class="bi bi-boxes"></i></span>
+                <span class="dash-stat-value">{{ total_global }}</span>
+                <span class="dash-stat-label">Total Global</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjetas de módulo -->
+    <div class="row g-4">
+        <!-- Activos Informáticos -->
+        <div class="col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-mod-informatica text-white border-0">
+                    <h6 class="mb-0"><i class="bi bi-laptop me-2"></i>Activos Informáticos</h6>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for asset in informatica_summary %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi {{ asset.icon }} me-2 text-muted"></i>{{ asset.label }}</span>
+                            <a href="{% url asset.list_url %}" class="badge bg-primary text-decoration-none">{{ asset.total }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="card-footer bg-transparent text-center">
+                    <a href="{% url 'inventario:dashboard_informatica' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i>Ver módulo
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tecnología Médica -->
+        <div class="col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-mod-medica text-white border-0">
+                    <h6 class="mb-0"><i class="bi bi-heart-pulse me-2"></i>Tecnología Médica</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center g-3">
+                        <div class="col-4">
+                            <div class="fw-bold fs-4">{{ total_medica }}</div>
+                            <small class="text-muted">Total</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="fw-bold fs-4 text-success">{{ medica_activos }}</div>
+                            <small class="text-muted">Activos</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="fw-bold fs-4 text-warning">{{ medica_mantenimiento }}</div>
+                            <small class="text-muted">Mantenimiento</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent text-center">
+                    <a href="{% url 'inventario:dashboard_medica' %}" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i>Ver módulo
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activos Generales -->
+        <div class="col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-mod-generales text-white border-0">
+                    <h6 class="mb-0"><i class="bi bi-building me-2"></i>Activos Generales</h6>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for asset in generales_summary %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi {{ asset.icon }} me-2 text-muted"></i>{{ asset.label }}</span>
+                            <a href="{% url asset.list_url %}" class="badge bg-warning text-dark text-decoration-none">{{ asset.total }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="card-footer bg-transparent text-center">
+                    <a href="{% url 'inventario:dashboard_generales' %}" class="btn btn-outline-warning btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i>Ver módulo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Garantías próximas a vencer -->
+    {% if garantia_proxima %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-exclamation-triangle text-warning me-2"></i>Garantías próximas a vencer (próximos 30 días)
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Activo</th>
+                            <th>Módulo</th>
+                            <th>Vence</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in garantia_proxima %}
+                        <tr>
+                            <td><strong>{{ item.nombre }}</strong></td>
+                            <td><span class="badge bg-secondary">{{ item.tipo }}</span></td>
+                            <td>{{ item.fecha|date:'d/m/Y' }}</td>
+                            <td class="text-end">
+                                <a href="{% url item.detail_url item.pk %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Accesos rápidos -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-lightning-charge me-2"></i>Accesos rápidos</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <a href="{% url 'inventario:computadora_create' %}" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-pc-display me-2"></i>Registrar computadora
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'inventario:tecnologia_medica_create' %}" class="btn btn-outline-danger w-100">
+                        <i class="bi bi-heart-pulse me-2"></i>Registrar equipo médico
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'inventario:vehiculo_create' %}" class="btn btn-outline-warning w-100">
+                        <i class="bi bi-car-front me-2"></i>Registrar vehículo
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'inventario:orden_servicio_create' %}" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-clipboard-check me-2"></i>Nueva orden servicio
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -37,6 +37,9 @@ htmlcov/
 .coverage.*
 .pytest_cache/
 
+# Claude AI (notas internas del asistente)
+.claude/
+
 # Otros
 *.md
 *.swp

@@ -11,6 +11,9 @@ from .models import (
     Insumo,
     Software,
     OrdenServicio,
+    Mobiliario,
+    Vehiculo,
+    Herramienta,
     generar_numero_inventario,
 )
 from .widgets import TreeSelectWidget
@@ -545,7 +548,7 @@ class OrdenServicioForm(FormControlMixin, forms.ModelForm):
     def save(self, commit=True):
         """Guarda la orden vinculándola al dispositivo encontrado"""
         instance = super().save(commit=False)
-        
+
         # Si tenemos dispositivo encontrado, establecer los campos
         if hasattr(self, '_dispositivo_encontrado'):
             dispositivo = self._dispositivo_encontrado
@@ -553,9 +556,99 @@ class OrdenServicioForm(FormControlMixin, forms.ModelForm):
             instance.dispositivo_id = dispositivo.id
             instance.dispositivo_nombre = getattr(dispositivo, 'nombre', str(dispositivo))
             instance.dispositivo_numero_serie = dispositivo.numero_serie
-        
+
         if commit:
             instance.save()
             self.save_m2m()
-        
+
         return instance
+
+
+# ============================================================================
+# FORMULARIOS ACTIVOS GENERALES
+# ============================================================================
+
+
+class MobiliarioForm(FormControlMixin, forms.ModelForm):
+    """Formulario para crear y editar mobiliario y equipamiento de oficina."""
+
+    class Meta:
+        model = Mobiliario
+        exclude = [
+            'fecha_finalizacion_garantia',
+            'fecha_creacion',
+            'fecha_modificacion',
+        ]
+        widgets = {
+            'lugar': TreeSelectWidget(),
+            'fecha_adquisicion': DatePickerInput(),
+            'comentarios': forms.Textarea(attrs={'rows': 4}),
+            'numero_serie': forms.TextInput(),
+            'numero_inventario': forms.TextInput(attrs={'readonly': 'readonly'}),
+            'valor_adquisicion': forms.NumberInput(attrs={'step': '0.01'}),
+            'moneda': forms.Select(attrs={'class': 'form-select'}),
+            'anos_garantia': forms.NumberInput(attrs={'min': '1'}),
+            'material': forms.TextInput(attrs={'placeholder': 'Ej: madera, metal, vidrio'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.apply_form_control()
+
+
+class VehiculoForm(FormControlMixin, forms.ModelForm):
+    """Formulario para crear y editar vehículos de flota."""
+
+    class Meta:
+        model = Vehiculo
+        exclude = [
+            'fecha_finalizacion_garantia',
+            'fecha_creacion',
+            'fecha_modificacion',
+        ]
+        widgets = {
+            'lugar': TreeSelectWidget(),
+            'fecha_adquisicion': DatePickerInput(),
+            'comentarios': forms.Textarea(attrs={'rows': 4}),
+            'numero_serie': forms.TextInput(attrs={'placeholder': 'Número VIN'}),
+            'numero_inventario': forms.TextInput(attrs={'readonly': 'readonly'}),
+            'matricula': forms.TextInput(attrs={'placeholder': 'Ej: ABC 1234'}),
+            'anio_fabricacion': forms.NumberInput(attrs={'min': '1900', 'max': '2100'}),
+            'color': forms.TextInput(),
+            'valor_adquisicion': forms.NumberInput(attrs={'step': '0.01'}),
+            'moneda': forms.Select(attrs={'class': 'form-select'}),
+            'anos_garantia': forms.NumberInput(attrs={'min': '1'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.apply_form_control()
+
+
+class HerramientaForm(FormControlMixin, forms.ModelForm):
+    """Formulario para crear y editar herramientas e instrumental."""
+
+    class Meta:
+        model = Herramienta
+        exclude = [
+            'fecha_finalizacion_garantia',
+            'fecha_creacion',
+            'fecha_modificacion',
+        ]
+        widgets = {
+            'lugar': TreeSelectWidget(),
+            'fecha_adquisicion': DatePickerInput(),
+            'comentarios': forms.Textarea(attrs={'rows': 4}),
+            'numero_serie': forms.TextInput(),
+            'numero_inventario': forms.TextInput(attrs={'readonly': 'readonly'}),
+            'valor_adquisicion': forms.NumberInput(attrs={'step': '0.01'}),
+            'moneda': forms.Select(attrs={'class': 'form-select'}),
+            'anos_garantia': forms.NumberInput(attrs={'min': '1'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.apply_form_control()
+        self.fields['requiere_calibracion'].widget.attrs.setdefault(
+            'class', 'form-check-input'
+        )

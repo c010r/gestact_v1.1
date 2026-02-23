@@ -541,7 +541,7 @@
     <div class="row g-4">
         {% for card in asset_cards %}
         <div class="col-xxl-3 col-lg-4 col-md-6">
-            <div class="metric-card" data-gradient="{{ card.gradient }}">
+            <div class="metric-card {{ card.gradient_class }}">
                 <div class="metric-card-header">
                     <span class="metric-icon">
                         <i class="bi {{ card.icon }}"></i>
@@ -581,13 +581,6 @@
 {% block extra_js %}
 <script>
 (() => {
-    document.querySelectorAll('[data-gradient]').forEach((element) => {
-        const gradient = element.getAttribute('data-gradient');
-        if (gradient) {
-            element.style.background = gradient;
-        }
-    });
-
     document.querySelectorAll('[data-progress]').forEach((element) => {
         const rawValue = Number(element.getAttribute('data-progress') || 0);
         const clamped = Math.max(0, Math.min(rawValue, 100));
@@ -861,13 +854,6 @@
 {{ chart_estado_colors|json_script:"estado-chart-colors" }}
 <script>
 (() => {
-    document.querySelectorAll('[data-gradient]').forEach((element) => {
-        const gradient = element.getAttribute('data-gradient');
-        if (gradient) {
-            element.style.background = gradient;
-        }
-    });
-
     document.querySelectorAll('[data-progress]').forEach((element) => {
         const rawValue = Number(element.getAttribute('data-progress') || 0);
         const clamped = Math.max(0, Math.min(rawValue, 100));

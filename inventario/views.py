@@ -14,7 +14,8 @@ from .models import (
     TipoMonitor, Monitor, PlantillaDispositivo, TipoNetworking,
     Networking, TipoTelefonia, Telefonia, TipoPeriferico, Periferico,
     TipoTecnologiaMedica, TecnologiaMedica,
-    TipoInsumo, Insumo, TipoSoftware, Software, OrdenServicio
+    TipoInsumo, Insumo, TipoSoftware, Software, OrdenServicio,
+    TipoMobiliario, Mobiliario, TipoVehiculo, Vehiculo, TipoHerramienta, Herramienta
 )
 from .serializers import (
     ModulosVisiblesSerializer, UnidadEjecutoraSerializer, UnidadAsistencialSerializer,
@@ -29,7 +30,10 @@ from .serializers import (
     TipoTecnologiaMedicaSerializer, TecnologiaMedicaSerializer, TecnologiaMedicaListSerializer,
     TipoInsumoSerializer, InsumoSerializer, InsumoListSerializer,
     TipoSoftwareSerializer, SoftwareSerializer, SoftwareListSerializer,
-    OrdenServicioSerializer, OrdenServicioListSerializer
+    OrdenServicioSerializer, OrdenServicioListSerializer,
+    TipoMobiliarioSerializer, MobiliarioSerializer, MobiliarioListSerializer,
+    TipoVehiculoSerializer, VehiculoSerializer, VehiculoListSerializer,
+    TipoHerramientaSerializer, HerramientaSerializer, HerramientaListSerializer
 )
 
 
@@ -899,3 +903,82 @@ class OrdenServicioViewSet(viewsets.ModelViewSet):
         orden.save()
         
         return Response({'mensaje': f'Orden {orden.numero_orden} completada'})
+
+
+# ──────────────────────────────────────────────
+# Activos Generales
+# ──────────────────────────────────────────────
+
+class TipoMobiliarioViewSet(viewsets.ModelViewSet):
+    queryset = TipoMobiliario.objects.all()
+    serializer_class = TipoMobiliarioSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['nombre']
+    ordering_fields = ['nombre']
+    ordering = ['nombre']
+
+
+class MobiliarioViewSet(viewsets.ModelViewSet):
+    queryset = Mobiliario.objects.select_related(
+        'estado', 'lugar', 'tipo_mobiliario', 'fabricante', 'modelo', 'proveedor', 'tipo_garantia'
+    ).all()
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['estado', 'lugar', 'tipo_mobiliario', 'fabricante']
+    search_fields = ['nombre', 'numero_serie', 'numero_inventario', 'material']
+    ordering_fields = ['nombre', 'fecha_adquisicion', 'fecha_creacion']
+    ordering = ['nombre']
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return MobiliarioListSerializer
+        return MobiliarioSerializer
+
+
+class TipoVehiculoViewSet(viewsets.ModelViewSet):
+    queryset = TipoVehiculo.objects.all()
+    serializer_class = TipoVehiculoSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['nombre']
+    ordering_fields = ['nombre']
+    ordering = ['nombre']
+
+
+class VehiculoViewSet(viewsets.ModelViewSet):
+    queryset = Vehiculo.objects.select_related(
+        'estado', 'lugar', 'tipo_vehiculo', 'fabricante', 'modelo', 'proveedor', 'tipo_garantia'
+    ).all()
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['estado', 'lugar', 'tipo_vehiculo', 'fabricante']
+    search_fields = ['nombre', 'numero_serie', 'numero_inventario', 'matricula', 'color']
+    ordering_fields = ['nombre', 'matricula', 'fecha_adquisicion', 'fecha_creacion']
+    ordering = ['nombre']
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return VehiculoListSerializer
+        return VehiculoSerializer
+
+
+class TipoHerramientaViewSet(viewsets.ModelViewSet):
+    queryset = TipoHerramienta.objects.all()
+    serializer_class = TipoHerramientaSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['nombre']
+    ordering_fields = ['nombre']
+    ordering = ['nombre']
+
+
+class HerramientaViewSet(viewsets.ModelViewSet):
+    queryset = Herramienta.objects.select_related(
+        'estado', 'lugar', 'tipo_herramienta', 'fabricante', 'modelo', 'proveedor', 'tipo_garantia'
+    ).all()
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['estado', 'lugar', 'tipo_herramienta', 'fabricante', 'requiere_calibracion']
+    search_fields = ['nombre', 'numero_serie', 'numero_inventario']
+    ordering_fields = ['nombre', 'fecha_adquisicion', 'fecha_creacion']
+    ordering = ['nombre']
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return HerramientaListSerializer
+        return HerramientaSerializer

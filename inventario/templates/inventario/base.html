@@ -58,9 +58,9 @@
                         </a>
                     </li>
                     
-                    {% if menu_type == 'informatica' %}
+                    {% if menu_type == 'informatica' or is_full_access %}
                     <!-- MENÚ PARA ACTIVOS INFORMÁTICOS -->
-                    
+
                     <!-- Menú desplegable: Hardware -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -71,23 +71,23 @@
                             <li><a class="dropdown-item" href="{% url 'inventario:computadora_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todas</a></li>
                             <li><a class="dropdown-item" href="{% url 'inventario:computadora_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nueva</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            
+
                             <li><h6 class="dropdown-header"><i class="bi bi-display"></i> Monitores</h6></li>
                             <li><a class="dropdown-item" href="{% url 'inventario:monitor_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todos</a></li>
                             <li><a class="dropdown-item" href="{% url 'inventario:monitor_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nuevo</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            
+
                             <li><h6 class="dropdown-header"><i class="bi bi-printer"></i> Impresoras</h6></li>
                             <li><a class="dropdown-item" href="{% url 'inventario:impresora_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todas</a></li>
                             <li><a class="dropdown-item" href="{% url 'inventario:impresora_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nueva</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            
+
                             <li><h6 class="dropdown-header"><i class="bi bi-usb-plug"></i> Periféricos</h6></li>
                             <li><a class="dropdown-item" href="{% url 'inventario:periferico_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todos</a></li>
                             <li><a class="dropdown-item" href="{% url 'inventario:periferico_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nuevo</a></li>
                         </ul>
                     </li>
-                    
+
                     <!-- Menú desplegable: Redes y Comunicaciones -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -98,33 +98,34 @@
                             <li><a class="dropdown-item" href="{% url 'inventario:networking_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todos</a></li>
                             <li><a class="dropdown-item" href="{% url 'inventario:networking_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nuevo</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            
+
                             <li><h6 class="dropdown-header"><i class="bi bi-telephone"></i> Telefonía</h6></li>
                             <li><a class="dropdown-item" href="{% url 'inventario:telefonia_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todas</a></li>
                             <li><a class="dropdown-item" href="{% url 'inventario:telefonia_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nueva</a></li>
                         </ul>
                     </li>
-                    
+
                     <!-- Menú desplegable: Recursos (Software e Insumos TI) -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-boxes me-1"></i>Recursos
+                            <i class="bi bi-boxes me-1"></i>Recursos TI
                         </a>
                         <ul class="dropdown-menu">
                             <li><h6 class="dropdown-header"><i class="bi bi-window"></i> Software</h6></li>
                             <li><a class="dropdown-item" href="{% url 'inventario:software_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todos</a></li>
                             <li><a class="dropdown-item" href="{% url 'inventario:software_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nuevo</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            
+
                             <li><h6 class="dropdown-header"><i class="bi bi-box-seam"></i> Insumos</h6></li>
                             <li><a class="dropdown-item" href="{% url 'inventario:insumo_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todos</a></li>
                             <li><a class="dropdown-item" href="{% url 'inventario:insumo_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nuevo</a></li>
                         </ul>
                     </li>
-                    
-                    {% elif menu_type == 'medica' %}
+                    {% endif %}
+
+                    {% if menu_type == 'medica' or is_full_access %}
                     <!-- MENÚ PARA TECNOLOGÍA MÉDICA -->
-                    
+
                     <!-- Menú desplegable: Equipos Médicos -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -136,14 +137,53 @@
                             <li><a class="dropdown-item" href="{% url 'inventario:tecnologia_medica_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nuevo</a></li>
                         </ul>
                     </li>
-                    
                     {% endif %}
-                    
-                    {% if menu_type == 'informatica' or menu_type == 'medica' %}
-                    <!-- Menú desplegable: Servicio y Mantenimiento (COMPARTIDO) -->
+
+                    {% if menu_type == 'generales' or is_full_access %}
+                    <!-- MENÚ PARA ACTIVOS GENERALES -->
+
+                    <!-- Menú desplegable: Mobiliario -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-tools me-1"></i>Servicio
+                            <i class="bi bi-building me-1"></i>Mobiliario
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><h6 class="dropdown-header"><i class="bi bi-building"></i> Mobiliario y Equipamiento</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:mobiliario_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todos</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:mobiliario_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nuevo</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Menú desplegable: Vehículos -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-car-front me-1"></i>Vehículos
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><h6 class="dropdown-header"><i class="bi bi-car-front"></i> Flota Vehicular</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:vehiculo_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todos</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:vehiculo_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nuevo</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Menú desplegable: Herramientas -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-tools me-1"></i>Herramientas
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><h6 class="dropdown-header"><i class="bi bi-tools"></i> Herramientas e Instrumental</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:herramienta_list' %}"><i class="bi bi-list-ul me-2"></i>Ver Todas</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:herramienta_create' %}"><i class="bi bi-plus-circle me-2"></i>Agregar Nueva</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    {% if menu_type == 'informatica' or menu_type == 'medica' or is_full_access %}
+                    <!-- Menú desplegable: Servicio y Mantenimiento -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-clipboard-check me-1"></i>Servicio
                         </a>
                         <ul class="dropdown-menu">
                             <li><h6 class="dropdown-header"><i class="bi bi-clipboard-check"></i> Órdenes de Servicio</h6></li>
@@ -152,24 +192,29 @@
                         </ul>
                     </li>
                     {% endif %}
-                    
+
+                    <!-- Bitácora -->
                     {% if menu_type == 'informatica' %}
-                    <!-- Bitácora - Activos Informáticos -->
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'inventario:bitacora_list_informatica' %}">
                             <i class="bi bi-clock-history me-1"></i>Bitácora
                         </a>
                     </li>
                     {% elif menu_type == 'medica' %}
-                    <!-- Bitácora - Tecnología Médica -->
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'inventario:bitacora_list_medica' %}">
                             <i class="bi bi-clock-history me-1"></i>Bitácora
                         </a>
                     </li>
+                    {% elif menu_type == 'generales' or is_full_access %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'inventario:bitacora_list' %}">
+                            <i class="bi bi-clock-history me-1"></i>Bitácora
+                        </a>
+                    </li>
                     {% endif %}
-                    
-                    {% if menu_type == 'informatica' or menu_type == 'medica' %}
+
+                    {% if menu_type == 'informatica' or menu_type == 'medica' or is_full_access %}
                     <!-- Reportes -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -187,13 +232,11 @@
                                     <i class="bi bi-graph-up-arrow me-2"></i>Reporte Empresarial (TI)
                                 </a>
                             </li>
-                            {% if menu_type == 'medica' %}
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'inventario:reports_enterprise' %}?segment=medica">
-                                        <i class="bi bi-heart-pulse me-2"></i>Reporte Tecnología Médica
-                                    </a>
-                                </li>
-                            {% endif %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'inventario:reports_enterprise' %}?segment=medica">
+                                    <i class="bi bi-heart-pulse me-2"></i>Reporte Tecnología Médica
+                                </a>
+                            </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item" href="{% url 'inventario:reports_menu' %}">
@@ -202,7 +245,7 @@
                             </li>
                         </ul>
                     </li>
-                    
+
                     <!-- Configuración -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">

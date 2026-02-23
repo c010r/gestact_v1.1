@@ -1,0 +1,156 @@
+{% extends 'inventario/base_device_form.html' %}
+
+{% block form_sections %}
+<div class="card">
+	<div class="card-body">
+		{% if form.non_field_errors %}
+		<div class="alert alert-danger mb-3">
+			<ul class="mb-0">
+				{% for error in form.non_field_errors %}
+				<li>{{ error }}</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+
+		<ul class="nav nav-tabs" id="vehiculoTabs" role="tablist">
+			<li class="nav-item" role="presentation">
+				<button class="nav-link active" id="veh-tab-basicos" data-bs-toggle="tab"
+						data-bs-target="#veh-pane-basicos" type="button" role="tab" aria-selected="true">
+					Datos básicos
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="veh-tab-vehiculo" data-bs-toggle="tab"
+						data-bs-target="#veh-pane-vehiculo" type="button" role="tab" aria-selected="false">
+					Datos del vehículo
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="veh-tab-compra" data-bs-toggle="tab"
+						data-bs-target="#veh-pane-compra" type="button" role="tab" aria-selected="false">
+					Compra y garantía
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="veh-tab-notas" data-bs-toggle="tab"
+						data-bs-target="#veh-pane-notas" type="button" role="tab" aria-selected="false">
+					Notas
+				</button>
+			</li>
+		</ul>
+
+		<div class="tab-content pt-3" id="vehiculoTabsContent">
+			<div class="tab-pane fade show active" id="veh-pane-basicos" role="tabpanel">
+				<div class="row g-3">
+					<div class="col-md-6">
+						{{ form.nombre.label_tag }}
+						{{ form.nombre }}
+						{% for error in form.nombre.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.numero_inventario.label_tag }}
+						{{ form.numero_inventario }}
+						{% for error in form.numero_inventario.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.tipo_vehiculo.label_tag }}
+						{{ form.tipo_vehiculo }}
+						{% for error in form.tipo_vehiculo.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.estado.label_tag }}
+						{{ form.estado }}
+						{% for error in form.estado.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.lugar.label_tag }}
+						{{ form.lugar }}
+						{% for error in form.lugar.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="veh-pane-vehiculo" role="tabpanel">
+				<div class="row g-3">
+					<div class="col-md-4">
+						{{ form.matricula.label_tag }}
+						{{ form.matricula }}
+						{% for error in form.matricula.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.fabricante.label_tag }}
+						{{ form.fabricante }}
+						{% for error in form.fabricante.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.modelo.label_tag }}
+						{{ form.modelo }}
+						{% for error in form.modelo.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.anio_fabricacion.label_tag }}
+						{{ form.anio_fabricacion }}
+						{% for error in form.anio_fabricacion.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.color.label_tag }}
+						{{ form.color }}
+						{% for error in form.color.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.numero_serie.label_tag }}
+						{{ form.numero_serie }}
+						{% for error in form.numero_serie.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="veh-pane-compra" role="tabpanel">
+				<div class="row g-3">
+					<div class="col-md-6">
+						{{ form.proveedor.label_tag }}
+						{{ form.proveedor }}
+						{% for error in form.proveedor.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-6">
+						{{ form.fecha_adquisicion.label_tag }}
+						{{ form.fecha_adquisicion }}
+						{% for error in form.fecha_adquisicion.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-2">
+						{{ form.moneda.label_tag }}
+						{{ form.moneda }}
+						{% for error in form.moneda.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-4">
+						{{ form.valor_adquisicion.label_tag }}
+						{{ form.valor_adquisicion }}
+						{% for error in form.valor_adquisicion.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-3">
+						{{ form.tipo_garantia.label_tag }}
+						{{ form.tipo_garantia }}
+						{% for error in form.tipo_garantia.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+					<div class="col-md-3">
+						{{ form.anos_garantia.label_tag }}
+						{{ form.anos_garantia }}
+						{% for error in form.anos_garantia.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="veh-pane-notas" role="tabpanel">
+				<div class="row g-3">
+					<div class="col-12">
+						{{ form.comentarios.label_tag }}
+						{{ form.comentarios }}
+						{% for error in form.comentarios.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

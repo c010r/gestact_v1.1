@@ -7,7 +7,9 @@ from .models import (
     TipoMonitor, Monitor, PlantillaDispositivo, TipoNetworking,
     Networking, TipoTelefonia, Telefonia, TipoPeriferico, Periferico,
     TipoTecnologiaMedica, TecnologiaMedica,
-    TipoInsumo, Insumo, TipoSoftware, Software, OrdenServicio
+    TipoInsumo, Insumo, TipoSoftware, Software, OrdenServicio,
+    TipoMobiliario, Mobiliario, TipoVehiculo, Vehiculo,
+    TipoHerramienta, Herramienta
 )
 
 
@@ -955,4 +957,126 @@ class OrdenServicioListSerializer(serializers.ModelSerializer):
             'solicitante', 'tecnico_asignado',
             'fecha_solicitud', 'fecha_estimada', 'fecha_finalizacion',
             'dias_pendiente', 'esta_vencida', 'costo_total'
+        ]
+
+
+# ============================================================================
+# SERIALIZADORES ACTIVOS GENERALES
+# ============================================================================
+
+
+class TipoMobiliarioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TipoMobiliario
+        fields = '__all__'
+
+
+class MobiliarioSerializer(serializers.ModelSerializer):
+    estado_nombre = serializers.CharField(source='estado.nombre', read_only=True)
+    lugar_nombre = serializers.CharField(source='lugar.nombre', read_only=True)
+    tipo_mobiliario_nombre = serializers.CharField(source='tipo_mobiliario.nombre', read_only=True)
+    fabricante_nombre = serializers.CharField(source='fabricante.nombre', read_only=True)
+    modelo_nombre = serializers.CharField(source='modelo.nombre', read_only=True)
+    proveedor_nombre = serializers.CharField(source='proveedor.nombre', read_only=True)
+    tipo_garantia_nombre = serializers.CharField(source='tipo_garantia.nombre', read_only=True)
+    garantia_vigente = serializers.ReadOnlyField()
+    dias_restantes_garantia = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Mobiliario
+        fields = '__all__'
+        read_only_fields = ('fecha_creacion', 'fecha_modificacion', 'fecha_finalizacion_garantia')
+
+
+class MobiliarioListSerializer(serializers.ModelSerializer):
+    estado_nombre = serializers.CharField(source='estado.nombre', read_only=True)
+    lugar_nombre = serializers.CharField(source='lugar.nombre', read_only=True)
+    tipo_mobiliario_nombre = serializers.CharField(source='tipo_mobiliario.nombre', read_only=True)
+    garantia_vigente = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Mobiliario
+        fields = [
+            'id', 'nombre', 'numero_serie', 'numero_inventario',
+            'estado', 'estado_nombre', 'lugar', 'lugar_nombre',
+            'tipo_mobiliario', 'tipo_mobiliario_nombre',
+            'material', 'garantia_vigente',
+        ]
+
+
+class TipoVehiculoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TipoVehiculo
+        fields = '__all__'
+
+
+class VehiculoSerializer(serializers.ModelSerializer):
+    estado_nombre = serializers.CharField(source='estado.nombre', read_only=True)
+    lugar_nombre = serializers.CharField(source='lugar.nombre', read_only=True)
+    tipo_vehiculo_nombre = serializers.CharField(source='tipo_vehiculo.nombre', read_only=True)
+    fabricante_nombre = serializers.CharField(source='fabricante.nombre', read_only=True)
+    modelo_nombre = serializers.CharField(source='modelo.nombre', read_only=True)
+    proveedor_nombre = serializers.CharField(source='proveedor.nombre', read_only=True)
+    tipo_garantia_nombre = serializers.CharField(source='tipo_garantia.nombre', read_only=True)
+    garantia_vigente = serializers.ReadOnlyField()
+    dias_restantes_garantia = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Vehiculo
+        fields = '__all__'
+        read_only_fields = ('fecha_creacion', 'fecha_modificacion', 'fecha_finalizacion_garantia')
+
+
+class VehiculoListSerializer(serializers.ModelSerializer):
+    estado_nombre = serializers.CharField(source='estado.nombre', read_only=True)
+    lugar_nombre = serializers.CharField(source='lugar.nombre', read_only=True)
+    tipo_vehiculo_nombre = serializers.CharField(source='tipo_vehiculo.nombre', read_only=True)
+    garantia_vigente = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Vehiculo
+        fields = [
+            'id', 'nombre', 'numero_inventario', 'matricula',
+            'estado', 'estado_nombre', 'lugar', 'lugar_nombre',
+            'tipo_vehiculo', 'tipo_vehiculo_nombre',
+            'anio_fabricacion', 'color', 'garantia_vigente',
+        ]
+
+
+class TipoHerramientaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TipoHerramienta
+        fields = '__all__'
+
+
+class HerramientaSerializer(serializers.ModelSerializer):
+    estado_nombre = serializers.CharField(source='estado.nombre', read_only=True)
+    lugar_nombre = serializers.CharField(source='lugar.nombre', read_only=True)
+    tipo_herramienta_nombre = serializers.CharField(source='tipo_herramienta.nombre', read_only=True)
+    fabricante_nombre = serializers.CharField(source='fabricante.nombre', read_only=True)
+    modelo_nombre = serializers.CharField(source='modelo.nombre', read_only=True)
+    proveedor_nombre = serializers.CharField(source='proveedor.nombre', read_only=True)
+    tipo_garantia_nombre = serializers.CharField(source='tipo_garantia.nombre', read_only=True)
+    garantia_vigente = serializers.ReadOnlyField()
+    dias_restantes_garantia = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Herramienta
+        fields = '__all__'
+        read_only_fields = ('fecha_creacion', 'fecha_modificacion', 'fecha_finalizacion_garantia')
+
+
+class HerramientaListSerializer(serializers.ModelSerializer):
+    estado_nombre = serializers.CharField(source='estado.nombre', read_only=True)
+    lugar_nombre = serializers.CharField(source='lugar.nombre', read_only=True)
+    tipo_herramienta_nombre = serializers.CharField(source='tipo_herramienta.nombre', read_only=True)
+    garantia_vigente = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Herramienta
+        fields = [
+            'id', 'nombre', 'numero_serie', 'numero_inventario',
+            'estado', 'estado_nombre', 'lugar', 'lugar_nombre',
+            'tipo_herramienta', 'tipo_herramienta_nombre',
+            'requiere_calibracion', 'garantia_vigente',
         ]

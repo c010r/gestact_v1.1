@@ -38,6 +38,9 @@ from .forms import (
     SoftwareForm,
     TecnologiaMedicaForm,
     TelefoniaForm,
+    MobiliarioForm,
+    VehiculoForm,
+    HerramientaForm,
 )
 from .models import (
     Bitacora,
@@ -65,6 +68,9 @@ from .models import (
     TipoSoftware,
     TipoTecnologiaMedica,
     TipoTelefonia,
+    TipoMobiliario, Mobiliario,
+    TipoVehiculo, Vehiculo,
+    TipoHerramienta, Herramienta,
 )
 from .models import generar_numero_inventario
 from .utils_reports import (
@@ -88,6 +94,9 @@ DEVICE_MODEL_MAP = {
     "insumo": Insumo,
     "software": Software,
     "orden_servicio": OrdenServicio,
+    "mobiliario": Mobiliario,
+    "vehiculo": Vehiculo,
+    "herramienta": Herramienta,
 }
 
 
@@ -101,6 +110,9 @@ DEVICE_LABELS = {
     "tecnologia_medica": "Tecnología Médica",
     "insumo": "Insumo",
     "software": "Software",
+    "mobiliario": "Mobiliario",
+    "vehiculo": "Vehículo",
+    "herramienta": "Herramienta",
 }
 
 
@@ -204,9 +216,12 @@ class MenuContextMixin:
         if model_name == 'TecnologiaMedica':
             context['menu_type'] = 'medica'
         # Modelos de Activos Informáticos
-        elif model_name in ['Computadora', 'Impresora', 'Monitor', 'Networking', 
+        elif model_name in ['Computadora', 'Impresora', 'Monitor', 'Networking',
                            'Telefonia', 'Periferico', 'Software', 'Insumo']:
             context['menu_type'] = 'informatica'
+        # Modelos de Activos Generales
+        elif model_name in ['Mobiliario', 'Vehiculo', 'Herramienta']:
+            context['menu_type'] = 'generales'
         # Módulos compartidos (sin menú específico - muestra ambos)
         else:
             context['menu_type'] = None
@@ -219,10 +234,14 @@ def dashboard_selector(request):
     """Pantalla de selección de dashboard."""
     # Si el usuario está autenticado, redirigir automáticamente según su grupo
     if request.user.is_authenticated:
-        if request.user.groups.filter(name='Activos Informáticos').exists():
+        if request.user.is_superuser or request.user.groups.filter(name='Administrador').exists():
+            return redirect('inventario:dashboard_admin')
+        elif request.user.groups.filter(name='Activos Informáticos').exists():
             return redirect('inventario:dashboard_informatica')
         elif request.user.groups.filter(name='Tecnología Médica').exists():
             return redirect('inventario:dashboard_medica')
+        elif request.user.groups.filter(name='Activos Generales').exists():
+            return redirect('inventario:dashboard_generales')
     
     # Si no tiene grupo específico o no está autenticado, mostrar selector
     return render(request, 'inventario/dashboard_selector.html', {
@@ -234,6 +253,78 @@ def dashboard_selector(request):
 def dashboard(request):
     """Vista del dashboard - Redirige a dashboard_selector."""
     return dashboard_selector(request)
+
+
+@login_required
+def dashboard_administrador(request):
+    """Dashboard para el perfil Administrador — vista consolidada de los 3 módulos."""
+    today = timezone.now().date()
+    limite_garantia = today + timedelta(days=30)
+
+    # ── Activos Informáticos ──────────────────────────────────────────────
+    from .models import Computadora, Impresora, Monitor, Networking, Telefonia, Periferico
+    informatica_summary = [
+        {'label': 'Computadoras', 'total': Computadora.objects.count(), 'icon': 'bi-pc-display', 'list_url': 'inventario:computadora_list'},
+        {'label': 'Impresoras',   'total': Impresora.objects.count(),   'icon': 'bi-printer',    'list_url': 'inventario:impresora_list'},
+        {'label': 'Monitores',    'total': Monitor.objects.count(),     'icon': 'bi-display',    'list_url': 'inventario:monitor_list'},
+        {'label': 'Networking',   'total': Networking.objects.count(),  'icon': 'bi-router',     'list_url': 'inventario:networking_list'},
+        {'label': 'Telefonía',    'total': Telefonia.objects.count(),   'icon': 'bi-telephone',  'list_url': 'inventario:telefonia_list'},
+        {'label': 'Periféricos',  'total': Periferico.objects.count(),  'icon': 'bi-mouse',      'list_url': 'inventario:periferico_list'},
+    ]
+    total_informatica = sum(a['total'] for a in informatica_summary)
+
+    # ── Tecnología Médica ─────────────────────────────────────────────────
+    from .models import TecnologiaMedica
+    total_medica       = TecnologiaMedica.objects.count()
+    medica_activos     = TecnologiaMedica.objects.filter(estado__nombre='Activo').count()
+    medica_mantenimiento = TecnologiaMedica.objects.filter(estado__nombre='Mantenimiento').count()
+
+    # ── Activos Generales ─────────────────────────────────────────────────
+    generales_summary = [
+        {'label': 'Mobiliario',   'total': Mobiliario.objects.count(),  'icon': 'bi-building',  'list_url': 'inventario:mobiliario_list'},
+        {'label': 'Vehículos',    'total': Vehiculo.objects.count(),    'icon': 'bi-car-front', 'list_url': 'inventario:vehiculo_list'},
+        {'label': 'Herramientas', 'total': Herramienta.objects.count(), 'icon': 'bi-tools',     'list_url': 'inventario:herramienta_list'},
+    ]
+    total_generales = sum(a['total'] for a in generales_summary)
+
+    # ── Garantías próximas (todos los módulos) ────────────────────────────
+    garantia_proxima = []
+    for model_cls, tipo_label, detail_url in [
+        (Computadora,    'Computadora',   'inventario:computadora_detail'),
+        (Impresora,      'Impresora',     'inventario:impresora_detail'),
+        (Monitor,        'Monitor',       'inventario:monitor_detail'),
+        (TecnologiaMedica, 'Tec. Médica', 'inventario:tecnologia_medica_detail'),
+        (Mobiliario,     'Mobiliario',    'inventario:mobiliario_detail'),
+        (Vehiculo,       'Vehículo',      'inventario:vehiculo_detail'),
+        (Herramienta,    'Herramienta',   'inventario:herramienta_detail'),
+    ]:
+        items = model_cls.objects.filter(
+            fecha_finalizacion_garantia__gte=today,
+            fecha_finalizacion_garantia__lte=limite_garantia,
+        ).select_related('estado')[:5]
+        for item in items:
+            garantia_proxima.append({
+                'nombre': str(item),
+                'tipo': tipo_label,
+                'fecha': item.fecha_finalizacion_garantia,
+                'detail_url': detail_url,
+                'pk': item.pk,
+            })
+    garantia_proxima.sort(key=lambda x: x['fecha'])
+
+    context = {
+        'menu_type': 'admin',
+        'informatica_summary': informatica_summary,
+        'total_informatica': total_informatica,
+        'total_medica': total_medica,
+        'medica_activos': medica_activos,
+        'medica_mantenimiento': medica_mantenimiento,
+        'generales_summary': generales_summary,
+        'total_generales': total_generales,
+        'garantia_proxima': garantia_proxima[:10],
+        'total_global': total_informatica + total_medica + total_generales,
+    }
+    return render(request, 'inventario/dashboard_administrador.html', context)
 
 
 def dashboard_activos_informaticos(request):
@@ -248,7 +339,7 @@ def dashboard_activos_informaticos(request):
             "label": "Computadoras",
             "model": Computadora,
             "icon": "bi-pc-display",
-            "gradient": "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+            "gradient_class": "bg-mod-computadora",
             "list_url_name": "inventario:computadora_list",
             "create_url_name": "inventario:computadora_create",
             "detail_url_name": "inventario:computadora_detail",
@@ -259,7 +350,7 @@ def dashboard_activos_informaticos(request):
             "label": "Impresoras",
             "model": Impresora,
             "icon": "bi-printer",
-            "gradient": "linear-gradient(135deg, #f97316 0%, #fb923c 100%)",
+            "gradient_class": "bg-mod-impresora",
             "list_url_name": "inventario:impresora_list",
             "create_url_name": "inventario:impresora_create",
             "detail_url_name": "inventario:impresora_detail",
@@ -270,7 +361,7 @@ def dashboard_activos_informaticos(request):
             "label": "Monitores",
             "model": Monitor,
             "icon": "bi-display",
-            "gradient": "linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%)",
+            "gradient_class": "bg-mod-monitor",
             "list_url_name": "inventario:monitor_list",
             "create_url_name": "inventario:monitor_create",
             "detail_url_name": "inventario:monitor_detail",
@@ -281,7 +372,7 @@ def dashboard_activos_informaticos(request):
             "label": "Networking",
             "model": Networking,
             "icon": "bi-diagram-3",
-            "gradient": "linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%)",
+            "gradient_class": "bg-mod-networking",
             "list_url_name": "inventario:networking_list",
             "create_url_name": "inventario:networking_create",
             "detail_url_name": "inventario:networking_detail",
@@ -292,7 +383,7 @@ def dashboard_activos_informaticos(request):
             "label": "Telefonía",
             "model": Telefonia,
             "icon": "bi-telephone-outbound",
-            "gradient": "linear-gradient(135deg, #ec4899 0%, #f472b6 100%)",
+            "gradient_class": "bg-mod-telefonia",
             "list_url_name": "inventario:telefonia_list",
             "create_url_name": "inventario:telefonia_create",
             "detail_url_name": "inventario:telefonia_detail",
@@ -303,7 +394,7 @@ def dashboard_activos_informaticos(request):
             "label": "Periféricos",
             "model": Periferico,
             "icon": "bi-keyboard",
-            "gradient": "linear-gradient(135deg, #facc15 0%, #fde047 100%)",
+            "gradient_class": "bg-mod-periferico",
             "list_url_name": "inventario:periferico_list",
             "create_url_name": "inventario:periferico_create",
             "detail_url_name": "inventario:periferico_detail",
@@ -314,7 +405,7 @@ def dashboard_activos_informaticos(request):
             "label": "Insumos TI",
             "model": Insumo,
             "icon": "bi-box-seam",
-            "gradient": "linear-gradient(135deg, #f43f5e 0%, #fb7185 100%)",
+            "gradient_class": "bg-mod-insumo",
             "list_url_name": "inventario:insumo_list",
             "create_url_name": "inventario:insumo_create",
             "detail_url_name": "inventario:insumo_detail",
@@ -325,7 +416,7 @@ def dashboard_activos_informaticos(request):
             "label": "Software",
             "model": Software,
             "icon": "bi-cpu",
-            "gradient": "linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)",
+            "gradient_class": "bg-mod-software",
             "list_url_name": "inventario:software_list",
             "create_url_name": "inventario:software_create",
             "detail_url_name": "inventario:software_detail",
@@ -379,7 +470,7 @@ def dashboard_activos_informaticos(request):
                 "active": activos,
                 "active_percentage": active_percentage,
                 "icon": cfg["icon"],
-                "gradient": cfg["gradient"],
+                "gradient_class": cfg["gradient_class"],
                 "list_url": reverse(cfg["list_url_name"]),
                 "create_url": reverse(cfg["create_url_name"]),
             }
@@ -800,34 +891,34 @@ def dashboard_tecnologia_medica(request):
     context = {
         'total_equipos': total_equipos,
         'equipos_activos': equipos_activos,
-        'equipos_mantenimiento': equipos_mantenimiento,
+        'equipos_en_mantenimiento': equipos_mantenimiento,
         'equipos_inactivos': equipos_inactivos,
         'equipos_criticos': equipos_criticos,
         'active_ratio': active_ratio,
-        
+
         # Gráficos
         'clasificacion_labels': clasificacion_labels,
         'clasificacion_data': clasificacion_data,
         'clasificacion_colors': clasificacion_color_list,
-        
+
         'tipo_labels': tipo_labels,
         'tipo_data': tipo_data,
         'tipo_colors': tipo_colors[:len(tipo_labels)],
-        
+
         'estado_labels': estado_labels,
         'estado_data': estado_data,
         'estado_colors': estado_colors[:len(estado_labels)],
-        
+
         # Alertas y listados
         'equipos_calibracion': equipos_calibracion[:10],
         'equipos_mantenimiento': equipos_mantenimiento_list[:10],
         'equipos_recientes': recent_items,
         'bitacora_feed': bitacora_feed,
-        
+
         # Contadores de alertas
         'alertas_calibracion': len(equipos_calibracion),
         'alertas_mantenimiento': len(equipos_mantenimiento_list),
-        
+
         'today': today,
         'dashboard_type': 'medica',
         'dashboard_title': 'Tecnología Médica',
@@ -3517,4 +3608,518 @@ class OrdenServicioDeleteView(DeleteView):
         numero = self.object.numero_orden
         mensaje = f'Orden de servicio "{numero}" eliminada exitosamente.'
         messages.success(request, mensaje)
+        return super().delete(request, *args, **kwargs)
+
+
+# ============================================================================
+# ACTIVOS GENERALES — DASHBOARD
+# ============================================================================
+
+
+@login_required
+def dashboard_activos_generales(request):
+    """Dashboard específico para Activos Generales (Mobiliario, Vehículos, Herramientas)."""
+    today = timezone.now().date()
+    limite_garantia = today + timedelta(days=30)
+
+    asset_configs = [
+        {
+            "key": "mobiliario",
+            "label": "Mobiliario",
+            "model": Mobiliario,
+            "icon": "bi-building",
+            "gradient_class": "bg-mod-mobiliario",
+            "list_url_name": "inventario:mobiliario_list",
+            "create_url_name": "inventario:mobiliario_create",
+            "detail_url_name": "inventario:mobiliario_detail",
+            "has_estado": True,
+        },
+        {
+            "key": "vehiculo",
+            "label": "Vehículos",
+            "model": Vehiculo,
+            "icon": "bi-car-front",
+            "gradient_class": "bg-mod-vehiculo",
+            "list_url_name": "inventario:vehiculo_list",
+            "create_url_name": "inventario:vehiculo_create",
+            "detail_url_name": "inventario:vehiculo_detail",
+            "has_estado": True,
+        },
+        {
+            "key": "herramienta",
+            "label": "Herramientas",
+            "model": Herramienta,
+            "icon": "bi-tools",
+            "gradient_class": "bg-mod-herramienta",
+            "list_url_name": "inventario:herramienta_list",
+            "create_url_name": "inventario:herramienta_create",
+            "detail_url_name": "inventario:herramienta_detail",
+            "has_estado": True,
+        },
+    ]
+
+    asset_summary = []
+    for cfg in asset_configs:
+        model = cfg["model"]
+        total = model.objects.count()
+        activos = model.objects.filter(estado__nombre="Activo").count() if cfg["has_estado"] else total
+        mantenimiento = model.objects.filter(estado__nombre="Mantenimiento").count() if cfg["has_estado"] else 0
+        garantia_proxima = model.objects.filter(
+            fecha_finalizacion_garantia__gte=today,
+            fecha_finalizacion_garantia__lte=limite_garantia,
+        ).count()
+        asset_summary.append({
+            "key": cfg["key"],
+            "label": cfg["label"],
+            "icon": cfg["icon"],
+            "gradient_class": cfg["gradient_class"],
+            "total": total,
+            "activos": activos,
+            "mantenimiento": mantenimiento,
+            "garantia_proxima": garantia_proxima,
+            "list_url_name": cfg["list_url_name"],
+            "create_url_name": cfg["create_url_name"],
+        })
+
+    # Activos con garantía próxima a vencer
+    garantia_proxima_list = []
+    for cfg in asset_configs:
+        model = cfg["model"]
+        items = model.objects.filter(
+            fecha_finalizacion_garantia__gte=today,
+            fecha_finalizacion_garantia__lte=limite_garantia,
+        ).select_related("estado", "lugar")[:5]
+        for item in items:
+            garantia_proxima_list.append({
+                "nombre": str(item),
+                "tipo": cfg["label"],
+                "fecha_finalizacion_garantia": item.fecha_finalizacion_garantia,
+                "detail_url_name": cfg["detail_url_name"],
+                "pk": item.pk,
+            })
+
+    context = {
+        "menu_type": "generales",
+        "asset_summary": asset_summary,
+        "garantia_proxima_list": garantia_proxima_list,
+        "total_activos_generales": sum(a["total"] for a in asset_summary),
+    }
+    return render(request, "inventario/dashboard_activos_generales.html", context)
+
+
+# ============================================================================
+# ACTIVOS GENERALES — MOBILIARIO
+# ============================================================================
+
+
+class MobiliarioListView(MenuContextMixin, LugarFilterMixin, ListView):
+    """Vista de lista para mobiliario"""
+
+    model = Mobiliario
+    template_name = "inventario/mobiliario_list.html"
+    context_object_name = "object_list"
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = (
+            Mobiliario.objects.select_related(
+                "estado", "lugar", "tipo_mobiliario", "fabricante", "modelo",
+            )
+            .all()
+            .order_by("-fecha_creacion")
+        )
+
+        search = self.request.GET.get("search")
+        if search:
+            queryset = queryset.filter(
+                Q(nombre__icontains=search)
+                | Q(numero_inventario__icontains=search)
+                | Q(numero_serie__icontains=search)
+                | Q(material__icontains=search)
+                | Q(fabricante__nombre__icontains=search)
+            )
+
+        estado = self.request.GET.get("estado")
+        if estado:
+            queryset = queryset.filter(estado__nombre=estado)
+
+        tipo = self.request.GET.get("tipo")
+        if tipo:
+            queryset = queryset.filter(tipo_mobiliario__nombre=tipo)
+
+        queryset = self.aplicar_filtro_lugar(queryset)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["total_mobiliario"] = Mobiliario.objects.count()
+        context["mobiliario_activo"] = Mobiliario.objects.filter(estado__nombre="Activo").count()
+        context["mobiliario_mantenimiento"] = Mobiliario.objects.filter(estado__nombre="Mantenimiento").count()
+        context["mobiliario_inactivo"] = Mobiliario.objects.filter(estado__nombre="Inactivo").count()
+        context["estados"] = Estado.objects.all().order_by("nombre")
+        context["tipos"] = TipoMobiliario.objects.all().order_by("nombre")
+        self.agregar_contexto_lugar(context)
+        return context
+
+
+class MobiliarioDetailView(DetailView):
+    """Vista de detalle para mobiliario"""
+
+    model = Mobiliario
+    template_name = "inventario/mobiliario_detail.html"
+    context_object_name = "object"
+
+    def get_queryset(self):
+        return Mobiliario.objects.select_related(
+            "estado", "lugar", "tipo_mobiliario", "fabricante", "modelo", "proveedor", "tipo_garantia",
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["bitacoras_recientes"] = Bitacora.objects.filter(
+            tipo_dispositivo="mobiliario",
+            dispositivo_id=self.object.pk,
+        ).order_by("-fecha_evento")[:10]
+        return context
+
+
+class MobiliarioCreateView(CreateView):
+    """Vista para crear mobiliario"""
+
+    model = Mobiliario
+    form_class = MobiliarioForm
+    template_name = "inventario/mobiliario_form.html"
+    success_url = reverse_lazy("inventario:mobiliario_list")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            "device_type": "mobiliario",
+            "form_id": "mobiliarioForm",
+            "list_url": reverse("inventario:mobiliario_list"),
+            "detail_url": None,
+        })
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, f'Mobiliario "{form.instance.nombre}" creado exitosamente.')
+        return super().form_valid(form)
+
+
+class MobiliarioUpdateView(RedirectToListMixin, UpdateView):
+    """Vista para editar mobiliario"""
+
+    model = Mobiliario
+    form_class = MobiliarioForm
+    template_name = "inventario/mobiliario_form.html"
+    success_url = reverse_lazy("inventario:mobiliario_list")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["bitacoras_recientes"] = Bitacora.objects.filter(
+            tipo_dispositivo="mobiliario",
+            dispositivo_id=self.object.pk,
+        ).order_by("-fecha_evento")[:5]
+        context.update({
+            "device_type": "mobiliario",
+            "form_id": "mobiliarioForm",
+            "list_url": reverse("inventario:mobiliario_list"),
+            "detail_url": reverse("inventario:mobiliario_detail", kwargs={"pk": self.object.pk}),
+        })
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, f'Mobiliario "{form.instance.nombre}" actualizado exitosamente.')
+        return super().form_valid(form)
+
+
+class MobiliarioDeleteView(DeleteView):
+    """Vista para eliminar mobiliario"""
+
+    model = Mobiliario
+    success_url = reverse_lazy("inventario:mobiliario_list")
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        messages.success(request, f'Mobiliario "{self.object.nombre}" eliminado exitosamente.')
+        return super().delete(request, *args, **kwargs)
+
+
+# ============================================================================
+# ACTIVOS GENERALES — VEHÍCULOS
+# ============================================================================
+
+
+class VehiculoListView(MenuContextMixin, LugarFilterMixin, ListView):
+    """Vista de lista para vehículos"""
+
+    model = Vehiculo
+    template_name = "inventario/vehiculo_list.html"
+    context_object_name = "object_list"
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = (
+            Vehiculo.objects.select_related(
+                "estado", "lugar", "tipo_vehiculo", "fabricante", "modelo",
+            )
+            .all()
+            .order_by("-fecha_creacion")
+        )
+
+        search = self.request.GET.get("search")
+        if search:
+            queryset = queryset.filter(
+                Q(nombre__icontains=search)
+                | Q(numero_inventario__icontains=search)
+                | Q(matricula__icontains=search)
+                | Q(color__icontains=search)
+                | Q(fabricante__nombre__icontains=search)
+            )
+
+        estado = self.request.GET.get("estado")
+        if estado:
+            queryset = queryset.filter(estado__nombre=estado)
+
+        tipo = self.request.GET.get("tipo")
+        if tipo:
+            queryset = queryset.filter(tipo_vehiculo__nombre=tipo)
+
+        queryset = self.aplicar_filtro_lugar(queryset)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["total_vehiculos"] = Vehiculo.objects.count()
+        context["vehiculos_activos"] = Vehiculo.objects.filter(estado__nombre="Activo").count()
+        context["vehiculos_mantenimiento"] = Vehiculo.objects.filter(estado__nombre="Mantenimiento").count()
+        context["vehiculos_inactivos"] = Vehiculo.objects.filter(estado__nombre="Inactivo").count()
+        context["estados"] = Estado.objects.all().order_by("nombre")
+        context["tipos"] = TipoVehiculo.objects.all().order_by("nombre")
+        self.agregar_contexto_lugar(context)
+        return context
+
+
+class VehiculoDetailView(DetailView):
+    """Vista de detalle para vehículos"""
+
+    model = Vehiculo
+    template_name = "inventario/vehiculo_detail.html"
+    context_object_name = "object"
+
+    def get_queryset(self):
+        return Vehiculo.objects.select_related(
+            "estado", "lugar", "tipo_vehiculo", "fabricante", "modelo", "proveedor", "tipo_garantia",
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["bitacoras_recientes"] = Bitacora.objects.filter(
+            tipo_dispositivo="vehiculo",
+            dispositivo_id=self.object.pk,
+        ).order_by("-fecha_evento")[:10]
+        return context
+
+
+class VehiculoCreateView(CreateView):
+    """Vista para crear vehículos"""
+
+    model = Vehiculo
+    form_class = VehiculoForm
+    template_name = "inventario/vehiculo_form.html"
+    success_url = reverse_lazy("inventario:vehiculo_list")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            "device_type": "vehiculo",
+            "form_id": "vehiculoForm",
+            "list_url": reverse("inventario:vehiculo_list"),
+            "detail_url": None,
+        })
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, f'Vehículo "{form.instance.nombre}" creado exitosamente.')
+        return super().form_valid(form)
+
+
+class VehiculoUpdateView(RedirectToListMixin, UpdateView):
+    """Vista para editar vehículos"""
+
+    model = Vehiculo
+    form_class = VehiculoForm
+    template_name = "inventario/vehiculo_form.html"
+    success_url = reverse_lazy("inventario:vehiculo_list")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["bitacoras_recientes"] = Bitacora.objects.filter(
+            tipo_dispositivo="vehiculo",
+            dispositivo_id=self.object.pk,
+        ).order_by("-fecha_evento")[:5]
+        context.update({
+            "device_type": "vehiculo",
+            "form_id": "vehiculoForm",
+            "list_url": reverse("inventario:vehiculo_list"),
+            "detail_url": reverse("inventario:vehiculo_detail", kwargs={"pk": self.object.pk}),
+        })
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, f'Vehículo "{form.instance.nombre}" actualizado exitosamente.')
+        return super().form_valid(form)
+
+
+class VehiculoDeleteView(DeleteView):
+    """Vista para eliminar vehículos"""
+
+    model = Vehiculo
+    success_url = reverse_lazy("inventario:vehiculo_list")
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        messages.success(request, f'Vehículo "{self.object.nombre}" eliminado exitosamente.')
+        return super().delete(request, *args, **kwargs)
+
+
+# ============================================================================
+# ACTIVOS GENERALES — HERRAMIENTAS
+# ============================================================================
+
+
+class HerramientaListView(MenuContextMixin, LugarFilterMixin, ListView):
+    """Vista de lista para herramientas"""
+
+    model = Herramienta
+    template_name = "inventario/herramienta_list.html"
+    context_object_name = "object_list"
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = (
+            Herramienta.objects.select_related(
+                "estado", "lugar", "tipo_herramienta", "fabricante", "modelo",
+            )
+            .all()
+            .order_by("-fecha_creacion")
+        )
+
+        search = self.request.GET.get("search")
+        if search:
+            queryset = queryset.filter(
+                Q(nombre__icontains=search)
+                | Q(numero_inventario__icontains=search)
+                | Q(numero_serie__icontains=search)
+                | Q(fabricante__nombre__icontains=search)
+            )
+
+        estado = self.request.GET.get("estado")
+        if estado:
+            queryset = queryset.filter(estado__nombre=estado)
+
+        tipo = self.request.GET.get("tipo")
+        if tipo:
+            queryset = queryset.filter(tipo_herramienta__nombre=tipo)
+
+        calibracion = self.request.GET.get("calibracion")
+        if calibracion == "1":
+            queryset = queryset.filter(requiere_calibracion=True)
+
+        queryset = self.aplicar_filtro_lugar(queryset)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["total_herramientas"] = Herramienta.objects.count()
+        context["herramientas_activas"] = Herramienta.objects.filter(estado__nombre="Activo").count()
+        context["herramientas_mantenimiento"] = Herramienta.objects.filter(estado__nombre="Mantenimiento").count()
+        context["herramientas_inactivas"] = Herramienta.objects.filter(estado__nombre="Inactivo").count()
+        context["herramientas_calibracion"] = Herramienta.objects.filter(requiere_calibracion=True).count()
+        context["estados"] = Estado.objects.all().order_by("nombre")
+        context["tipos"] = TipoHerramienta.objects.all().order_by("nombre")
+        self.agregar_contexto_lugar(context)
+        return context
+
+
+class HerramientaDetailView(DetailView):
+    """Vista de detalle para herramientas"""
+
+    model = Herramienta
+    template_name = "inventario/herramienta_detail.html"
+    context_object_name = "object"
+
+    def get_queryset(self):
+        return Herramienta.objects.select_related(
+            "estado", "lugar", "tipo_herramienta", "fabricante", "modelo", "proveedor", "tipo_garantia",
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["bitacoras_recientes"] = Bitacora.objects.filter(
+            tipo_dispositivo="herramienta",
+            dispositivo_id=self.object.pk,
+        ).order_by("-fecha_evento")[:10]
+        return context
+
+
+class HerramientaCreateView(CreateView):
+    """Vista para crear herramientas"""
+
+    model = Herramienta
+    form_class = HerramientaForm
+    template_name = "inventario/herramienta_form.html"
+    success_url = reverse_lazy("inventario:herramienta_list")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            "device_type": "herramienta",
+            "form_id": "herramientaForm",
+            "list_url": reverse("inventario:herramienta_list"),
+            "detail_url": None,
+        })
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, f'Herramienta "{form.instance.nombre}" creada exitosamente.')
+        return super().form_valid(form)
+
+
+class HerramientaUpdateView(RedirectToListMixin, UpdateView):
+    """Vista para editar herramientas"""
+
+    model = Herramienta
+    form_class = HerramientaForm
+    template_name = "inventario/herramienta_form.html"
+    success_url = reverse_lazy("inventario:herramienta_list")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["bitacoras_recientes"] = Bitacora.objects.filter(
+            tipo_dispositivo="herramienta",
+            dispositivo_id=self.object.pk,
+        ).order_by("-fecha_evento")[:5]
+        context.update({
+            "device_type": "herramienta",
+            "form_id": "herramientaForm",
+            "list_url": reverse("inventario:herramienta_list"),
+            "detail_url": reverse("inventario:herramienta_detail", kwargs={"pk": self.object.pk}),
+        })
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, f'Herramienta "{form.instance.nombre}" actualizada exitosamente.')
+        return super().form_valid(form)
+
+
+class HerramientaDeleteView(DeleteView):
+    """Vista para eliminar herramientas"""
+
+    model = Herramienta
+    success_url = reverse_lazy("inventario:herramienta_list")
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        messages.success(request, f'Herramienta "{self.object.nombre}" eliminada exitosamente.')
         return super().delete(request, *args, **kwargs)

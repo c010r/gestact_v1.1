@@ -37,6 +37,12 @@ router.register(r'insumos', views.InsumoViewSet)
 router.register(r'tipos-software', views.TipoSoftwareViewSet)
 router.register(r'software', views.SoftwareViewSet)
 router.register(r'ordenes-servicio', views.OrdenServicioViewSet)
+router.register(r'tipos-mobiliario', views.TipoMobiliarioViewSet)
+router.register(r'mobiliario', views.MobiliarioViewSet)
+router.register(r'tipos-vehiculo', views.TipoVehiculoViewSet)
+router.register(r'vehiculos', views.VehiculoViewSet)
+router.register(r'tipos-herramienta', views.TipoHerramientaViewSet)
+router.register(r'herramientas', views.HerramientaViewSet)
 
 app_name = 'inventario'
 
@@ -120,8 +126,13 @@ urlpatterns = [
     # Frontend URLs
     # Dashboard Selector
     path('', frontend_views.dashboard_selector, name='dashboard'),
-    
+
     # Dashboards Específicos
+    path(
+        'admin-panel/',
+        frontend_views.dashboard_administrador,
+        name='dashboard_admin'
+    ),
     path(
         'dashboard/informatica/',
         frontend_views.dashboard_activos_informaticos,
@@ -131,6 +142,11 @@ urlpatterns = [
         'dashboard/tecnologia-medica/',
         frontend_views.dashboard_tecnologia_medica,
         name='dashboard_medica'
+    ),
+    path(
+        'dashboard/activos-generales/',
+        frontend_views.dashboard_activos_generales,
+        name='dashboard_generales'
     ),
     
     path('reportes/', frontend_views.reports_menu, name='reports_menu'),
@@ -420,6 +436,87 @@ urlpatterns = [
         name='orden_servicio_delete',
     ),
     
+    # Mobiliario
+    path(
+        'mobiliario/',
+        frontend_views.MobiliarioListView.as_view(),
+        name='mobiliario_list',
+    ),
+    path(
+        'mobiliario/<int:pk>/',
+        frontend_views.MobiliarioDetailView.as_view(),
+        name='mobiliario_detail',
+    ),
+    path(
+        'mobiliario/crear/',
+        frontend_views.MobiliarioCreateView.as_view(),
+        name='mobiliario_create',
+    ),
+    path(
+        'mobiliario/<int:pk>/editar/',
+        frontend_views.MobiliarioUpdateView.as_view(),
+        name='mobiliario_update',
+    ),
+    path(
+        'mobiliario/<int:pk>/eliminar/',
+        frontend_views.MobiliarioDeleteView.as_view(),
+        name='mobiliario_delete',
+    ),
+
+    # Vehículos
+    path(
+        'vehiculos/',
+        frontend_views.VehiculoListView.as_view(),
+        name='vehiculo_list',
+    ),
+    path(
+        'vehiculos/<int:pk>/',
+        frontend_views.VehiculoDetailView.as_view(),
+        name='vehiculo_detail',
+    ),
+    path(
+        'vehiculos/crear/',
+        frontend_views.VehiculoCreateView.as_view(),
+        name='vehiculo_create',
+    ),
+    path(
+        'vehiculos/<int:pk>/editar/',
+        frontend_views.VehiculoUpdateView.as_view(),
+        name='vehiculo_update',
+    ),
+    path(
+        'vehiculos/<int:pk>/eliminar/',
+        frontend_views.VehiculoDeleteView.as_view(),
+        name='vehiculo_delete',
+    ),
+
+    # Herramientas
+    path(
+        'herramientas/',
+        frontend_views.HerramientaListView.as_view(),
+        name='herramienta_list',
+    ),
+    path(
+        'herramientas/<int:pk>/',
+        frontend_views.HerramientaDetailView.as_view(),
+        name='herramienta_detail',
+    ),
+    path(
+        'herramientas/crear/',
+        frontend_views.HerramientaCreateView.as_view(),
+        name='herramienta_create',
+    ),
+    path(
+        'herramientas/<int:pk>/editar/',
+        frontend_views.HerramientaUpdateView.as_view(),
+        name='herramienta_update',
+    ),
+    path(
+        'herramientas/<int:pk>/eliminar/',
+        frontend_views.HerramientaDeleteView.as_view(),
+        name='herramienta_delete',
+    ),
+
     # Bitácoras
     path(
         'bitacoras/',

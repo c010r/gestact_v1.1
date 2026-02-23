@@ -1,0 +1,129 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Dashboard Activos Generales - ASSE-GestACT{% endblock %}
+
+{% block content %}
+<div class="dashboard-page fade-in">
+
+    <!-- Hero -->
+    <div class="dash-hero bg-mod-generales">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+            <span class="dash-hero-badge">Activos Generales</span>
+            <a href="{% url 'inventario:dashboard' %}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-house me-1"></i>Inicio
+            </a>
+        </div>
+        <h1 class="dash-hero-title"><i class="bi bi-building me-2"></i>Activos Generales</h1>
+        <p class="dash-hero-subtitle">Gestión de mobiliario, vehículos y herramientas — {{ total_activos_generales }} activos registrados</p>
+    </div>
+
+    <!-- Tarjetas por tipo de activo -->
+    <div class="row g-4">
+        {% for asset in asset_summary %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header text-white d-flex align-items-center {{ asset.gradient_class }}">
+                    <i class="bi {{ asset.icon }} fs-4 me-2"></i>
+                    <h5 class="mb-0">{{ asset.label }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center g-2">
+                        <div class="col-4">
+                            <div class="fw-bold fs-4">{{ asset.total }}</div>
+                            <small class="text-muted">Total</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="fw-bold fs-4 text-success">{{ asset.activos }}</div>
+                            <small class="text-muted">Activos</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="fw-bold fs-4 text-warning">{{ asset.mantenimiento }}</div>
+                            <small class="text-muted">Mantenimiento</small>
+                        </div>
+                    </div>
+                    {% if asset.garantia_proxima > 0 %}
+                    <div class="alert alert-warning mt-3 mb-0 py-1 px-2">
+                        <small><i class="bi bi-exclamation-triangle me-1"></i>{{ asset.garantia_proxima }} con garantía próxima a vencer</small>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-transparent d-flex gap-2">
+                    <a href="{% url asset.list_url_name %}" class="btn btn-outline-primary btn-sm flex-fill">
+                        <i class="bi bi-list-ul me-1"></i>Ver todos
+                    </a>
+                    <a href="{% url asset.create_url_name %}" class="btn btn-primary btn-sm flex-fill">
+                        <i class="bi bi-plus-circle me-1"></i>Agregar
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Garantías próximas a vencer -->
+    {% if garantia_proxima_list %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-exclamation-triangle text-warning me-2"></i>Garantías próximas a vencer (próximos 30 días)
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Activo</th>
+                            <th>Tipo</th>
+                            <th>Vence</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in garantia_proxima_list %}
+                        <tr>
+                            <td><strong>{{ item.nombre }}</strong></td>
+                            <td><span class="badge bg-secondary">{{ item.tipo }}</span></td>
+                            <td>{{ item.fecha_finalizacion_garantia|date:'d/m/Y' }}</td>
+                            <td class="text-end">
+                                <a href="{% url item.detail_url_name item.pk %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Accesos rápidos -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-lightning-charge me-2"></i>Accesos rápidos</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <a href="{% url 'inventario:mobiliario_create' %}" class="btn btn-outline-warning w-100">
+                        <i class="bi bi-building me-2"></i>Registrar mobiliario
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{% url 'inventario:vehiculo_create' %}" class="btn btn-outline-success w-100">
+                        <i class="bi bi-car-front me-2"></i>Registrar vehículo
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{% url 'inventario:herramienta_create' %}" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-tools me-2"></i>Registrar herramienta
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

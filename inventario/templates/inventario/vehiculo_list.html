@@ -1,0 +1,216 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Vehículos - ASSE-GestACT{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h1 class="display-6 fw-bold text-gradient mb-0">
+                <i class="bi bi-car-front me-2"></i>Vehículos
+            </h1>
+            <p class="text-muted mb-0">Gestiona la flota vehicular de la organización.</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'inventario:vehiculo_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Agregar Vehículo
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="search" class="form-label">Buscar</label>
+                    <input type="text" id="search" name="search" class="form-control"
+                           value="{{ request.GET.search }}" placeholder="Nombre, matrícula, color...">
+                </div>
+                <div class="col-md-2">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select id="estado" name="estado" class="form-select">
+                        <option value="">Todos</option>
+                        {% for estado in estados %}
+                            <option value="{{ estado.nombre }}" {% if request.GET.estado == estado.nombre %}selected{% endif %}>{{ estado.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="tipo" class="form-label">Tipo</label>
+                    <select id="tipo" name="tipo" class="form-select">
+                        <option value="">Todos</option>
+                        {% for tipo in tipos %}
+                            <option value="{{ tipo.nombre }}" {% if request.GET.tipo == tipo.nombre %}selected{% endif %}>{{ tipo.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="filtro-lugar-vehiculo" class="form-label">Ubicación</label>
+                    <div
+                        id="filtro-lugar-vehiculo"
+                        class="tree-select-filter"
+                        data-input-name="lugar"
+                        data-input-id="filtro-lugar-vehiculo"
+                        data-selected-value="{{ selected_lugar|default:''|escape }}"
+                        data-selected-label="{{ selected_lugar_label|default:''|escape }}"
+                        data-placeholder="Todas las ubicaciones">
+                    </div>
+                </div>
+                <div class="col-md-3 d-flex align-items-end justify-content-end gap-2">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="bi bi-search me-2"></i>Filtrar
+                    </button>
+                    <a href="{% url 'inventario:vehiculo_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle me-2"></i>Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row mb-4 g-3">
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="bi bi-car-front display-5 text-primary mb-2"></i>
+                    <h5 class="card-title mb-0">{{ total_vehiculos }}</h5>
+                    <small class="text-muted">Total de vehículos</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="bi bi-check-circle display-5 text-success mb-2"></i>
+                    <h5 class="card-title mb-0">{{ vehiculos_activos }}</h5>
+                    <small class="text-muted">Activos</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="bi bi-tools display-5 text-warning mb-2"></i>
+                    <h5 class="card-title mb-0">{{ vehiculos_mantenimiento }}</h5>
+                    <small class="text-muted">En mantenimiento</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="bi bi-x-circle display-5 text-danger mb-2"></i>
+                    <h5 class="card-title mb-0">{{ vehiculos_inactivos }}</h5>
+                    <small class="text-muted">Inactivos</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0"><i class="bi bi-list-ul me-2"></i>Listado</h5>
+        </div>
+        <div class="card-body p-0">
+            {% if object_list %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Matrícula</th>
+                                <th>Tipo</th>
+                                <th>Año</th>
+                                <th>Color</th>
+                                <th>Estado</th>
+                                <th>Ubicación</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in object_list %}
+                            <tr>
+                                <td><strong>{{ item.nombre }}</strong></td>
+                                <td><code>{{ item.matricula }}</code></td>
+                                <td>{{ item.tipo_vehiculo|default:'-' }}</td>
+                                <td>{{ item.anio_fabricacion|default:'-' }}</td>
+                                <td>{{ item.color|default:'-' }}</td>
+                                <td>{% include 'inventario/partials/estado_badge.html' with estado=item.estado.nombre %}</td>
+                                <td>{{ item.lugar|default:'-' }}</td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'inventario:vehiculo_detail' item.pk %}" class="btn btn-primary text-white" title="Ver detalles">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'inventario:vehiculo_update' item.pk %}" class="btn btn-warning text-dark" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-danger text-white" onclick="confirmDelete('{{ item.pk }}', '{{ item.nombre }}')" title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="py-5 text-center">
+                    <i class="bi bi-car-front display-1 text-muted mb-3"></i>
+                    <h5 class="text-muted">No se encontraron vehículos</h5>
+                    <p class="text-muted">Ajusta los filtros o registra un nuevo vehículo.</p>
+                    <a href="{% url 'inventario:vehiculo_create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Registrar vehículo
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if is_paginated %}
+    <nav class="mt-4" aria-label="Paginación">
+        <ul class="pagination justify-content-center mb-0">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}&{{ request.GET.urlencode }}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDelete(itemId, itemName) {
+    if (!window.bootstrap) {
+        window.location.href = `/vehiculos/${itemId}/eliminar/`;
+        return;
+    }
+    document.getElementById('deleteItemName').textContent = itemName;
+    document.getElementById('deleteForm').action = `/vehiculos/${itemId}/eliminar/`;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+</script>
+{% include 'inventario/partials/delete_modal.html' with resource_label='vehículo' %}
+{% endblock %}

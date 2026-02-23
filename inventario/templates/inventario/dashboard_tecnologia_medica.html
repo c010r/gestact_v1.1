@@ -4,69 +4,56 @@
 {% block title %}Dashboard Tecnología Médica - ASSE-GestACT{% endblock %}
 
 {% block content %}
-<div class="fade-in">
-    <!-- Header con selector de dashboard -->
-    <div class="row mb-4">
-        <div class="col-md-10">
-            <h1 class="display-6 fw-bold text-gradient mb-0">
-                <i class="bi bi-heart-pulse me-2" style="color: #dc2626;"></i>{{ dashboard_title }}
-            </h1>
-            <p class="text-muted">Gestión y monitoreo de equipos médicos</p>
-        </div>
-        <div class="col-md-2 text-end">
-            <a href="{% url 'inventario:dashboard' %}" class="btn btn-outline-secondary">
+<div class="dashboard-page fade-in">
+
+    <!-- Hero -->
+    <div class="dash-hero bg-mod-medica">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+            <span class="dash-hero-badge">Tecnología Médica</span>
+            <a href="{% url 'inventario:dashboard' %}" class="btn btn-outline-light btn-sm">
                 <i class="bi bi-house me-1"></i>Inicio
             </a>
         </div>
+        <h1 class="dash-hero-title"><i class="bi bi-heart-pulse me-2"></i>{{ dashboard_title }}</h1>
+        <p class="dash-hero-subtitle">Gestión y monitoreo de equipos médicos</p>
     </div>
 
-    <!-- Tarjetas de estadísticas -->
-    <div class="row g-4 mb-4">
-        <div class="col-lg-3 col-md-6">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <i class="bi bi-heart-pulse display-5 text-danger mb-2"></i>
-                    <h3 class="card-title mb-0">{{ total_equipos|intcomma }}</h3>
-                    <p class="card-text text-muted">Total Equipos Médicos</p>
-                </div>
+    <!-- Estadísticas -->
+    <div class="row g-3">
+        <div class="col-6 col-md-3">
+            <div class="dash-stat">
+                <span class="dash-stat-icon text-danger"><i class="bi bi-heart-pulse"></i></span>
+                <span class="dash-stat-value">{{ total_equipos|intcomma }}</span>
+                <span class="dash-stat-label">Total Equipos</span>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <i class="bi bi-check-circle display-5 text-success mb-2"></i>
-                    <h3 class="card-title mb-0">{{ equipos_activos|intcomma }}</h3>
-                    <p class="card-text text-muted">Equipos Activos</p>
-                    <small class="text-muted">{{ active_ratio }}% del total</small>
-                </div>
+        <div class="col-6 col-md-3">
+            <div class="dash-stat">
+                <span class="dash-stat-icon text-success"><i class="bi bi-check-circle"></i></span>
+                <span class="dash-stat-value">{{ equipos_activos|intcomma }}</span>
+                <span class="dash-stat-label">Activos ({{ active_ratio }}%)</span>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <i class="bi bi-exclamation-triangle display-5 text-warning mb-2"></i>
-                    <h3 class="card-title mb-0">{{ equipos_criticos|intcomma }}</h3>
-                    <p class="card-text text-muted">Equipos Críticos</p>
-                    <small class="text-muted">Clase III y IV</small>
-                </div>
+        <div class="col-6 col-md-3">
+            <div class="dash-stat">
+                <span class="dash-stat-icon text-warning"><i class="bi bi-exclamation-triangle"></i></span>
+                <span class="dash-stat-value">{{ equipos_criticos|intcomma }}</span>
+                <span class="dash-stat-label">Equipos Críticos</span>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <i class="bi bi-tools display-5 text-info mb-2"></i>
-                    <h3 class="card-title mb-0">{{ alertas_calibracion|add:alertas_mantenimiento }}</h3>
-                    <p class="card-text text-muted">Alertas Pendientes</p>
-                    <small class="text-muted">Calibración y mantenimiento</small>
-                </div>
+        <div class="col-6 col-md-3">
+            <div class="dash-stat">
+                <span class="dash-stat-icon text-info"><i class="bi bi-tools"></i></span>
+                <span class="dash-stat-value">{{ alertas_calibracion|add:alertas_mantenimiento }}</span>
+                <span class="dash-stat-label">Alertas Pendientes</span>
             </div>
         </div>
     </div>
 
     <!-- Gráficos -->
-    <div class="row g-4 mb-4">
+    <div class="row g-4">
         <div class="col-lg-6">
-            <div class="card h-100">
+            <div class="card h-100 border-0 shadow-sm">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Clasificación de Riesgo</h5>
                 </div>
@@ -76,7 +63,7 @@
             </div>
         </div>
         <div class="col-lg-6">
-            <div class="card h-100">
+            <div class="card h-100 border-0 shadow-sm">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Equipos por Tipo</h5>
                 </div>
@@ -88,9 +75,9 @@
     </div>
 
     <!-- Alertas de calibración y mantenimiento -->
-    <div class="row g-4 mb-4">
+    <div class="row g-4">
         <div class="col-lg-6">
-            <div class="card h-100">
+            <div class="card h-100 border-0 shadow-sm">
                 <div class="card-header bg-warning text-dark">
                     <h5 class="mb-0">
                         <i class="bi bi-tools me-2"></i>Requieren Calibración
@@ -112,9 +99,7 @@
                             <tbody>
                                 {% for equipo in equipos_calibracion %}
                                 <tr>
-                                    <td>
-                                        <a href="{{ equipo.url }}">{{ equipo.nombre|truncatewords:4 }}</a>
-                                    </td>
+                                    <td><a href="{{ equipo.url }}">{{ equipo.nombre|truncatewords:4 }}</a></td>
                                     <td><small>{{ equipo.tipo }}</small></td>
                                     <td><small>{{ equipo.clasificacion }}</small></td>
                                     <td><small>{{ equipo.fecha_ultima|date:'d/m/Y'|default:'-' }}</small></td>
@@ -134,7 +119,7 @@
         </div>
 
         <div class="col-lg-6">
-            <div class="card h-100">
+            <div class="card h-100 border-0 shadow-sm">
                 <div class="card-header bg-info text-white">
                     <h5 class="mb-0">
                         <i class="bi bi-wrench me-2"></i>Requieren Mantenimiento
@@ -156,9 +141,7 @@
                             <tbody>
                                 {% for equipo in equipos_mantenimiento %}
                                 <tr>
-                                    <td>
-                                        <a href="{{ equipo.url }}">{{ equipo.nombre|truncatewords:4 }}</a>
-                                    </td>
+                                    <td><a href="{{ equipo.url }}">{{ equipo.nombre|truncatewords:4 }}</a></td>
                                     <td><small>{{ equipo.tipo }}</small></td>
                                     <td><small>{{ equipo.area }}</small></td>
                                     <td><small>{{ equipo.fecha_ultima|date:'d/m/Y'|default:'-' }}</small></td>
@@ -181,7 +164,7 @@
     <!-- Equipos recientes y bitácora -->
     <div class="row g-4">
         <div class="col-lg-6">
-            <div class="card h-100">
+            <div class="card h-100 border-0 shadow-sm">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Equipos Recientes</h5>
                 </div>
@@ -200,13 +183,9 @@
                             <tbody>
                                 {% for equipo in equipos_recientes %}
                                 <tr>
-                                    <td>
-                                        <a href="{{ equipo.url }}">{{ equipo.nombre|truncatewords:4 }}</a>
-                                    </td>
+                                    <td><a href="{{ equipo.url }}">{{ equipo.nombre|truncatewords:4 }}</a></td>
                                     <td><small>{{ equipo.tipo }}</small></td>
-                                    <td>
-                                        <span class="badge bg-success">{{ equipo.estado }}</span>
-                                    </td>
+                                    <td><span class="badge bg-success">{{ equipo.estado }}</span></td>
                                     <td><small>{{ equipo.fecha|date:'d/m/Y' }}</small></td>
                                 </tr>
                                 {% endfor %}
@@ -223,7 +202,7 @@
         </div>
 
         <div class="col-lg-6">
-            <div class="card h-100">
+            <div class="card h-100 border-0 shadow-sm">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bi bi-journal-text me-2"></i>Bitácora Reciente</h5>
                 </div>
@@ -242,7 +221,7 @@
                                         {% else %}
                                         {{ entry.nombre }}
                                         {% endif %}
-                                        - {{ entry.descripcion|truncatewords:8 }}
+                                        — {{ entry.descripcion|truncatewords:8 }}
                                     </p>
                                 </div>
                                 <small class="text-muted">{{ entry.fecha|date:'d/m H:i' }}</small>
@@ -260,32 +239,34 @@
         </div>
     </div>
 
-    <!-- Acceso rápido -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Acceso Rápido</h5>
-                    <div class="btn-group" role="group">
-                        <a href="{% url 'inventario:tecnologia_medica_list' %}" class="btn btn-outline-danger">
-                            <i class="bi bi-list-ul me-1"></i>Ver Todos los Equipos
-                        </a>
-                        <a href="{% url 'inventario:tecnologia_medica_create' %}" class="btn btn-danger">
-                            <i class="bi bi-plus-circle me-1"></i>Agregar Nuevo Equipo
-                        </a>
-                    </div>
+    <!-- Accesos rápidos -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-lightning-charge me-2"></i>Accesos rápidos</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <a href="{% url 'inventario:tecnologia_medica_list' %}" class="btn btn-outline-danger w-100">
+                        <i class="bi bi-list-ul me-2"></i>Ver todos los equipos
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a href="{% url 'inventario:tecnologia_medica_create' %}" class="btn btn-danger w-100">
+                        <i class="bi bi-plus-circle me-2"></i>Agregar nuevo equipo
+                    </a>
                 </div>
             </div>
         </div>
     </div>
+
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-// Gráfico de clasificación de riesgo
-const ctxClasificacion = document.getElementById('chartClasificacion');
+var ctxClasificacion = document.getElementById('chartClasificacion');
 if (ctxClasificacion) {
     new Chart(ctxClasificacion, {
         type: 'doughnut',
@@ -299,17 +280,12 @@ if (ctxClasificacion) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
+            plugins: { legend: { position: 'bottom' } }
         }
     });
 }
 
-// Gráfico de equipos por tipo
-const ctxTipos = document.getElementById('chartTipos');
+var ctxTipos = document.getElementById('chartTipos');
 if (ctxTipos) {
     new Chart(ctxTipos, {
         type: 'bar',
@@ -324,22 +300,10 @@ if (ctxTipos) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
-                    }
-                }
-            }
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
         }
     });
 }
 </script>
 {% endblock %}
-
