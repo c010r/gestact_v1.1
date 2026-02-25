@@ -90,7 +90,7 @@ PYTHON311=$(command -v python3.11) || err "No se pudo instalar python3.11. Verif
 PY_VER=$("$PYTHON311" -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 ok "Python ${PY_VER} disponible en: ${PYTHON311}"
 
-[ "$(echo "$PY_VER >= 3.10" | bc)" -eq 1 ] || \
+"$PYTHON311" -c "import sys; sys.exit(0 if sys.version_info >= (3,10) else 1)" || \
     err "Python ${PY_VER} es demasiado antiguo para Django 5.x. Se necesita >= 3.10."
 
 ok "Dependencias base instaladas."
