@@ -482,6 +482,12 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
+# Crear archivos de log de Gunicorn con el dueño correcto ANTES de iniciar el servicio
+touch "/var/log/gunicorn_${APP_NAME}_access.log" "/var/log/gunicorn_${APP_NAME}_error.log"
+chown "${APP_USER}:${APP_GROUP}" \
+    "/var/log/gunicorn_${APP_NAME}_access.log" \
+    "/var/log/gunicorn_${APP_NAME}_error.log"
+
 systemctl daemon-reload
 systemctl enable  "gunicorn_${APP_NAME}.socket"
 systemctl restart "gunicorn_${APP_NAME}.socket"
