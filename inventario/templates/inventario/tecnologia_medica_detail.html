@@ -25,6 +25,7 @@
             <p class="text-muted mb-0">Descripción detallada del equipo de tecnología médica.</p>
         </div>
         <div class="btn-group">
+            <a href="{% url 'inventario:activo_etiqueta_qr' 'tecnologia_medica' object.pk %}" class="btn btn-outline-secondary" target="_blank" title="Imprimir Etiqueta QR"><i class="bi bi-qr-code me-1"></i>Etiqueta QR</a>
             <a href="{% url 'inventario:tecnologia_medica_update' object.pk %}" class="btn btn-warning text-dark">
                 <i class="bi bi-pencil me-2"></i>Editar
             </a>
@@ -166,6 +167,7 @@
                     </dl>
                 </div>
             </div>
+            {% include "inventario/_ordenes_servicio_card.html" %}
         </div>
 
         <div class="col-lg-4">

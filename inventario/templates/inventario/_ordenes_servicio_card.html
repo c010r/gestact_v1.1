@@ -1,0 +1,116 @@
+{% comment %}
+Template parcial: sección de Mantenimiento y Reparaciones en páginas de detalle.
+Requiere en el contexto:
+  - ordenes_servicio: queryset de OrdenServicio relacionadas al activo
+  - tipo_dispositivo_os: string del tipo (ej. 'computadora')
+  - object: instancia del activo
+
+El botón "Nueva Orden" pre-rellena el campo número de serie mediante GET param.
+{% endcomment %}
+
+{% if ordenes_servicio is not None %}
+<div class="card detail-card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 class="mb-0">
+            <i class="bi bi-tools me-2"></i>Mantenimiento y Reparaciones
+        </h5>
+        <div class="d-flex gap-2 flex-wrap">
+            {% if object.numero_serie %}
+                <a href="{% url 'inventario:orden_servicio_create' %}?numero_serie={{ object.numero_serie }}"
+                   class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i>Nueva Orden
+                </a>
+            {% elif tipo_dispositivo_os == 'software' and object.numero_licencia %}
+                <a href="{% url 'inventario:orden_servicio_create' %}?numero_serie={{ object.numero_licencia }}"
+                   class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i>Nueva Orden
+                </a>
+            {% else %}
+                <a href="{% url 'inventario:orden_servicio_create' %}"
+                   class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i>Nueva Orden
+                </a>
+            {% endif %}
+            <a href="{% url 'inventario:orden_servicio_list' %}"
+               class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-list-ul me-1"></i>Ver Todas
+            </a>
+        </div>
+    </div>
+
+    <div class="card-body p-0">
+        {% if ordenes_servicio %}
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">N° Orden</th>
+                            <th>Tipo</th>
+                            <th>Estado</th>
+                            <th>Prioridad</th>
+                            <th>Fecha</th>
+                            <th>Técnico</th>
+                            <th class="pe-3"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for orden in ordenes_servicio %}
+                        <tr>
+                            <td class="ps-3">
+                                <span class="font-monospace small fw-bold">{{ orden.numero_orden }}</span>
+                            </td>
+                            <td>{{ orden.get_tipo_servicio_display }}</td>
+                            <td>
+                                {% if orden.estado == 'pendiente' %}
+                                    <span class="badge bg-warning text-dark">Pendiente</span>
+                                {% elif orden.estado == 'en_proceso' %}
+                                    <span class="badge bg-primary">En Proceso</span>
+                                {% elif orden.estado == 'en_espera_repuesto' %}
+                                    <span class="badge bg-info text-dark">Espera Repuesto</span>
+                                {% elif orden.estado == 'completada' %}
+                                    <span class="badge bg-success">Completada</span>
+                                {% elif orden.estado == 'cancelada' %}
+                                    <span class="badge bg-secondary">Cancelada</span>
+                                {% else %}
+                                    <span class="badge bg-light text-dark">{{ orden.get_estado_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if orden.prioridad == 'critica' %}
+                                    <span class="badge bg-danger">Crítica</span>
+                                {% elif orden.prioridad == 'alta' %}
+                                    <span class="badge bg-warning text-dark">Alta</span>
+                                {% elif orden.prioridad == 'media' %}
+                                    <span class="badge bg-info text-dark">Media</span>
+                                {% else %}
+                                    <span class="badge bg-light text-dark">Baja</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-nowrap">{{ orden.fecha_solicitud|date:"d/m/Y" }}</td>
+                            <td>{{ orden.tecnico_asignado|default:"—" }}</td>
+                            <td class="pe-3 text-end">
+                                <a href="{% url 'inventario:orden_servicio_detail' orden.pk %}"
+                                   class="btn btn-xs btn-outline-secondary btn-sm py-0 px-2"
+                                   title="Ver detalle">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'inventario:orden_servicio_pdf' orden.pk %}"
+                                   class="btn btn-xs btn-outline-danger btn-sm py-0 px-2"
+                                   target="_blank" title="Ver PDF">
+                                    <i class="bi bi-file-pdf"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-4 text-muted">
+                <i class="bi bi-tools fs-2 d-block mb-2 opacity-50"></i>
+                <p class="mb-0">No hay órdenes de servicio registradas para este activo.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}

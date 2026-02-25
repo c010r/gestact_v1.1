@@ -17,7 +17,7 @@ const FacturacionCarrito = (() => {
     const selectors = {
         modal: '#modalCarritoFacturacion',
         tablaContainer: '#facturacion-items-container',
-        counter: '#facturacion-counter',
+        counter: '.facturacion-counter',
         btnsFacturacion: '.btn-facturacion',
         lugarDestino: '#facturacion-lugar-destino .tree-select-input',
         lugarDestinoContainer: '#facturacion-lugar-destino',
@@ -49,11 +49,13 @@ const FacturacionCarrito = (() => {
     };
 
     const renderCounter = () => {
-        const counterEl = document.querySelector(selectors.counter);
-        if (!counterEl) return;
+        const counterEls = document.querySelectorAll(selectors.counter);
+        if (!counterEls.length) return;
         const total = Object.values(state.items).reduce((acc, items) => acc + Object.keys(items).length, 0);
-        counterEl.textContent = total;
-        counterEl.style.display = total > 0 ? 'inline' : 'none';
+        counterEls.forEach(el => {
+            el.textContent = total;
+            el.style.display = total > 0 ? 'inline' : 'none';
+        });
     };
 
     const renderTabla = () => {

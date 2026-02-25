@@ -10,6 +10,7 @@
             <p class="text-muted mb-0">Descripción detallada del mobiliario.</p>
         </div>
         <div class="btn-group">
+            <a href="{{% url \'inventario:activo_etiqueta_qr\' \'mobiliario\' object.pk %}}" class="btn btn-outline-secondary" target="_blank" title="Imprimir Etiqueta QR"><i class="bi bi-qr-code me-1"></i>Etiqueta QR</a>
             <a href="{% url 'inventario:mobiliario_update' object.pk %}" class="btn btn-warning text-dark">
                 <i class="bi bi-pencil me-2"></i>Editar
             </a>
@@ -48,6 +49,7 @@
                     </dl>
                 </div>
             </div>
+            {% include "inventario/_ordenes_servicio_card.html" %}
         </div>
         <div class="col-lg-4">
             <div class="card mb-4">

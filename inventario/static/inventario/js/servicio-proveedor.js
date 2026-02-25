@@ -19,7 +19,7 @@ const ServicioProveedorCarrito = (() => {
     const selectors = {
         modal: '#modalCarritoServicioProveedor',
         tablaContainer: '#servicio-proveedor-items-container',
-        counter: '#servicio-proveedor-counter',
+        counter: '.servicio-proveedor-counter',
         btnsServicio: '.btn-servicio-proveedor',
         proveedorSelect: '#servicio-proveedor-select',
         motivoEnvio: '#servicio-motivo-envio',
@@ -52,16 +52,18 @@ const ServicioProveedorCarrito = (() => {
     };
 
     const renderCounter = () => {
-        const counter = document.querySelector(selectors.counter);
-        if (!counter) return;
-        
+        const counters = document.querySelectorAll(selectors.counter);
+        if (!counters.length) return;
+
         const total = Object.values(state.items).reduce(
             (acc, tipoItems) => acc + Object.keys(tipoItems).length,
             0
         );
-        
-        counter.textContent = total;
-        counter.style.display = total > 0 ? '' : 'none';
+
+        counters.forEach(counter => {
+            counter.textContent = total;
+            counter.style.display = total > 0 ? '' : 'none';
+        });
     };
 
     const renderTable = () => {

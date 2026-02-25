@@ -544,6 +544,13 @@ urlpatterns = [
         name='registrar_evento_manual',
     ),
     
+    # Etiqueta QR para cualquier tipo de activo
+    path(
+        'activos/<str:tipo>/<int:pk>/etiqueta/',
+        frontend_views.qr_label_pdf_view,
+        name='activo_etiqueta_qr',
+    ),
+
     # API endpoints para funcionalidades AJAX
     path(
         'api/dashboard-stats/',

@@ -20,6 +20,7 @@
             </div>
         </div>
         <div class="col-md-4 text-end">
+            <a href="{% url 'inventario:activo_etiqueta_qr' 'software' object.pk %}" class="btn btn-outline-secondary" target="_blank" title="Imprimir Etiqueta QR"><i class="bi bi-qr-code me-1"></i>Etiqueta QR</a>
             <a href="{% url 'inventario:software_update' object.pk %}" class="btn btn-warning text-dark">
                 <i class="bi bi-pencil me-2"></i>Editar
             </a>
@@ -72,6 +73,7 @@
                     </div>
                 </div>
             </div>
+            {% include "inventario/_ordenes_servicio_card.html" %}
         </div>
         <div class="col-lg-4">
             <div class="card">

@@ -23,6 +23,7 @@
                 </p>
             </div>
             <div class="col-md-4 text-md-end">
+                <a href="{% url 'inventario:activo_etiqueta_qr' 'monitor' object.pk %}" class="btn btn-outline-secondary btn-action" target="_blank" title="Imprimir Etiqueta QR"><i class="bi bi-qr-code me-1"></i>Etiqueta QR</a>
                 <a href="{% url 'inventario:monitor_update' object.pk %}" class="btn btn-warning text-dark btn-action">
                     <i class="fas fa-edit me-1"></i>Editar
                 </a>
@@ -193,6 +194,7 @@
                 </div>
             </div>
             {% endif %}
+            {% include "inventario/_ordenes_servicio_card.html" %}
         </div>
 
         <!-- Panel Lateral -->

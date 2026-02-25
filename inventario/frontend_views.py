@@ -229,6 +229,26 @@ class MenuContextMixin:
         return context
 
 
+class OrdenServicioContextMixin:
+    """Agrega órdenes de servicio relacionadas al contexto de los DetailViews."""
+
+    tipo_dispositivo_os = None  # Cada vista asigna su tipo, ej: 'computadora'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.tipo_dispositivo_os:
+            context['ordenes_servicio'] = (
+                OrdenServicio.objects
+                .filter(
+                    tipo_dispositivo=self.tipo_dispositivo_os,
+                    dispositivo_id=self.object.pk,
+                )
+                .order_by('-fecha_solicitud')[:8]
+            )
+            context['tipo_dispositivo_os'] = self.tipo_dispositivo_os
+        return context
+
+
 # Dashboard Selection View
 def dashboard_selector(request):
     """Pantalla de selección de dashboard."""
@@ -1214,8 +1234,10 @@ class ComputadoraListView(MenuContextMixin, LugarFilterMixin, ListView):
         return context
 
 
-class ComputadoraDetailView(MenuContextMixin, DetailView):
+class ComputadoraDetailView(OrdenServicioContextMixin, MenuContextMixin, DetailView):
     """Vista de detalle de una computadora"""
+
+    tipo_dispositivo_os = 'computadora'
 
     model = Computadora
     template_name = "inventario/computadora_detail.html"
@@ -1468,8 +1490,10 @@ class ImpresoraListView(MenuContextMixin, LugarFilterMixin, ListView):
         return context
 
 
-class ImpresoraDetailView(DetailView):
+class ImpresoraDetailView(OrdenServicioContextMixin, DetailView):
     """Vista de detalle de una impresora"""
+
+    tipo_dispositivo_os = 'impresora'
 
     model = Impresora
     template_name = "inventario/impresora_detail.html"
@@ -1670,8 +1694,10 @@ class MonitorListView(MenuContextMixin, LugarFilterMixin, ListView):
         return context
 
 
-class MonitorDetailView(DetailView):
+class MonitorDetailView(OrdenServicioContextMixin, DetailView):
     """Vista de detalle de un monitor"""
+
+    tipo_dispositivo_os = 'monitor'
 
     model = Monitor
     template_name = "inventario/monitor_detail.html"
@@ -1866,8 +1892,10 @@ class NetworkingListView(MenuContextMixin, LugarFilterMixin, ListView):
         return context
 
 
-class NetworkingDetailView(DetailView):
+class NetworkingDetailView(OrdenServicioContextMixin, DetailView):
     """Vista de detalle de un equipo de networking"""
+
+    tipo_dispositivo_os = 'networking'
 
     model = Networking
     template_name = "inventario/networking_detail.html"
@@ -2054,8 +2082,10 @@ class TelefoniaListView(MenuContextMixin, LugarFilterMixin, ListView):
         return context
 
 
-class TelefoniaDetailView(DetailView):
+class TelefoniaDetailView(OrdenServicioContextMixin, DetailView):
     """Vista de detalle para telefonía"""
+
+    tipo_dispositivo_os = 'telefonia'
 
     model = Telefonia
     template_name = "inventario/telefonia_detail.html"
@@ -2244,8 +2274,10 @@ class PerifericoListView(MenuContextMixin, LugarFilterMixin, ListView):
         return context
 
 
-class PerifericoDetailView(DetailView):
+class PerifericoDetailView(OrdenServicioContextMixin, DetailView):
     """Vista de detalle para periféricos"""
+
+    tipo_dispositivo_os = 'periferico'
 
     model = Periferico
     template_name = "inventario/periferico_detail.html"
@@ -2433,8 +2465,10 @@ class TecnologiaMedicaListView(MenuContextMixin, LugarFilterMixin, ListView):
         return context
 
 
-class TecnologiaMedicaDetailView(MenuContextMixin, DetailView):
+class TecnologiaMedicaDetailView(OrdenServicioContextMixin, MenuContextMixin, DetailView):
     """Vista de detalle para tecnología médica"""
+
+    tipo_dispositivo_os = 'tecnologia_medica'
 
     model = TecnologiaMedica
     template_name = "inventario/tecnologia_medica_detail.html"
@@ -2588,8 +2622,10 @@ class InsumoListView(MenuContextMixin, ListView):
         return context
 
 
-class InsumoDetailView(DetailView):
+class InsumoDetailView(OrdenServicioContextMixin, DetailView):
     """Vista de detalle para insumos"""
+
+    tipo_dispositivo_os = 'insumo'
 
     model = Insumo
     template_name = "inventario/insumo_detail.html"
@@ -2752,8 +2788,10 @@ class SoftwareListView(MenuContextMixin, ListView):
         return context
 
 
-class SoftwareDetailView(DetailView):
+class SoftwareDetailView(OrdenServicioContextMixin, DetailView):
     """Vista de detalle para software"""
+
+    tipo_dispositivo_os = 'software'
 
     model = Software
     template_name = "inventario/software_detail.html"
@@ -3553,6 +3591,13 @@ class OrdenServicioCreateView(CreateView):
     template_name = "inventario/orden_servicio_form.html"
     success_url = reverse_lazy("inventario:orden_servicio_list")
 
+    def get_initial(self):
+        initial = super().get_initial()
+        numero_serie = self.request.GET.get('numero_serie', '').strip()
+        if numero_serie:
+            initial['buscar_numero_serie'] = numero_serie
+        return initial
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update(
@@ -3762,8 +3807,10 @@ class MobiliarioListView(MenuContextMixin, LugarFilterMixin, ListView):
         return context
 
 
-class MobiliarioDetailView(DetailView):
+class MobiliarioDetailView(OrdenServicioContextMixin, DetailView):
     """Vista de detalle para mobiliario"""
+
+    tipo_dispositivo_os = 'mobiliario'
 
     model = Mobiliario
     template_name = "inventario/mobiliario_detail.html"
@@ -3900,8 +3947,10 @@ class VehiculoListView(MenuContextMixin, LugarFilterMixin, ListView):
         return context
 
 
-class VehiculoDetailView(DetailView):
+class VehiculoDetailView(OrdenServicioContextMixin, DetailView):
     """Vista de detalle para vehículos"""
+
+    tipo_dispositivo_os = 'vehiculo'
 
     model = Vehiculo
     template_name = "inventario/vehiculo_detail.html"
@@ -4042,8 +4091,10 @@ class HerramientaListView(MenuContextMixin, LugarFilterMixin, ListView):
         return context
 
 
-class HerramientaDetailView(DetailView):
+class HerramientaDetailView(OrdenServicioContextMixin, DetailView):
     """Vista de detalle para herramientas"""
+
+    tipo_dispositivo_os = 'herramienta'
 
     model = Herramienta
     template_name = "inventario/herramienta_detail.html"
@@ -4123,3 +4174,64 @@ class HerramientaDeleteView(DeleteView):
         self.object = self.get_object()
         messages.success(request, f'Herramienta "{self.object.nombre}" eliminada exitosamente.')
         return super().delete(request, *args, **kwargs)
+
+
+# ============================================================================
+# ETIQUETA QR
+# ============================================================================
+
+_TIPO_MODEL_MAP_QR = {
+    'computadora': Computadora,
+    'monitor': Monitor,
+    'impresora': Impresora,
+    'networking': Networking,
+    'telefonia': Telefonia,
+    'periferico': Periferico,
+    'tecnologia_medica': TecnologiaMedica,
+    'software': Software,
+    'insumo': Insumo,
+    'mobiliario': Mobiliario,
+    'vehiculo': Vehiculo,
+    'herramienta': Herramienta,
+}
+
+_TIPO_URL_NAME_MAP_QR = {
+    'computadora': 'inventario:computadora_detail',
+    'monitor': 'inventario:monitor_detail',
+    'impresora': 'inventario:impresora_detail',
+    'networking': 'inventario:networking_detail',
+    'telefonia': 'inventario:telefonia_detail',
+    'periferico': 'inventario:periferico_detail',
+    'tecnologia_medica': 'inventario:tecnologia_medica_detail',
+    'software': 'inventario:software_detail',
+    'insumo': 'inventario:insumo_detail',
+    'mobiliario': 'inventario:mobiliario_detail',
+    'vehiculo': 'inventario:vehiculo_detail',
+    'herramienta': 'inventario:herramienta_detail',
+}
+
+
+@login_required
+def qr_label_pdf_view(request, tipo: str, pk: int) -> HttpResponse:
+    """Genera y retorna un PDF de etiqueta con código QR para un activo."""
+    model = _TIPO_MODEL_MAP_QR.get(tipo)
+    if not model:
+        from django.http import Http404
+        raise Http404("Tipo de activo no válido")
+
+    activo = get_object_or_404(model, pk=pk)
+
+    url_name = _TIPO_URL_NAME_MAP_QR.get(tipo)
+    try:
+        detail_url = request.build_absolute_uri(reverse(url_name, args=[pk]))
+    except Exception:
+        detail_url = request.build_absolute_uri('/')
+
+    from .utils_qr_label import build_qr_label_pdf
+    pdf_bytes = build_qr_label_pdf(activo, tipo, detail_url)
+
+    nombre = getattr(activo, 'nombre', str(activo)).replace(' ', '-')[:40]
+    filename = f"etiqueta-{tipo}-{nombre}.pdf"
+    response = HttpResponse(pdf_bytes, content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="{filename}"'
+    return response

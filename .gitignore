@@ -1,46 +1,106 @@
-# Entornos virtuales
-venv/
-ENV/
-.venv/
-
-# Cache de Python y bytecode
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+PIPFILE.lock
 
-# Archivos temporales y logs
+# Django
 *.log
-*.pot
-*.pyc
-*.pyo
-*.pyd
-*.sqlite3
-
-# Configuración local
-.env
-.env.*
-*.local
-
-# Archivos generados por Django
-staticfiles/
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
 media/
+staticfiles/
 
-# Herramientas y editores
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# Cobertura y testing
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Node modules (if using frontend tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage reports
 htmlcov/
 .coverage
 .coverage.*
+coverage.xml
+*.cover
+.hypothesis/
 .pytest_cache/
 
-# Claude AI (notas internas del asistente)
-.claude/
+# Migrations (optional - uncomment if you don't want to track migrations)
+# */migrations/
+# !*/migrations/__init__.py
 
-# Otros
-*.md
-*.swp
-*.swo
+# Static files collected
+static/
+
+# Backup files
+*.bak
+*.backup
+*_backup.py
+
+# Temporary files
+*.tmp
+*.temp
+
+# Logs
+logs/
+*.log
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Configuration files with sensitive data
+config.ini
+settings_local.py

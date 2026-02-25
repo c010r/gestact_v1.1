@@ -46,7 +46,31 @@
                 ASSE-GestACT
             </a>
             
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <!-- Acciones rápidas: siempre visibles en móvil junto al botón hamburguesa -->
+            <div class="d-flex align-items-center gap-1 d-lg-none me-1">
+                <button class="theme-toggle" type="button" aria-label="Cambiar tema" data-theme-toggle>
+                    <i class="bi bi-sun-fill theme-icon theme-icon-light" aria-hidden="true"></i>
+                    <i class="bi bi-moon-stars-fill theme-icon theme-icon-dark" aria-hidden="true"></i>
+                </button>
+                {% if user.is_authenticated %}
+                    <button class="btn btn-facturacion position-relative" type="button"
+                            data-bs-toggle="modal" data-bs-target="#modalCarritoFacturacion"
+                            title="Carrito de Envío a Unidades">
+                        <i class="bi bi-receipt"></i>
+                        <span class="badge facturacion-counter position-absolute top-0 start-100 translate-middle"
+                              style="display:none;">0</span>
+                    </button>
+                    <button class="btn btn-servicio-proveedor position-relative" type="button"
+                            data-bs-toggle="modal" data-bs-target="#modalCarritoServicioProveedor"
+                            title="Carrito de Envío a Servicio">
+                        <i class="bi bi-tools"></i>
+                        <span class="badge servicio-proveedor-counter position-absolute top-0 start-100 translate-middle"
+                              style="display:none;">0</span>
+                    </button>
+                {% endif %}
+            </div>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             
@@ -265,9 +289,9 @@
 
                 <div class="d-flex align-items-center gap-2">
                     {% if user.is_authenticated %}
-                        <!-- Usuario autenticado -->
+                        <!-- Usuario autenticado: menú de usuario (visible en móvil al abrir el menú) -->
                         <div class="dropdown">
-                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" 
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button"
                                     data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-person-circle me-1"></i>
                                 {{ user.get_full_name|default:user.username }}
@@ -287,28 +311,31 @@
                         </a>
                     {% endif %}
 
-                    <button class="theme-toggle" type="button" id="themeToggle" aria-label="Cambiar tema" data-theme-toggle>
-                        <i class="bi bi-sun-fill theme-icon theme-icon-light" aria-hidden="true"></i>
-                        <i class="bi bi-moon-stars-fill theme-icon theme-icon-dark" aria-hidden="true"></i>
-                        <span class="visually-hidden">Cambiar modo de color</span>
-                    </button>
+                    <!-- Solo desktop: tema y carritos (en móvil están siempre visibles fuera del collapse) -->
+                    <div class="d-none d-lg-flex align-items-center gap-2">
+                        <button class="theme-toggle" type="button" id="themeToggle" aria-label="Cambiar tema" data-theme-toggle>
+                            <i class="bi bi-sun-fill theme-icon theme-icon-light" aria-hidden="true"></i>
+                            <i class="bi bi-moon-stars-fill theme-icon theme-icon-dark" aria-hidden="true"></i>
+                            <span class="visually-hidden">Cambiar modo de color</span>
+                        </button>
 
-                    {% if user.is_authenticated %}
-                        <button class="btn btn-facturacion position-relative" type="button"
-                                data-bs-toggle="modal" data-bs-target="#modalCarritoFacturacion"
-                                title="Carrito de Envío a Unidades">
-                            <i class="bi bi-receipt"></i>
-                            <span class="badge facturacion-counter position-absolute top-0 start-100 translate-middle"
-                                  id="facturacion-counter" style="display:none;">0</span>
-                        </button>
-                        <button class="btn btn-servicio-proveedor position-relative" type="button"
-                                data-bs-toggle="modal" data-bs-target="#modalCarritoServicioProveedor"
-                                title="Carrito de Envío a Servicio">
-                            <i class="bi bi-tools"></i>
-                            <span class="badge servicio-proveedor-counter position-absolute top-0 start-100 translate-middle"
-                                  id="servicio-proveedor-counter" style="display:none;">0</span>
-                        </button>
-                    {% endif %}
+                        {% if user.is_authenticated %}
+                            <button class="btn btn-facturacion position-relative" type="button"
+                                    data-bs-toggle="modal" data-bs-target="#modalCarritoFacturacion"
+                                    title="Carrito de Envío a Unidades">
+                                <i class="bi bi-receipt"></i>
+                                <span class="badge facturacion-counter position-absolute top-0 start-100 translate-middle"
+                                      id="facturacion-counter" style="display:none;">0</span>
+                            </button>
+                            <button class="btn btn-servicio-proveedor position-relative" type="button"
+                                    data-bs-toggle="modal" data-bs-target="#modalCarritoServicioProveedor"
+                                    title="Carrito de Envío a Servicio">
+                                <i class="bi bi-tools"></i>
+                                <span class="badge servicio-proveedor-counter position-absolute top-0 start-100 translate-middle"
+                                      id="servicio-proveedor-counter" style="display:none;">0</span>
+                            </button>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>

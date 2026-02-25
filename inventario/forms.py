@@ -502,13 +502,14 @@ class OrdenServicioForm(FormControlMixin, forms.ModelForm):
         # Mapeo de modelos
         from inventario.models import (
             Computadora, Impresora, Monitor, Networking,
-            Telefonia, Periferico, TecnologiaMedica
+            Telefonia, Periferico, TecnologiaMedica,
+            Mobiliario, Vehiculo, Herramienta,
         )
-        
+
         dispositivo_encontrado = None
         tipo_encontrado = None
-        
-        # Buscar en todos los modelos
+
+        # Buscar en todos los modelos con numero_serie
         modelos_busqueda = [
             (Computadora, 'computadora'),
             (Impresora, 'impresora'),
@@ -517,6 +518,9 @@ class OrdenServicioForm(FormControlMixin, forms.ModelForm):
             (Telefonia, 'telefonia'),
             (Periferico, 'periferico'),
             (TecnologiaMedica, 'tecnologia_medica'),
+            (Mobiliario, 'mobiliario'),
+            (Vehiculo, 'vehiculo'),
+            (Herramienta, 'herramienta'),
         ]
         
         for modelo, tipo_dispositivo in modelos_busqueda:

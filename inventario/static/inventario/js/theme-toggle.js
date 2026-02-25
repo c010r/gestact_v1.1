@@ -38,14 +38,16 @@
     }
 
     function updateToggleState(theme) {
-        var toggle = document.querySelector('[data-theme-toggle]');
-        if (!toggle) {
+        var toggles = document.querySelectorAll('[data-theme-toggle]');
+        if (!toggles.length) {
             return;
         }
         var nextTheme = theme === 'light' ? 'dark' : 'light';
-        toggle.setAttribute('data-next-theme', nextTheme);
-        toggle.setAttribute('title', theme === 'light' ? 'Activar modo oscuro' : 'Activar modo claro');
-        toggle.setAttribute('aria-pressed', theme === 'dark');
+        toggles.forEach(function (toggle) {
+            toggle.setAttribute('data-next-theme', nextTheme);
+            toggle.setAttribute('title', theme === 'light' ? 'Activar modo oscuro' : 'Activar modo claro');
+            toggle.setAttribute('aria-pressed', theme === 'dark');
+        });
     }
 
     function toggleTheme() {
@@ -57,8 +59,8 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         applyTheme(getPreferredTheme());
-        var toggle = document.querySelector('[data-theme-toggle]');
-        if (toggle) {
+        var toggles = document.querySelectorAll('[data-theme-toggle]');
+        toggles.forEach(function (toggle) {
             toggle.addEventListener('click', toggleTheme);
             toggle.addEventListener('keydown', function (event) {
                 if (event.key === 'Enter' || event.key === ' ') {
@@ -66,7 +68,7 @@
                     toggleTheme();
                 }
             });
-        }
+        });
 
         if (window.matchMedia) {
             var mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
