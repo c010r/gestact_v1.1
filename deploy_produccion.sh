@@ -243,16 +243,20 @@ ok "Proyecto copiado a ${PROJECT_DIR}."
 section "7. Entorno virtual Python + dependencias"
 # =============================================================================
 
-# Crear venv con Python 3.11 (garantiza compatibilidad con Django 5.x)
-"$PYTHON311" -m venv "$VENV_DIR"
+# Crear (o recrear) venv con Python 3.11.
+# --clear garantiza que si existe un venv previo con otra versión de Python
+# (ej. 3.9 de una corrida anterior) se elimine y recree correctamente.
+"$PYTHON311" -m venv --clear "$VENV_DIR"
 
 # El venv creado con python3.11 puede no tener el symlink 'python' en algunas
 # distribuciones. Usar siempre la ruta explícita python3 dentro del venv.
 VENV_PYTHON="$VENV_DIR/bin/python3"
 VENV_PIP="$VENV_DIR/bin/pip3"
 
-# Verificar que el python del venv responde
+# Verificar que el python del venv es 3.11+
 "$VENV_PYTHON" -c "import sys; print('venv python:', sys.executable, sys.version)"
+"$VENV_PYTHON" -c "import sys; sys.exit(0 if sys.version_info >= (3,10) else 1)" || \
+    err "El venv usa Python $($VENV_PYTHON -c 'import sys; print(sys.version)') en lugar de 3.11."
 
 # Actualizar pip
 "$VENV_PIP" install --upgrade pip
