@@ -236,16 +236,31 @@ section "7. Entorno virtual Python + dependencias"
 
 # Crear venv con Python 3.11 (garantiza compatibilidad con Django 5.x)
 "$PYTHON311" -m venv "$VENV_DIR"
-"$VENV_DIR/bin/pip" install --upgrade pip -q
+
+# El venv creado con python3.11 puede no tener el symlink 'python' en algunas
+# distribuciones. Usar siempre la ruta explícita python3 dentro del venv.
+VENV_PYTHON="$VENV_DIR/bin/python3"
+VENV_PIP="$VENV_DIR/bin/pip3"
+
+# Verificar que el python del venv responde
+"$VENV_PYTHON" -c "import sys; print('venv python:', sys.executable, sys.version)"
+
+# Actualizar pip
+"$VENV_PIP" install --upgrade pip
 
 # Instalar dependencias del proyecto (incluye qrcode, reportlab, pillow, etc.)
-"$VENV_DIR/bin/pip" install -r "$PROJECT_DIR/requirements.txt" -q
+# Sin -q para ver errores si los hay
+"$VENV_PIP" install -r "$PROJECT_DIR/requirements.txt"
 
 # Instalar psycopg2 (adaptador PostgreSQL para Python)
-"$VENV_DIR/bin/pip" install psycopg2-binary -q
+"$VENV_PIP" install psycopg2-binary
 
 # Instalar Gunicorn
-"$VENV_DIR/bin/pip" install gunicorn -q
+"$VENV_PIP" install gunicorn
+
+# Verificar que Django quedó instalado correctamente
+"$VENV_PYTHON" -c "import django; print('Django', django.__version__, 'instalado OK')" || \
+    err "Django no quedó instalado en el venv. Revise los errores de pip anteriores."
 
 ok "Entorno virtual configurado con todas las dependencias."
 
@@ -338,13 +353,14 @@ section "9. Collectstatic y migraciones"
 export DJANGO_SETTINGS_MODULE="sgai.settings_production"
 
 ok "Ejecutando collectstatic..."
-"$VENV_DIR/bin/python" "$PROJECT_DIR/manage.py" collectstatic --noinput -v 0
+cd "$PROJECT_DIR"
+"$VENV_PYTHON" manage.py collectstatic --noinput -v 0
 
 ok "Ejecutando migraciones..."
-"$VENV_DIR/bin/python" "$PROJECT_DIR/manage.py" migrate --noinput
+"$VENV_PYTHON" manage.py migrate --noinput
 
 ok "Creando grupos de acceso del sistema..."
-"$VENV_DIR/bin/python" "$PROJECT_DIR/manage.py" crear_grupos
+"$VENV_PYTHON" manage.py crear_grupos
 
 ok "Base de datos migrada y grupos creados."
 
