@@ -81,9 +81,18 @@ dnf install -y \
     python3.11 python3.11-pip python3.11-devel \
     nginx \
     rsync gcc make \
-    libpq-devel \
     policycoreutils-python-utils \
     wget curl
+
+# libpq-devel: necesario para compilar psycopg2 desde fuente.
+# Se instala solo si no está presente y deshabilitando repos PGDG
+# para evitar el conflicto de dependencia perl(IPC::Run).
+if ! rpm -q libpq-devel &>/dev/null; then
+    dnf install -y --disablerepo="pgdg*" libpq-devel 2>/dev/null || \
+        warn "libpq-devel no pudo instalarse (no requerido si se usa psycopg2-binary)."
+else
+    ok "libpq-devel ya instalado, saltando."
+fi
 
 # Verificar que Python 3.11 quedó instalado
 PYTHON311=$(command -v python3.11) || err "No se pudo instalar python3.11. Verifique los repositorios dnf."
